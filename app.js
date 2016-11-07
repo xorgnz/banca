@@ -6,6 +6,8 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var nunjucks = require('nunjucks');
+var sqlite3 = require('sqlite3');
+
 
 // Routes
 var index = require('./routes/index');
@@ -20,7 +22,7 @@ nunjucks.configure('views', {
     express: app
 });
 
-// Configure utilities
+// Configure standard middleware
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -31,10 +33,13 @@ app.use(require('node-sass-middleware')({
     indentedSyntax: true,
     sourceMap: true
 }));
-
-// Configure static content
-app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Configure middleware - DB connection
+app.use(function(req, res, next) {
+    req.db = new sqlite3.Database('database.sqlite');
+    next();
+});
 
 // Configure routes
 app.use('/', index);
