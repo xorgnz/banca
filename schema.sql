@@ -13,7 +13,8 @@ CREATE TABLE entry
     entry_date_year INTEGER,
     entry_date_month INTEGER,
     entry_date_day INTEGER,
-    entry_type INTEGER,
+    entry_note TEXT,
+    entry_tag TEXT,
     entry_what TEXT,
     entry_where TEXT
 );

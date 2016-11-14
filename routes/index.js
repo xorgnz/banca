@@ -6,9 +6,9 @@ router.get('/', function(req, res, next) {
 
     req.db.serialize(function()
     {
-        req.db.each("SELECT * FROM Category", function (err, row)
+        req.db.all("SELECT * FROM entry", function (err, rows)
         {
-            console.log(row);
+            console.log(rows);
         });
 
         res.render('base.html', {

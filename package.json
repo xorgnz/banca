@@ -6,6 +6,7 @@
   "private": true,
   "scripts": {
     "start": "nodemon ./bin/www.js",
+    "import-csv": "node --harmony ./tools/import-csv.js",
     "test": "echo \"No tests\""
   },
   "repository": {
@@ -21,13 +22,16 @@
     "debug": "~2.2.0",
     "express": "~4.14.0",
     "fs-extra": "^1.0.0",
+    "lodash": "^4.17.0",
+    "mathjs": "^3.7.0",
     "merge-descriptors": "^1.0.1",
     "morgan": "~1.7.0",
     "node-sass": "^3.11.2",
     "node-sass-middleware": "^0.9.8",
     "nunjucks": "^3.0.0",
     "serve-favicon": "~2.3.0",
-    "sqlite3": "^3.1.8"
+    "sqlite3": "^3.1.8",
+    "sync": "^0.2.5"
   },
   "devDependencies": {
     "nodemon": "*"
