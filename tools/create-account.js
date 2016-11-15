@@ -17,7 +17,11 @@ if (! name) {
 }
 
 
-db.run("INSERT INTO account (account_name, account_description) VALUES (?, ?)", name, description, function (err, row) {
+db.run(
+    "INSERT INTO account (account_name, account_description) VALUES (?, ?)",
+    name,
+    description,
+    function (err, row) {
     if (err)
         throw err;
 

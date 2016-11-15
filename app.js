@@ -11,7 +11,7 @@ var sqlite3 = require('sqlite3');
 
 // Routes
 var index = require('./routes/index');
-var users = require('./routes/users');
+var account = require('./routes/account');
 
 // Express engine
 var app = express();
@@ -43,7 +43,7 @@ app.use(function(req, res, next) {
 
 // Configure routes
 app.use('/', index);
-app.use('/users', users);
+app.use('/rest/account', account);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next)

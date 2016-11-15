@@ -4,6 +4,9 @@
     ".git",
     "node_modules/**/node_modules"
   ],
+  "events": {
+    "restart": "echo App restarted due to:'%FILENAME%'"
+  },
   "execMap": {
     "js": "node --harmony"
   },

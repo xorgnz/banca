@@ -1,25 +1,24 @@
 var express = require('express');
 var router = express.Router();
+var utils = require('../lib/ui-utils.js');
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
 
-    req.db.serialize(function()
+router.get('/', function (req,res, next) {
+    res.redirect('/ui/');
+});
+
+router.get('/ui', function (req,res, next) {
+    res.render('base.html', {
+        title: 'Base page'
+    });
+});
+
+router.get('/ui/accounts', function(req, res, next) {
+    req.db.all("SELECT * FROM account", function (err, rows)
     {
-        req.db.all("SELECT * FROM entry", function (err, rows)
-        {
-            console.log(rows);
+        res.render('accounts.html', {
+            title: 'Accounts'
         });
-
-        res.render('base.html', {
-            title: 'Express',
-            items: [
-                { name: "item1" },
-                { name: "item2" },
-                { name: "item3" },
-            ]
-        });
-
     });
 });
 

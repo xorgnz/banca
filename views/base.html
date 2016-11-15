@@ -2,11 +2,37 @@
 <html>
 <head>
     <title>{{title}}</title>
+    <script
+        src="https://code.jquery.com/jquery-3.1.1.min.js"
+        integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+        crossorigin="anonymous"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.1/knockout-min.js"></script>
 </head>
 <body>
-    <ul>
-    {% for item in items %}
-        <li>{{ item.name }}</li>
-    {% endfor %}
-    </ul>
+
+    <!-- Navigation -->
+    <div id="nav">
+    {% block nav %}
+        <ul>
+            <li><a href="/ui/accounts">Accounts</a></li>
+            <li><a href="/ui/summaries">Summaries</a></li>
+        </ul>
+    {% endblock %}
+    </div>
+
+    <!-- Header -->
+    <h1>{{title}}</h1>
+
+    <!-- General content -->
+    <div id="content">
+    {% block content %}{% endblock %}
+    </div>
+
+    <!-- Templates -->
+    {% block templates %}{% endblock %}
+
+    <!-- Scripts -->
+    {% block scripts %}{% endblock %}
+
 </html>

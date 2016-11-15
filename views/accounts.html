@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <span data-bind="visible: loaded() == false">Loading...</span>
+
+    <table data-bind="visible: accounts().length > 0">
+    <thead><tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Description</th>
+    </tr></thead>
+    <tbody data-bind="foreach: accounts">
+        <td><span data-bind="text: id" /></td>
+        <td data-bind="click: editName">
+            <b data-bind="text: name, visible: !editingName()"></b>
+            <input data-bind="value: name, visible: editingName, hasFocus: editingName" />
+        </td>
+        <td data-bind="click: editDescription">
+            <b data-bind="text: description, visible: !editingDescription()"></b>
+            <input data-bind="value: description, visible: editingDescription, hasFocus: editingDescription" />
+        </td>
+        <td>
+            <a data-bind="click: deleteAccount, visible: waitingDeleteConfirm() == false">Delete</a>
+            <a data-bind="click: deleteAccountReally, visible: waitingDeleteConfirm() == true">Confirm</a>
+            <a data-bind="click: cancelDelete, visible: waitingDeleteConfirm() == true">Cancel</a>
+        </td>
+
+    </tbody>
+    </table>
+
+    <div data-bind="with: newAccount">
+        <input data-bind="value: name" />
+        <input data-bind="value: description" />
+
+        <button data-bind="click: $root.addAccount">Add Account</button>
+    </div>
+
+{% endblock %}
+
+
+{% block scripts %}
+<script type="text/javascript">
+    $(document).ready( function () {
+
+        const ViewModel = function () {
+            var self = this;
+            self.loaded = ko.observable(false),
+            self.accounts = ko.observableArray([]),
+            self.newAccount = ko.observable(new Account(-1, "a", "d")),
+
+            self.addAccount = function () {
+                $.ajax({
+                    url: "/rest/account",
+                    method: "post",
+                    contentType: "application/json",
+                    data: ko.toJSON(self.newAccount()),
+                    success: function (result) {
+                        self.newAccount().id(result.data.id);
+                        self.accounts.push(self.newAccount());
+                        self.newAccount(new Account(-1, "", ""));
+                    }
+                });
+            };
+        };
+        var viewModel = new ViewModel();
+        ko.applyBindings(viewModel);
+
+        function Account(id, name, description) {
+            var acct = {
+                id: ko.observable(id),
+                name: ko.observable(name),
+                description: ko.observable(description),
+                valuesOnly: function () {
+                    return {
+                        id: this.id,
+                        name: this.name,
+                        description: this.description,
+                    }
+                },
+
+                // Deleting accounts
+                waitingDeleteConfirm: ko.observable(false),
+                cancelDelete: function ()  { this.waitingDeleteConfirm(false); },
+                deleteAccount: function () { this.waitingDeleteConfirm(true); },
+                deleteAccountReally: function (obj) {
+                    $.ajax({
+                        url: "/rest/account/" + obj.id(),
+                        method: "delete",
+                        success: function (result) {
+                            console.log("Account '" + obj.name() + "' removed");
+                            viewModel.accounts.remove(obj);
+                        }
+                    });
+                },
+
+                // Editing
+                editingName: ko.observable(false),
+                editingDescription: ko.observable(false),
+                editName: function () { this.editingName(true); },
+                editDescription: function () { this.editingDescription(true); },
+                update: function () {
+                    $.ajax({
+                        url: "/rest/account/" + this.id(),
+                        method: "patch",
+                        contentType: "application/json",
+                        data: ko.toJSON(this.valuesOnly()),
+                        success: function (result) {
+                            console.log("Account '" + acct.name() + "' updated");
+                        }
+                    });
+                }
+            };
+
+            var update
+            acct.name.subscribe(function (newValue) { acct.update(); });
+            acct.description.subscribe(function (newValue) { acct.update(); });
+
+            return acct;
+        }
+
+        $.ajax("/rest/account").done (function (data) {
+
+            for (var d of data)
+                viewModel.accounts.push(new Account(d.id, d.name, d.description));
+
+            viewModel.loaded(true);
+        });
+
+
+    });
+
+</script>
+{% endblock %}
