@@ -5,6 +5,7 @@ CREATE TABLE account
     account_description TEXT
 );
 
+
 CREATE TABLE entry
 (
     entry_id INTEGER PRIMARY KEY ASC AUTOINCREMENT,
@@ -13,11 +14,31 @@ CREATE TABLE entry
     entry_date_year INTEGER,
     entry_date_month INTEGER,
     entry_date_day INTEGER,
+    entry_bank_note TEXT,
     entry_note TEXT,
     entry_tag TEXT,
     entry_what TEXT,
     entry_where TEXT
 );
+
+
+CREATE TABLE budget
+(
+    budget_id INTEGER PRIMARY KEY ASC AUTOINCREMENT,
+    budget_code TEXT,
+    budget_type INTEGER,
+    budget_amount NUMERIC
+);
+
+
+CREATE TABLE budget_assignment
+(
+    ba_id INTEGER PRIMARY KEY ASC AUTOINCREMENT,
+    ba_entry_id INTEGER REFERENCES entry (tr_id),
+    ba_budget_id INTEGER REFERENCES budget (budget_id),
+    ba_amount NUMERIC
+);
+
 
 CREATE TABLE period
 (

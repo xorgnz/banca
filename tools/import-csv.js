@@ -1,11 +1,11 @@
 "use strict";
 
 const fs = require("fs");
-const Sync = require('sync');
 const sqlite3 = require("sqlite3");
 const db = new sqlite3.Database('database.sqlite');
 const math = require("mathjs");
-const utils = require('../lib/import-utils.js');
+const mathUtils = require('../lib/math-utils.js');
+const importUtils = require('../lib/import-utils.js');
 
 // Show usage if requested
 function usage() {
@@ -86,8 +86,8 @@ p = p.then((entries) => {
     for (var entry of entries) {
 
         // Parse numbers from amount strings
-        entry.amount_pre = utils.parseNumber(entry.amount_pre);
-        entry.amount_pre2 = utils.parseNumber(entry.amount_pre2);
+        entry.amount_pre = mathUtils.parseNumber(entry.amount_pre);
+        entry.amount_pre2 = mathUtils.parseNumber(entry.amount_pre2);
 
         // Ignore if no date is provided
         if (! entry.date)
@@ -137,7 +137,7 @@ p = p.then((entries) => {
             }
 
             // Clean up tags - use Unknown if not available
-            entry.tag = utils.isValidTagString(entry.tag) ? entry.tag : utils.UNKNOWN_TAG;
+            entry.tag = importUtils.isValidTagString(entry.tag) ? entry.tag : utils.UNKNOWN_TAG;
 
 
         } catch (err) {

@@ -1,6 +1,17 @@
 {% extends "base.html" %}
 
+
 {% block content %}
+
+
+<style>
+
+tr.invalid {
+    background-color: #ff0000;
+}
+
+</style>
+
     <span data-bind="visible: loaded() == false">Loading...</span>
 
     <table data-bind="visible: accounts().length > 0">
@@ -10,21 +21,22 @@
         <th>Description</th>
     </tr></thead>
     <tbody data-bind="foreach: accounts">
+    <tr data-bind="groupFocus: editing, css: { invalid: !valid() }">
         <td><span data-bind="text: id" /></td>
-        <td data-bind="click: editName">
-            <b data-bind="text: name, visible: !editingName()"></b>
-            <input data-bind="value: name, visible: editingName, hasFocus: editingName" />
+        <td>
+            <b data-bind="text: name, visible: !editing()"></b>
+            <input data-bind="value: name, visible: editing" />
         </td>
-        <td data-bind="click: editDescription">
-            <b data-bind="text: description, visible: !editingDescription()"></b>
-            <input data-bind="value: description, visible: editingDescription, hasFocus: editingDescription" />
+        <td>
+            <b data-bind="text: description, visible: !editing()"></b>
+            <input data-bind="value: description, visible: editing" />
         </td>
         <td>
             <a data-bind="click: deleteAccount, visible: waitingDeleteConfirm() == false">Delete</a>
             <a data-bind="click: deleteAccountReally, visible: waitingDeleteConfirm() == true">Confirm</a>
             <a data-bind="click: cancelDelete, visible: waitingDeleteConfirm() == true">Cancel</a>
         </td>
-
+    </tr>
     </tbody>
     </table>
 
@@ -55,15 +67,49 @@
                     contentType: "application/json",
                     data: ko.toJSON(self.newAccount()),
                     success: function (result) {
-                        self.newAccount().id(result.data.id);
-                        self.accounts.push(self.newAccount());
-                        self.newAccount(new Account(-1, "", ""));
+                        if (result.success)
+                        {
+                            self.newAccount().id(result.id);
+                            self.accounts.push(self.newAccount());
+                            self.newAccount(new Account(-1, "", ""));
+                        }
+                        else
+                        {
+                            alert(result.message + " - see console for details");
+                            console.log(result.errors);
+                        }
+                    },
+                    error: function (result) {
+                        alert("AJAX request failed. See console for details");
+                        console.log(result);
                     }
                 });
             };
         };
         var viewModel = new ViewModel();
         ko.applyBindings(viewModel);
+
+        ko.bindingHandlers.groupFocus = {
+            init: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
+                $(element).find("td").click(function () {
+                    bindingContext.$data.editing(true);
+                    $(this).find(":input").focus();
+                });
+
+                $(element).focusout(function () {
+                    setTimeout(function() {
+                        if ($(element).find(":input").is(":focus"))
+                            valueAccessor()(true);
+                        else
+                            valueAccessor()(false);
+                    }, 1);
+                });
+            },
+            update: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
+                // Do nothing
+            }
+        };
+
 
         function Account(id, name, description) {
             var acct = {
@@ -94,24 +140,29 @@
                 },
 
                 // Editing
-                editingName: ko.observable(false),
-                editingDescription: ko.observable(false),
-                editName: function () { this.editingName(true); },
-                editDescription: function () { this.editingDescription(true); },
+                editing: ko.observable(false),
+                valid: ko.observable(true),
                 update: function () {
+                    var self = this;
                     $.ajax({
                         url: "/rest/account/" + this.id(),
                         method: "patch",
                         contentType: "application/json",
                         data: ko.toJSON(this.valuesOnly()),
                         success: function (result) {
-                            console.log("Account '" + acct.name() + "' updated");
+                            if (result.success) {
+                                console.log("Account '" + acct.name() + "' updated");
+                            }
+                            else {
+                                alert("Unable to apply update - AJAX request failed. See console for details");
+                                self.valid(false);
+                                console.log(result);
+                            }
                         }
                     });
                 }
             };
 
-            var update
             acct.name.subscribe(function (newValue) { acct.update(); });
             acct.description.subscribe(function (newValue) { acct.update(); });
 
@@ -119,11 +170,15 @@
         }
 
         $.ajax("/rest/account").done (function (data) {
+            if (data.success) {
+                for (var d of data.data)
+                    viewModel.accounts.push(new Account(d.id, d.name, d.description));
 
-            for (var d of data)
-                viewModel.accounts.push(new Account(d.id, d.name, d.description));
-
-            viewModel.loaded(true);
+                viewModel.loaded(true);
+            }
+            else {
+                alert("Cannot load accounts");
+            }
         });
 
 

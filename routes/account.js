@@ -1,17 +1,21 @@
 var express = require('express');
 var router = express.Router();
 var utils = require("../lib/ui-utils.js");
+var validation = require("../lib/validation.js");
+
+router.post('/', function(req, res, next) { validation.validateAccount(req, res, next) });
+router.patch('/:id', function(req, res, next) { validation.validateAccount(req, res, next) });
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
 
     req.db.all("SELECT * FROM account", function (err, rows) {
         res.setHeader('Content-Type', 'application/json');
-        res.send(JSON.stringify(utils.stripDatabasePrefix(rows)));
+        res.status(200).json({success: true, data: utils.stripDatabasePrefix(rows)});
     });
-
 });
 
+/* POST - Create new budget */
 router.post('/', function(req, res, next) {
     req.db.run(
         "INSERT INTO account (account_name, account_description) VALUES (?, ?)",
@@ -23,11 +27,12 @@ router.post('/', function(req, res, next) {
                 throw err;
 
             console.log("Successfully created account with name '" + req.body.name + "' (" + this.lastID +")");
-            res.status(200).json({status: 200, data: {id: this.lastID}});
+            res.status(200).json({success: true, id: this.lastID});
         }
     );
 });
 
+/* DELETE - Delete specified budget */
 router.delete("/:id", function (req, res, next) {
     req.db.run(
         "DELETE FROM account WHERE account_id = ?",
@@ -38,14 +43,13 @@ router.delete("/:id", function (req, res, next) {
                 throw err;
 
             console.log("Successfully deleted account with ID " + req.params.id);
-            res.status(200).json({status: 200});
+            res.status(200).json({success: true});
         }
     );
 });
 
+/* PATCH - Update specified budget */
 router.patch("/:id", function (req, res, next) {
-
-    console.log(req.body);
     req.db.run(
         "UPDATE account SET             " +
         "   account_name = ?,           " +
@@ -62,7 +66,7 @@ router.patch("/:id", function (req, res, next) {
                 throw err;
 
             console.log("Successfully updated account with ID " + req.params.id);
-            res.status(200).json({status: 200});
+            res.status(200).json({success: true});
         }
     );
 });
