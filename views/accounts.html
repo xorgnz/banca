@@ -3,186 +3,268 @@
 
 {% block content %}
 
-
 <style>
 
-tr.invalid {
-    background-color: #ff0000;
-}
+    div.form_div {
+        background-color: #e0ffe0;
+        padding: 12px;
+        width: 700px;
+        margin: 0px auto;
+    }
+    div.form_div div.container {
+        margin: 0px auto;
+        width: 360px;
+    }
+    div.form_div div div {
+        display: inline-block;
+        vertical-align: top;
+    }
+    div.form_div input.error {
+        background-color: #ffb0b0;
+        border: 1px solid #ff0000;
+    }
+    div.form_div .error_message {
+        display: inline-block;
+        color: #c00000;
+        font-size: 10px;
+    }
+    div.form_div button {
+        display: block;
+        margin: 0px auto
+    }
+
+
+
+    table.data_table {
+        border-spacing: 3px;
+        margin: 0px auto;
+    }
+    table.data_table td.width-1 { width: 40px; }
+    table.data_table td.width-3 { width: 120px; }
+    table.data_table td.width-6 { width: 240px; }
+    table.data_table th {
+        background-color: #508050;
+        padding: 4px;
+    }
+    table.data_table td {
+        vertical-align: top;
+    }
+    table.data_table tr:nth-child(odd) { background-color: #e0e0e0; }
+    table.data_table input.error {
+        background-color: #ffb0b0;
+        border: 1px solid #ff0000;
+    }
+    table.data_table .error_message {
+        display:inline-block;
+        color: #c00000;
+        font-size: 10px;
+    }
+
+
+    input.width-1 { width: 36px; }
+    input.width-3 { width: 116px; }
+    input.width-6 { width: 236px; }
 
 </style>
 
-    <span data-bind="visible: loaded() == false">Loading...</span>
+<span data-bind="visible: loaded() == false">Loading...</span>
 
-    <table data-bind="visible: accounts().length > 0">
+<table class="data_table">
+
     <thead><tr>
         <th>ID</th>
         <th>Name</th>
         <th>Description</th>
+        <th>&nbsp;</th>
     </tr></thead>
+
     <tbody data-bind="foreach: accounts">
-    <tr data-bind="groupFocus: editing, css: { invalid: !valid() }">
-        <td><span data-bind="text: id" /></td>
-        <td>
+    <tr data-bind="groupFocus: editing">
+        <td class="width-1"><span data-bind="text: id"></span></td>
+        <td class="width-3">
             <b data-bind="text: name, visible: !editing()"></b>
-            <input data-bind="value: name, visible: editing" />
+            <input data-bind="value: name, visible: editing, css: {error: validation('name')}" title="Name" class="width-3"/>
+            <span data-bind="text: validation('name'), visible: validation('name')" class="error_message"></span>
         </td>
-        <td>
+        <td class="width-6">
             <b data-bind="text: description, visible: !editing()"></b>
-            <input data-bind="value: description, visible: editing" />
+            <input data-bind="value: description, visible: editing, css: {error: validation('description')}" title="Description" class="width-6"/>
+            <span data-bind="text: validation('description'), visible: validation('description')" class="error_message"></span>
         </td>
-        <td>
-            <a data-bind="click: deleteAccount, visible: waitingDeleteConfirm() == false">Delete</a>
-            <a data-bind="click: deleteAccountReally, visible: waitingDeleteConfirm() == true">Confirm</a>
-            <a data-bind="click: cancelDelete, visible: waitingDeleteConfirm() == true">Cancel</a>
+        <td class="width-3">
+            <a data-bind="click: deleteAccount, visible: deleting() == false">Delete</a>
+            <a data-bind="click: deleteAccountReally, visible: deleting() == true">Confirm</a>
+            <a data-bind="click: cancelDelete, visible: deleting() == true">Cancel</a>
         </td>
     </tr>
     </tbody>
-    </table>
 
-    <div data-bind="with: newAccount">
-        <input data-bind="value: name" />
-        <input data-bind="value: description" />
-
-        <button data-bind="click: $root.addAccount">Add Account</button>
-    </div>
+    <tfoot>
+    <tr data-bind="with: newAccount">
+        <td>&nbsp;</td>
+        <td class="width-3">
+            <input data-bind="value: name, css: {error: $root.validation('name')}" title="Name" class="width-3" ><br/>
+            <span data-bind="text: $root.validation('name'), visible: $root.validation('name')" class="error_message"></span>
+        </td>
+        <td class="width-6">
+            <input data-bind="value: description, css: {error: $root.validation('description')}" title="Description" class="width-6"/><br/>
+            <span data-bind="text: $root.validation('description'), visible: $root.validation('description')" class="error_message"></span>
+        </td>
+        <td class="width-3">
+            <button data-bind="click: $root.addAccount">Add Account</button>
+        </td>
+    </tr>
+    </tfoot>
+</table>
 
 {% endblock %}
 
 
 {% block scripts %}
 <script type="text/javascript">
-    $(document).ready( function () {
+    var viewModel;
 
-        const ViewModel = function () {
-            var self = this;
-            self.loaded = ko.observable(false),
-            self.accounts = ko.observableArray([]),
-            self.newAccount = ko.observable(new Account(-1, "a", "d")),
-
-            self.addAccount = function () {
-                $.ajax({
-                    url: "/rest/account",
-                    method: "post",
-                    contentType: "application/json",
-                    data: ko.toJSON(self.newAccount()),
-                    success: function (result) {
-                        if (result.success)
-                        {
-                            self.newAccount().id(result.id);
-                            self.accounts.push(self.newAccount());
-                            self.newAccount(new Account(-1, "", ""));
-                        }
-                        else
-                        {
-                            alert(result.message + " - see console for details");
-                            console.log(result.errors);
-                        }
-                    },
-                    error: function (result) {
-                        alert("AJAX request failed. See console for details");
-                        console.log(result);
-                    }
-                });
-            };
-        };
-        var viewModel = new ViewModel();
+    $(document).ready( function ()  {
+        viewModel = new ViewModel();
         ko.applyBindings(viewModel);
 
-        ko.bindingHandlers.groupFocus = {
-            init: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-                $(element).find("td").click(function () {
-                    bindingContext.$data.editing(true);
-                    $(this).find(":input").focus();
-                });
+        // Load initial accounts
+        $.ajax({
+            url: "/rest/account",
+            success: function (data) {
+                for (var d of data.data) {
+                    viewModel.accounts.push(new Account(d.id, d.name, d.description));
+                }
 
-                $(element).focusout(function () {
-                    setTimeout(function() {
-                        if ($(element).find(":input").is(":focus"))
-                            valueAccessor()(true);
-                        else
-                            valueAccessor()(false);
-                    }, 1);
-                });
+                viewModel.loaded(true);
             },
-            update: function (element, valueAccessor, allBindings, viewModel, bindingContext) {
-                // Do nothing
+            error: function (err) {
+                alert("Cannot load accounts. See console for details");
+                console.log("Received HTTP 500. Server said: " + err.responseText)
+            }
+        });
+    });
+
+    const ViewModel = function () {
+        var self = this;
+        self.loaded = ko.observable(false);
+        self.fish = ko.observable("fish");
+        self.accounts = ko.observableArray([]);
+
+        self.newAccount = ko.observable(new Account(-1, "a", "d", false));
+        self.addAccount = function () {
+            console.log("addAccount");
+            console.log(ko.toJSON(self.newAccount()));
+            $.ajax({
+                url: "/rest/account",
+                method: "post",
+                contentType: "application/json",
+                data: ko.toJSON(self.newAccount()),
+                success: function (result) {
+                    if (result.success)
+                    {
+                        self.newAccount().id(result.id);
+                        self.accounts.push(self.newAccount());
+                        self.newAccount(new Account(-1, "", "", false));
+                        self.validationResults({});
+                    }
+                    else
+                    {
+                        var results = {};
+                        for (var error of result.errors) {
+                            results[error.field] = errorToString(error, "account");
+                        }
+                        self.validationResults(results);
+                    }
+                },
+                error: function (result) {
+                    alert("AJAX request failed. See console for details");
+                    console.log(result);
+                }
+            });
+        };
+
+        // Validation
+        self.validationResults = ko.observable({});
+        self.validation = function (fieldName) {
+            return ko.computed(function() { return self.validationResults()[fieldName]; });
+        };
+    };
+
+    function Account(id, name, description, updatable) {
+
+        // Create basic object
+        var acct = {
+            id: ko.observable(id),
+            name: ko.observable(name),
+            description: ko.observable(description)
+        };
+
+        // Retrieve object values
+        acct.valuesOnly = function () {
+            return {
+                id: this.id,
+                name: this.name,
+                description: this.description,
             }
         };
 
-
-        function Account(id, name, description) {
-            var acct = {
-                id: ko.observable(id),
-                name: ko.observable(name),
-                description: ko.observable(description),
-                valuesOnly: function () {
-                    return {
-                        id: this.id,
-                        name: this.name,
-                        description: this.description,
-                    }
-                },
-
-                // Deleting accounts
-                waitingDeleteConfirm: ko.observable(false),
-                cancelDelete: function ()  { this.waitingDeleteConfirm(false); },
-                deleteAccount: function () { this.waitingDeleteConfirm(true); },
-                deleteAccountReally: function (obj) {
-                    $.ajax({
-                        url: "/rest/account/" + obj.id(),
-                        method: "delete",
-                        success: function (result) {
-                            console.log("Account '" + obj.name() + "' removed");
-                            viewModel.accounts.remove(obj);
-                        }
-                    });
-                },
-
-                // Editing
-                editing: ko.observable(false),
-                valid: ko.observable(true),
-                update: function () {
-                    var self = this;
-                    $.ajax({
-                        url: "/rest/account/" + this.id(),
-                        method: "patch",
-                        contentType: "application/json",
-                        data: ko.toJSON(this.valuesOnly()),
-                        success: function (result) {
-                            if (result.success) {
-                                console.log("Account '" + acct.name() + "' updated");
-                            }
-                            else {
-                                alert("Unable to apply update - AJAX request failed. See console for details");
-                                self.valid(false);
-                                console.log(result);
-                            }
-                        }
-                    });
+        // Deleting accounts
+        acct.deleting = ko.observable(false);
+        acct.cancelDelete = function ()  { this.deleting(false); };
+        acct.deleteAccount = function () { this.deleting(true); };
+        acct.deleteAccountReally = function (obj) {
+            $.ajax({
+                url: "/rest/account/" + obj.id(),
+                method: "delete",
+                success: function (result) {
+                    console.log("Account '" + obj.name() + "' removed");
+                    viewModel.accounts.remove(obj);
                 }
-            };
+            });
+        };
 
-            acct.name.subscribe(function (newValue) { acct.update(); });
-            acct.description.subscribe(function (newValue) { acct.update(); });
-
-            return acct;
-        }
-
-        $.ajax("/rest/account").done (function (data) {
-            if (data.success) {
-                for (var d of data.data)
-                    viewModel.accounts.push(new Account(d.id, d.name, d.description));
-
-                viewModel.loaded(true);
+        // Updating
+        acct.editing = ko.observable(false);
+        acct.updatable = updatable === undefined ? true : updatable;
+        acct.update = function () {
+            if (this.updatable) {
+                $.ajax({
+                    url: "/rest/account/" + acct.id(),
+                    method: "patch",
+                    contentType: "application/json",
+                    data: ko.toJSON(acct.valuesOnly()),
+                    success: function (result) {
+                        if (result.success) {
+                            acct.validationResults({});
+                            acct.deleting(false);
+                            acct.editing(false);
+                        } else {
+                            var results = {};
+                            for (var error of result.errors) {
+                                results[error.field] = errorToString(error, "account");
+                            }
+                            acct.validationResults(results);
+                            acct.editing(true);
+                        }
+                    }
+                });
             }
-            else {
-                alert("Cannot load accounts");
-            }
+        };
+
+        // Validation
+        acct.validationResults = ko.observable({});
+        acct.validation = function (fieldName) {
+            return ko.computed(function() { return acct.validationResults()[fieldName]; });
+        };
+        acct.valid = ko.computed(function () {
+            return _.size(acct.validationResults()) === 0;
         });
 
+        acct.name.subscribe(function (newValue) { acct.update(); });
+        acct.description.subscribe(function (newValue) { acct.update(); });
 
-    });
-
+        return acct;
+    }
 </script>
 {% endblock %}
