@@ -14,11 +14,14 @@ router.get('/ui', function (req,res, next) {
 });
 
 router.get('/ui/accounts', function(req, res, next) {
-    req.db.all("SELECT * FROM account", function (err, rows)
-    {
-        res.render('accounts.html', {
-            title: 'Accounts'
-        });
+    res.render('accounts.html', {
+        title: 'Accounts'
+    });
+});
+
+router.get('/ui/budgets', function(req, res, next) {
+    res.render('budgets.html', {
+        title: 'Budgets'
     });
 });
 
