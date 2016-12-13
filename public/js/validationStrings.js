@@ -8,6 +8,19 @@ var validationDescriptors = {
         "description": {
             "missing": "Accounts must have a description",
         }
+    },
+    "budget": {
+        "code": {
+            "missing": "Budgets must have a code. Should be a single word",
+        },
+        "type": {
+            "missing": "Budgets must have a type. Should be selected from list available",
+            "invalid": "Budget type is invalid. Should be selected from list available"
+        },
+        "amount": {
+            "missing": "Budgets must have an allotted amount.",
+            "invalid": "Budget amount must be a non-negative number"
+        }
     }
 };
 

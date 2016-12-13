@@ -36,7 +36,7 @@ router.post('/', function (req, res, next) {
             }
             else {
                 console.log("Created account with name '" + req.body.name + "' (" + this.lastID + ")");
-                res.status(HTTP.OK).json({success: true, id: this.lastID});
+                res.status(HTTP.OK).json({success: true, data: {id: this.lastID}});
             }
         }
     );

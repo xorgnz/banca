@@ -5,16 +5,15 @@ const validation = require('../lib/validation');
 const HTTP = require('http-status');
 
 const types = [
-    {id: 1, type: "Monthly Regular"},
-    {id: 2, type: "Yearly Regular"},
-    {id: 3, type: "One Off Special"},
-    {id: 4, type: "Ongoing Special"},
+    {id: 1, description: "Monthly Regular"},
+    {id: 2, description: "Yearly Regular"},
+    {id: 3, description: "One Off Special"},
+    {id: 4, description: "Ongoing Special"},
 ];
 
 
 /* GET - List all budgets */
 router.get('/', function (req, res, next) {
-
     req.db.all("SELECT * FROM budget",
         function (err, rows) {
             if (err) {
@@ -22,7 +21,7 @@ router.get('/', function (req, res, next) {
             }
             else {
                 res.setHeader('Content-Type', 'application/json');
-                res.send(JSON.stringify(utils.stripDatabasePrefix(rows)));
+                res.status(HTTP.OK).json({success: true, data: utils.stripDatabasePrefix(rows)});
             }
         }
     );
@@ -68,7 +67,7 @@ router.delete("/:id", function (req, res, next) {
 });
 
 /* PATCH - Update specified budget */
-router.patch('/', function (req, res, next) {
+router.patch('/:id', function (req, res, next) {
     validation.validateBudget(req, res, next)
 });
 router.patch("/:id", function (req, res, next) {
@@ -88,7 +87,7 @@ router.patch("/:id", function (req, res, next) {
             }
             else {
                 console.log("Successfully updated budget with ID " + req.params.id);
-                res.status(HTTP.OK).json({success: true});
+                res.status(HTTP.OK).json({success: true, data: { amount: req.body.amount }});
             }
         }
     );
@@ -97,8 +96,9 @@ router.patch("/:id", function (req, res, next) {
 /* SPECIAL GET - List allowed budget types */
 router.get('/types', function (req, res, next) {
     res.setHeader('Content-Type', 'application/json');
-    res.send(JSON.stringify(types));
+    res.status(HTTP.OK).json({success: true, data: types});
 });
 
 
 module.exports = router;
+module.exports.types = types;

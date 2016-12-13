@@ -9,23 +9,34 @@
 
     <thead><tr>
         <th>ID</th>
-        <th>Name</th>
-        <th>Description</th>
+        <th>Code</th>
+        <th>Type</th>
+        <th>Amount</th>
         <th>&nbsp;</th>
     </tr></thead>
 
-    <tbody data-bind="foreach: accounts">
+    <tbody data-bind="foreach: budgets">
     <tr data-bind="groupFocus: editing">
         <td class="width-1"><span data-bind="text: id"></span></td>
         <td class="width-3">
-            <b data-bind="text: name, visible: !editing()"></b>
-            <input data-bind="value: name, visible: editing, css: {error: validation('name')}" title="Name" class="width-3"/>
-            <span data-bind="text: validation('name'), visible: validation('name')" class="error_message"></span>
+            <b data-bind="text: code, visible: !editing()"></b>
+            <input data-bind="value: code, visible: editing, css: {error: validation('code')}" title="Code" class="width-3"/>
+            <span data-bind="text: validation('code'), visible: validation('code')" class="error_message"></span>
         </td>
-        <td class="width-6">
-            <b data-bind="text: description, visible: !editing()"></b>
-            <input data-bind="value: description, visible: editing, css: {error: validation('description')}" title="Description" class="width-6"/>
-            <span data-bind="text: validation('description'), visible: validation('description')" class="error_message"></span>
+        <td class="width-3">
+            <b data-bind="text: typeNice, visible: !editing()"></b>
+            <select data-bind="value: type, foreach: $root.budgetTypes, visible: editing, css: {error: $root.newBudget().validation('type')}" title="Type" class="width-3">
+                <option data-bind="value: id, text: description"></option>
+            </select>
+            <span data-bind="text: validation('type'), visible: validation('type')" class="error_message"></span>
+        </td>
+        <td class="width-2">
+            <span data-bind="visible: !editing(), style: { color: amountNice < 0 ? 'red' : 'black' }" style="font-weight: bold">
+                <span style="float:left ">$</span>
+                <span style="float:right" data-bind="text: amountNice"></span>
+            </span>
+            <input data-bind="value: amount, visible: editing, css: {error: validation('amount')}" title="Amount" class="width-2" style="text-align:right"/>
+            <span data-bind="text: validation('amount'), visible: validation('amount')" class="error_message"></span>
         </td>
         <td class="width-3">
             <a data-bind="click: del, visible: deleting() == false">Delete</a>
@@ -36,18 +47,24 @@
     </tbody>
 
     <tfoot>
-    <tr data-bind="with: newAccount">
+    <tr data-bind="with: newBudget">
         <td>&nbsp;</td>
         <td class="width-3">
-            <input data-bind="value: name, css: {error: $root.newAccount().validation('name')}" title="Name" class="width-3" ><br/>
-            <span data-bind="text: $root.newAccount().validation('name'), visible: $root.newAccount().validation('name')" class="error_message"></span>
-        </td>
-        <td class="width-6">
-            <input data-bind="value: description, css: {error: $root.newAccount().validation('description')}" title="Description" class="width-6"/><br/>
-            <span data-bind="text: $root.newAccount().validation('description'), visible: $root.newAccount().validation('description')" class="error_message"></span>
+            <input data-bind="value: code, css: {error: validation('code')}" title="Code" class="width-3" ><br/>
+            <span data-bind="text: validation('code'), visible: validation('code')" class="error_message"></span>
         </td>
         <td class="width-3">
-            <button data-bind="click: $root.newAccount().add">Add Account</button>
+            <select data-bind="value: type, foreach: $root.budgetTypes, css: {error: validation('type')}" title="Type" class="width-3">
+                <option data-bind="value: id, text: description"></option>
+            </select>
+            <span data-bind="text: validation('type'), visible: validation('type')" class="error_message"></span>
+        </td>
+        <td class="width-2">
+            <input data-bind="value: amount, css: {error: validation('amount')}" title="Amount" class="width-2"/><br/>
+            <span data-bind="text: validation('amount'), visible: validation('amount')" class="error_message"></span>
+        </td>
+        <td class="width-3">
+            <button data-bind="click: $root.newBudget().add">Add Budget</button>
         </td>
     </tr>
     </tfoot>
@@ -61,61 +78,82 @@
     var viewModel;
 
     const ViewModel = function () {
-        this.loaded = ko.observable(false);
-        this.accounts = ko.observableArray([]);
-
-        // Setup blank account for new account form
         var self = this;
-        this.blankNewAccount = function () {
-            var a = new Account(-1, "a", "d");
-            a.updatable(false);
-            self.newAccount = ko.observable(a);
+
+        this.loadedBudgets = ko.observable(false);
+        this.loadedBudgetTypes = ko.observable(false);
+        this.loaded = ko.computed(function () {
+            return self.loadedBudgets() && self.loadedBudgetTypes();
+        });
+        this.budgets = ko.observableArray([]);
+        this.budgetTypes = [];
+
+        // Setup blank budget for new budget form
+        self.newBudget = ko.observable();
+        this.blankNewBudget = function () {
+            var b = new Budget(null, "code", 1, 0);
+            self.newBudget(b);
         };
-        self.blankNewAccount();
+        self.blankNewBudget();
     };
 
-    function Account(id, name, description)
+    function Budget(id, code, type, amount)
     {
         // Create basic object
-        var acct = {
+        var budget = {
             id: ko.observable(id),
-            name: ko.observable(name),
-            description: ko.observable(description),
+            code: ko.observable(code),
+            type: ko.observable(type),
+            amount: ko.observable("" + amount.toFixed(2)),
             valuesOnly: function () {
                 return {
-                    id: acct.id,
-                    name: acct.name,
-                    description: acct.description,
+                    id: this.id(),
+                    code: this.code(),
+                    type: this.type(),
+                    amount: this.amount()
                 }
             }
         };
 
-        // Decorate as rest managed object
-        decorateAjaxRest(
-            acct, id, name, "account", "/rest/account/",
-            {
-                del: function () {
-                    viewModel.accounts.remove(acct);
-                    console.log("Account " + acct.name() + " removed.");
-                },
-                add: function () {
-                    viewModel.accounts.push(acct);
-                    acct.updatable(true);
-                    viewModel.blankNewAccount();
-                    console.log("Account " + acct.name() + " added.");
-                },
-                update: function () {
-                    console.log("Account " + acct.name() + " updated.");
-                }
+        // Nice field values
+        budget.typeNice = ko.computed(function() {
+            if (viewModel) {
+                var t = _.find(viewModel.budgetTypes, {id: budget.type()});
+                return (t && t.description) ? t.description : "Unknown";
+            }
+            return "Not loaded yet";
+        });
+        budget.amountNice = ko.computed(function() {
+            var amount = parseFloat(budget.amount());
+            return amount.toFixed(2);
+        });
 
+        // Decorate as rest managed object
+        decorateAjaxRest( budget, id, name, "budget", "/rest/budget/",
+            {
+                del: function (obj) {
+                    viewModel.budgets.remove(budget);
+                    console.log("Budget " + budget.code() + " removed.");
+                },
+                add: function (obj) {
+                    viewModel.budgets.push(budget);
+                    viewModel.blankNewBudget();
+                    console.log("Budget " + budget.code() + " added.");
+                },
+                update: function (obj, result) {
+                    var amount = parseFloat(result.data.amount);
+                    budget.sneakyUpdate(budget.amount, "" + amount.toFixed(2));
+                    console.log("Budget " + budget.code() + " updated.");
+                }
             }
         );
 
         // Subscribe to exposed update fields
-        acct.name.subscribe(function (newValue) { if (acct.updatable()) { acct.update(); } });
-        acct.description.subscribe(function (newValue) { if (acct.updatable()) { acct.update(); } });
+        budget.code.subscribe(function (newValue) { budget.update(); });
+        budget.type.subscribe(function (newValue) { budget.update(); });
+        budget.amount.subscribe(function (newValue) { budget.update(); });
 
-        return acct;
+        return budget;
     }
 
     $(document).ready( function ()
@@ -124,23 +162,46 @@
         viewModel = new ViewModel();
         ko.applyBindings(viewModel);
 
-        // Load initial accounts
-        $.ajax({
-            url: "/rest/account",
-            success: function (data) {
-                for (var d of data.data) {
-                    viewModel.accounts.push(new Account(d.id, d.name, d.description));
+        // Set up promise chain
+        var df = $.Deferred();
+        df.resolve();
+
+        // Load budget types
+        df.promise().then(function () {
+            return $.ajax({
+                url: "/rest/budget/types",
+                success: function (data) {
+                    for (var d of data.data) {
+                        viewModel.budgetTypes.push({id: d.id, description: d.description});
+                    }
+                    viewModel.loadedBudgetTypes(true);
+                    viewModel.blankNewBudget();
+                },
+                error: function (err) {
+                    alert("Cannot load budgets. See console for details");
+                    console.log("Received HTTP 500. Server said: " + err.responseText)
                 }
-                viewModel.loaded(true);
-            },
-            error: function (err) {
-                alert("Cannot load accounts. See console for details");
-                console.log("Received HTTP 500. Server said: " + err.responseText)
-            }
-        });
+            }).promise();
+        })
+
+        // Load budgets
+        .then(function () {
+            return $.ajax({
+                url: "/rest/budget",
+                success: function (data) {
+                    for (var d of data.data) {
+                        viewModel.budgets.push(new Budget(d.id, d.code, d.type, d.amount));
+                    }
+                    viewModel.loadedBudgets(true);
+                },
+                error: function (err) {
+                    alert("Cannot load budgets. See console for details");
+                    console.log("Received HTTP 500. Server said: " + err.responseText)
+                }
+            }).promise();
+        })
+
     });
-
-
 
 </script>
 {% endblock %}

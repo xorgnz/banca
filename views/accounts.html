@@ -39,15 +39,15 @@
     <tr data-bind="with: newAccount">
         <td>&nbsp;</td>
         <td class="width-3">
-            <input data-bind="value: name, css: {error: $root.newAccount().validation('name')}" title="Name" class="width-3" ><br/>
-            <span data-bind="text: $root.newAccount().validation('name'), visible: $root.newAccount().validation('name')" class="error_message"></span>
+            <input data-bind="value: name, css: {error: validation('name')}" title="Name" class="width-3" ><br/>
+            <span data-bind="text: validation('name'), visible: validation('name')" class="error_message"></span>
         </td>
         <td class="width-6">
-            <input data-bind="value: description, css: {error: $root.newAccount().validation('description')}" title="Description" class="width-6"/><br/>
-            <span data-bind="text: $root.newAccount().validation('description'), visible: $root.newAccount().validation('description')" class="error_message"></span>
+            <input data-bind="value: description, css: {error: validation('description')}" title="Description" class="width-6"/><br/>
+            <span data-bind="text: validation('description'), visible: validation('description')" class="error_message"></span>
         </td>
         <td class="width-3">
-            <button data-bind="click: $root.newAccount().add">Add Account</button>
+            <button data-bind="click: add">Add Account</button>
         </td>
     </tr>
     </tfoot>
@@ -67,8 +67,7 @@
         // Setup blank account for new account form
         var self = this;
         this.blankNewAccount = function () {
-            var a = new Account(-1, "a", "d");
-            a.updatable(false);
+            var a = new Account(null, "Name", "Description");
             self.newAccount = ko.observable(a);
         };
         self.blankNewAccount();
@@ -100,20 +99,18 @@
                 },
                 add: function () {
                     viewModel.accounts.push(acct);
-                    acct.updatable(true);
                     viewModel.blankNewAccount();
                     console.log("Account " + acct.name() + " added.");
                 },
                 update: function () {
                     console.log("Account " + acct.name() + " updated.");
                 }
-
             }
         );
 
         // Subscribe to exposed update fields
-        acct.name.subscribe(function (newValue) { if (acct.updatable()) { acct.update(); } });
-        acct.description.subscribe(function (newValue) { if (acct.updatable()) { acct.update(); } });
+        acct.name.subscribe(function (newValue) { acct.update(); });
+        acct.description.subscribe(function (newValue) { acct.update(); });
 
         return acct;
     }
