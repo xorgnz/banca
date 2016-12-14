@@ -4,7 +4,7 @@ const uiUtils = require("../lib/ui-utils.js");
 const validation = require("../lib/validation.js");
 const HTTP = require("http-status");
 
-/* GET users listing. */
+/* GET list of all accounts */
 router.get('/', function (req, res, next) {
     req.db.all("SELECT * FROM account",
         function (err, rows) {
@@ -15,13 +15,12 @@ router.get('/', function (req, res, next) {
                 res.setHeader('Content-Type', 'application/json');
                 res.status(HTTP.OK).json({success: true, data: uiUtils.stripDatabasePrefix(rows)});
             }
-            console.log("fish");
         }
     );
 });
 
 
-/* POST - Create new budget */
+/* POST - Create new account */
 router.post('/', function (req, res, next) {
     validation.validateAccount(req, res, next);
 });
@@ -43,7 +42,7 @@ router.post('/', function (req, res, next) {
 });
 
 
-/* DELETE - Delete specified budget */
+/* DELETE - Delete specified account */
 router.delete("/:id", function (req, res, next) {
     req.db.run(
         "DELETE FROM account WHERE account_id = ?",
@@ -61,7 +60,7 @@ router.delete("/:id", function (req, res, next) {
 });
 
 
-/* PATCH - Update specified budget */
+/* PATCH - Update specified account */
 router.patch('/:id', function (req, res, next) {
     validation.validateAccount(req, res, next)
 });
@@ -81,6 +80,22 @@ router.patch("/:id", function (req, res, next) {
             else {
                 console.log("Successfully updated account with ID " + req.params.id);
                 res.status(HTTP.OK).json({success: true});
+            }
+        }
+    );
+});
+
+/* SPECIAL GET - List entries associated with account */
+router.get('/:id/entries', function (req, res, next) {
+    req.db.all(
+        "SELECT * FROM entry WHERE entry_account_id = ?",
+        req.params.id,
+        function (err, rows) {
+            if (err) {
+                res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message);
+            }
+            else {
+                res.status(HTTP.OK).json({success: true, data: uiUtils.stripDatabasePrefix(rows)});
             }
         }
     );

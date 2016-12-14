@@ -12,6 +12,7 @@
         <th>Name</th>
         <th>Description</th>
         <th>&nbsp;</th>
+        <th>&nbsp;</th>
     </tr></thead>
 
     <tbody data-bind="foreach: accounts">
@@ -32,6 +33,9 @@
             <a data-bind="click: delReally, visible: deleting() == true">Confirm</a>
             <a data-bind="click: cancelDel, visible: deleting() == true">Cancel</a>
         </td>
+        <td class="width-1">
+            <a data-bind="attr: { href: '/ui/account/' + id() + '/entries'}">Entries</a>
+        </td>
     </tr>
     </tbody>
 
@@ -49,6 +53,7 @@
         <td class="width-3">
             <button data-bind="click: add">Add Account</button>
         </td>
+        <td>&nbsp;</td>
     </tr>
     </tfoot>
 </table>
@@ -66,9 +71,9 @@
 
         // Setup blank account for new account form
         var self = this;
+        self.newAccount = ko.observable();
         this.blankNewAccount = function () {
-            var a = new Account(null, "Name", "Description");
-            self.newAccount = ko.observable(a);
+            self.newAccount(new Account(null, "Name", "Description"));
         };
         self.blankNewAccount();
     };
@@ -91,7 +96,7 @@
 
         // Decorate as rest managed object
         decorateAjaxRest(
-            acct, id, name, "account", "/rest/account/",
+            acct, id, "account", "/rest/account/",
             {
                 del: function () {
                     viewModel.accounts.remove(acct);

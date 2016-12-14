@@ -5,13 +5,14 @@ const sqlite3 = require("sqlite3");
 const db = new sqlite3.Database('database.sqlite');
 const math = require("mathjs");
 const mathUtils = require('../lib/math-utils.js');
-const importUtils = require('../lib/import-utils.js');
+const tags = require('../lib/tags.js');
+const pad = require("pad-number");
 
 // Show usage if requested
 function usage() {
     console.log("node --harmony tools/import-csv.js [account_id] [filename]");
     process.exit();
-};
+}
 if (process.argv[2] == "-hno") {
     usage();
 }
@@ -36,6 +37,7 @@ if (! fs.existsSync(filename)) {
 
 // Verify that specified account exists
 var p = new Promise((resolve, reject) => {
+    console.log("p1");
     var acct = db.get(
         "SELECT * FROM account WHERE account_id = ?",
         account_id,
@@ -51,8 +53,8 @@ var p = new Promise((resolve, reject) => {
                 console.log("Cannot proceed - no account exists with ID '" + account_id + "'");
                 process.exit();
             }
+            console.log("p1e");
 
-            console.log(2.2);
             resolve();
         }
     );
@@ -60,6 +62,7 @@ var p = new Promise((resolve, reject) => {
 
 // Import data from CSV
 p = p.then(() => {
+    console.log("p1");
 
     return new Promise((resolve, reject) => {
 
@@ -69,6 +72,7 @@ p = p.then(() => {
         });
 
         converter.on("end_parsed", function (data) {
+            console.log("p1e");
             resolve(data);
         });
 
@@ -78,6 +82,7 @@ p = p.then(() => {
 
 // Dump data
 p = p.then((entries) => {
+    console.log("p1");
 
     // Filter unusable rows
     // - ignore entries with no date
@@ -90,23 +95,22 @@ p = p.then((entries) => {
         entry.amount_pre2 = mathUtils.parseNumber(entry.amount_pre2);
 
         // Ignore if no date is provided
-        if (! entry.date)
-        {
+        if (! entry.date) {
             console.log("Ignoring CSV row - date column contains no value:");
             console.log(entry);
         }
 
         // Ignore if no amount is provided
-        else if (isNaN(entry.amount_pre) && isNaN(entry.amount_pre2))
-        {
+        else if (isNaN(entry.amount_pre) && isNaN(entry.amount_pre2)) {
             console.log(entry.amount_pre);
             console.log(entry.amount_pre2);
             console.log("Ignoring CSV row - amount columns contain no numeric value:");
             console.log(entry);
         }
 
-        else
+        else {
             filteredEntries.push(entry);
+        }
     }
     console.log(entries.length + " entries found");
     console.log(filteredEntries.length + " entries valid for use");
@@ -114,40 +118,29 @@ p = p.then((entries) => {
     // Scrub and clean imported data
     var exceptions = [];
     for (var entry of filteredEntries) {
-        try {
-            // Calculate transaction amount from both cells
-            // - Many bank outputs use different columns for debit and credit
-            entry.amount = (isNaN(entry.amount_pre) ? 0 : entry.amount_pre)
-                         + (isNaN(entry.amount_pre2) ? 0 : entry.amount_pre2);
-            delete entry.amount_pre;
-            delete entry.amount_pre2;
+        // Calculate transaction amount from both cells
+        // - Many bank outputs use different columns for debit and credit
+        entry.amount = (isNaN(entry.amount_pre) ? 0 : entry.amount_pre)
+                     + (isNaN(entry.amount_pre2) ? 0 : entry.amount_pre2);
+        delete entry.amount_pre;
+        delete entry.amount_pre2;
 
-            // Parse transaction date field
-            var d = new Date(entry.date);
-            if (isNaN(d.getUTCFullYear()) || isNaN(d.getUTCMonth()) || isNaN(d.getUTCDate()))
-            {
-                throw "Import aborted - date string '" + entry.date + "' cannot be parsed";
-            }
-            else
-            {
-                entry.date_year = d.getUTCFullYear();
-                entry.date_month = d.getUTCMonth();
-                entry.date_day = d.getUTCDate();
-                delete entry.date;
-            }
-
-            // Clean up tags - use Unknown if not available
-            entry.tag = importUtils.isValidTagString(entry.tag) ? entry.tag : utils.UNKNOWN_TAG;
-
-
-        } catch (err) {
-            exceptions.push({ entry: entry, message: err});
+        // Parse transaction date field
+        var d = new Date(entry.date);
+        if (isNaN(d.getUTCFullYear()) || isNaN(d.getUTCMonth()) || isNaN(d.getUTCDate())) {
+            exceptions.push({ entry: entry, message: "Import aborted - date string '" + entry.date + "' cannot be parsed"});
+        } else {
+            entry.date = pad(d.getUTCFullYear(),4) + "-" + pad(d.getUTCMonth()+1,2) + "-" +  pad(d.getUTCDate(),2);
         }
+
+        // Clean up tags - use Unknown if not available
+        entry.tag = tags.isValidTagString(entry.tag) ? entry.tag : tags.UNKNOWN_TAG;
     }
 
     if (exceptions.length > 0)
     {
         console.log("Import aborted - please fix the following rows: ");
+        console.log(exceptions);
         process.exit();
     }
     else
@@ -156,24 +149,20 @@ p = p.then((entries) => {
             "INSERT INTO entry (            " +
             "   entry_account_id,           " +
             "   entry_amount,               " +
-            "   entry_date_year,            " +
-            "   entry_date_month,           " +
-            "   entry_date_day,             " +
+            "   entry_date,                 " +
             "   entry_what,                 " +
             "   entry_where,                " +
             "   entry_note,                 " +
             "   entry_tag                   " +
-            ") VALUES (?,?,?,?,?,?,?,?,?)   ");
+            ") VALUES (?,?,?,?,?,?,?)   ");
 
         for (var entry of filteredEntries)
         {
-            console.log("Importing - " + entry.date_year + "-" + entry.date_month + "-" + entry.date_day + " :: " + entry.amount);
+            console.log("Importing - " + entry.date + " :: " + entry.amount);
             stmt.run(
                 account_id,
                 entry.amount,
-                entry.date_year,
-                entry.date_month,
-                entry.date_day,
+                entry.date,
                 entry.what,
                 entry.where,
                 entry.note,

@@ -13,6 +13,13 @@ router.get('/ui', function (req,res, next) {
     });
 });
 
+router.get('/ui/account/:id/entries', function(req, res, next) {
+    res.render('entries.html', {
+        title: 'Entries',
+        account_id: req.params.id
+    });
+});
+
 router.get('/ui/accounts', function(req, res, next) {
     res.render('accounts.html', {
         title: 'Accounts'

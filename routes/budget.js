@@ -95,7 +95,6 @@ router.patch("/:id", function (req, res, next) {
 
 /* SPECIAL GET - List allowed budget types */
 router.get('/types', function (req, res, next) {
-    res.setHeader('Content-Type', 'application/json');
     res.status(HTTP.OK).json({success: true, data: types});
 });
 

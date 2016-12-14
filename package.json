@@ -30,6 +30,7 @@
     "node-sass": "^3.11.2",
     "node-sass-middleware": "^0.9.8",
     "nunjucks": "^3.0.0",
+    "pad-number": "0.0.4",
     "serve-favicon": "~2.3.0",
     "sqlite3": "^3.1.8",
     "sync": "^0.2.5"

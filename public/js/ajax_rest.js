@@ -1,4 +1,4 @@
-function decorateAjaxRest(obj, id, display_name, type, ajax_endpoint, callbacks) {
+function decorateAjaxRest(obj, id, type, ajax_endpoint, callbacks) {
 
     // Ensure parameters meet contract
     if (!obj)

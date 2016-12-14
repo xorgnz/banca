@@ -91,8 +91,7 @@
         // Setup blank budget for new budget form
         self.newBudget = ko.observable();
         this.blankNewBudget = function () {
-            var b = new Budget(null, "code", 1, 0);
-            self.newBudget(b);
+            self.newBudget(new Budget(null, "code", 1, 0));
         };
         self.blankNewBudget();
     };
@@ -129,7 +128,7 @@
         });
 
         // Decorate as rest managed object
-        decorateAjaxRest( budget, id, name, "budget", "/rest/budget/",
+        decorateAjaxRest(budget, id, "budget", "/rest/budget/",
             {
                 del: function (obj) {
                     viewModel.budgets.remove(budget);
