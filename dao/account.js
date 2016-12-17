@@ -2,7 +2,6 @@ const logger = require("../lib/debug.js").logger;
 const dbUtils = require("../lib/db-utils.js");
 
 class Account {
-    fish;
     constructor(id, name, description) {
         this._id = id ? id : -1;
         this._name = name ? name : "";

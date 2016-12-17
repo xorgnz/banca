@@ -3,7 +3,7 @@ var sqlite3 = require('sqlite3');
 var fs = require("fs");
 
 // Define constants
-const filename_db = "database.sqlite";
+const filename_db = "test.sqlite";
 const filename_schema = "schema.sql";
 
 

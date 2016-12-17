@@ -139,7 +139,7 @@ exports.update = function(db, accounting) {
             "UPDATE accounting SET          " +
             "   accounting_period_id = ?,   " +
             "   accounting_account_id = ?,  " +
-            "   accounting_amount_start = ? " +
+            "   accounting_amount_start = ?," +
             "   accounting_amount_end = ?   " +
             "WHERE accounting_id = ?",
             accounting.period_id,
