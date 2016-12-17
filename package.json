@@ -24,6 +24,7 @@
     "fs-extra": "^1.0.0",
     "http-status": "^0.2.3",
     "lodash": "^4.17.0",
+    "log4js": "^1.0.1",
     "mathjs": "^3.7.0",
     "merge-descriptors": "^1.0.1",
     "morgan": "~1.7.0",

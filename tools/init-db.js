@@ -38,5 +38,6 @@ db.serialize(function () {
     }
 });
 
+console.log("Database initialization complete");
 
 

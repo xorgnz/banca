@@ -11,7 +11,7 @@ CREATE TABLE entry
     entry_id INTEGER PRIMARY KEY ASC AUTOINCREMENT,
     entry_account_id INTEGER REFERENCES account (account_id),
     entry_amount NUMERIC,
-    entry_date TEXT,
+    entry_date INTEGER,
     entry_bank_note TEXT,
     entry_note TEXT,
     entry_tag TEXT,
@@ -40,8 +40,18 @@ CREATE TABLE budget_assignment
 
 CREATE TABLE period
 (
-    period_date_year INTEGER,
-    period_date_month INTEGER,
-    period_account_id INTEGER REFERENCES account (account_id),
-    period_amount NUMERIC
+    period_id INTEGER PRIMARY KEY ASC AUTOINCREMENT,
+    period_name TEXT,
+    period_date_start INTEGER,
+    period_date_end INTEGER
+);
+
+
+CREATE TABLE accounting
+(
+    accounting_id INTEGER PRIMARY KEY ASC AUTOINCREMENT,
+    accounting_period_id INTEGER REFERENCES period (period_id),
+    accounting_account_id INTEGER REFERENCES account (account_id),
+    accounting_amount_start NUMERIC,
+    accounting_amount_end NUMERIC
 );
