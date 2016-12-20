@@ -13,6 +13,10 @@ class Account {
     set id(v)           { this._id = v; }
     set name(v)         { this._name = v; }
     set description(v)  { this._description = v; }
+
+    static equivalenceFields() {
+        return ["id", "name", "description"];
+    }
 }
 exports.Account = Account;
 

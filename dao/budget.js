@@ -2,11 +2,10 @@ const logger = require("../lib/debug.js").logger;
 const dbUtils = require("../lib/db-utils.js");
 
 class Budget {
-    fish;
     constructor(id, code, type, amount) {
-        this._id = id ? id : -1;
-        this._code = code ? code : "";
-        this._type= type ? type  : "";
+        this._id     = id ? id : -1;
+        this._code   = code ? code : "";
+        this._type   = type ? type  : "";
         this._amount = amount ? amount  : "";
     }
     get id()            { return this._id; }
@@ -17,6 +16,10 @@ class Budget {
     set code(v)         { this._code = v; }
     set type(v)         { this._type = v; }
     set amount(v)       { this._amount = v; }
+
+    static equivalenceFields() {
+        return ["id", "code", "type", "amount"];
+    }
 }
 exports.Budget = Budget;
 
@@ -132,10 +135,10 @@ exports.update = function(db, budget) {
     logger.trace(budget);
     return new Promise((resolve, reject) => {
         db.run(
-            "UPDATE budget SET             " +
-            "   budget_code = ?,           " +
-            "   budget_type = ?     " +
-            "   budget_amount = ?     " +
+            "UPDATE budget SET       " +
+            "   budget_code = ?,     " +
+            "   budget_type = ?,     " +
+            "   budget_amount = ?    " +
             "WHERE budget_id = ?",
             budget.code,
             budget.type,
