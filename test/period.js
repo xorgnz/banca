@@ -1,11 +1,10 @@
 const assert  = require("chai").assert;
-const sqlite3 = require('sqlite3');
 const logger  = require("../lib/debug.js").logger;
 const _       = require('lodash');
 
-const db        = new sqlite3.Database('test.sqlite');
+const db            = require("./_shared.js").db;
+const testObjects   = require("./_shared.js").testObjects;
 const periodDAO = require("../dao/period.js");
-const testObjects   = require("./objects.js");
 
 const beforeEach = require("mocha").beforeEach;
 const describe   = require("mocha").describe;
@@ -97,22 +96,22 @@ describe("Period DAO", function () {
             .then(() => { return periodDAO.add(db, period1); })
             .then(() => { return periodDAO.add(db, period2); })
             .then(() => { return periodDAO.getPeriodContainingDate(db, new Date("2000-01-20").getTime()); })
-            .then((row) => {
+            .then((obj) => {
                 for (var key of periodDAO.Period.equivalenceFields())
                     assert(obj[key] === period0[key], "Incorrect period found");
             })
             .then(() => { return periodDAO.getPeriodContainingDate(db, new Date("2001-01-31T23:59:59.999Z").getTime()); })
-            .then((row) => {
+            .then((obj) => {
                 for (var key of periodDAO.Period.equivalenceFields())
                     assert(obj[key] === period1[key], "Incorrect period found");
             })
             .then(() => { return periodDAO.getPeriodContainingDate(db, new Date("2002-01-01T00:00:00.000Z").getTime()); })
-            .then((row) => {
+            .then((obj) => {
                 for (var key of periodDAO.Period.equivalenceFields())
                     assert(obj[key] === period2[key], "Incorrect period found");
             })
             .then(() => { return periodDAO.getPeriodContainingDate(db, new Date("2003-01-01T00:00:00.000Z").getTime()); })
-            .then((row) => {
+            .then((obj) => {
                 assert(obj === null, "Expecting null - no period should match - bad date");
             });
     });

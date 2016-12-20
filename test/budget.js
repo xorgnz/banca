@@ -1,11 +1,10 @@
-const assert  = require("chai").assert;
-const sqlite3 = require('sqlite3');
-const logger  = require("../lib/debug.js").logger;
-const _       = require('lodash');
+const assert = require("chai").assert;
+const logger = require("../lib/debug.js").logger;
+const _      = require('lodash');
 
-const db        = new sqlite3.Database('test.sqlite');
-const budgetDAO = require("../dao/budget.js");
-const testObjects   = require("./objects.js");
+const db          = require("./_shared.js").db;
+const testObjects = require("./_shared.js").testObjects;
+const budgetDAO   = require("../dao/budget.js");
 
 const beforeEach = require("mocha").beforeEach;
 const describe   = require("mocha").describe;
@@ -54,7 +53,7 @@ describe("Budget DAO", function () {
             });
     });
 
-        // Test removeAll
+    // Test removeAll
     it(".removeAll", function () {
         return Promise.resolve()
             .then(() => { return budgetDAO.add(db, budget0); })

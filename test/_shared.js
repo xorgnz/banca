@@ -4,22 +4,27 @@ const budgetDAO     = require("../dao/budget.js");
 const entryDAO      = require("../dao/entry.js");
 const periodDAO     = require("../dao/period.js");
 
+const sqlite3 = require('sqlite3');
+exports.db = new sqlite3.Database('test.sqlite');
+
+exports.testObjects = {};
+
 var createTestAccount     = function (num) {
     return new accountDAO.Account(null, "Name " + num, "Description " + num);
 };
-exports.createTestAccount = createTestAccount;
+exports.testObjects.createTestAccount = createTestAccount;
 
 
 var createTestAccounting     = function (num, period, account) {
     return new accountingDAO.Accounting(null, period, account, num * 0.01, num * 1.01);
 };
-exports.createTestAccounting = createTestAccounting;
+exports.testObjects.createTestAccounting = createTestAccounting;
 
 
 var createTestBudget     = function (num) {
     return new budgetDAO.Budget(null, "Code " + num, num, num + 1000);
 };
-exports.createTestBudget = createTestBudget;
+exports.testObjects.createTestBudget = createTestBudget;
 
 
 var createTestEntry     = function (num, account) {
@@ -34,7 +39,7 @@ var createTestEntry     = function (num, account) {
         "Where " + num,
         "What " + num)
 };
-exports.createTestEntry = createTestEntry;
+exports.testObjects.createTestEntry = createTestEntry;
 
 
 var createTestPeriod     = function (num) {
@@ -42,4 +47,4 @@ var createTestPeriod     = function (num) {
     var d_end = new Date((2000 + num) + "-01-31T23:59:59.999Z");
     return new periodDAO.Period(null, "Name " + num, d_start.getTime(), d_end.getTime());
 };
-exports.createTestPeriod = createTestPeriod;
+exports.testObjects.createTestPeriod = createTestPeriod;

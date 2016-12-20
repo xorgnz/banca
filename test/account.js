@@ -1,19 +1,18 @@
-const assert  = require("chai").assert;
-const sqlite3 = require('sqlite3');
-const logger  = require("../lib/debug.js").logger;
-const _       = require('lodash');
+const assert = require("chai").assert;
+const logger = require("../lib/debug.js").logger;
+const _      = require('lodash');
 
-const db            = new sqlite3.Database('test.sqlite');
-const accountDAO    = require("../dao/account.js");
-const testObjects   = require("./objects.js");
+const db          = require("./_shared.js").db;
+const testObjects = require("./_shared.js").testObjects;
+const accountDAO  = require("../dao/account.js");
 
 const beforeEach = require("mocha").beforeEach;
-const describe = require("mocha").describe;
-const it       = require("mocha").it;
+const describe   = require("mocha").describe;
+const it         = require("mocha").it;
 
 describe("Account DAO", function () {
-    const account0    = testObjects.createTestAccount(0);
-    const account1    = testObjects.createTestAccount(1);
+    const account0 = testObjects.createTestAccount(0);
+    const account1 = testObjects.createTestAccount(1);
 
     beforeEach(function () {
         return Promise.resolve()
@@ -52,7 +51,7 @@ describe("Account DAO", function () {
                 assert(rows.length === 0, "Record remains after remove");
             });
     });
-        // Test removeAll
+    // Test removeAll
     it(".removeAll", function () {
         return Promise.resolve()
             .then(() => { return accountDAO.add(db, account0); })

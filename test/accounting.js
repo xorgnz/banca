@@ -1,13 +1,12 @@
-const assert  = require("chai").assert;
-const sqlite3 = require('sqlite3');
-const logger  = require("../lib/debug.js").logger;
-const _       = require('lodash');
+const assert = require("chai").assert;
+const logger = require("../lib/debug.js").logger;
+const _      = require('lodash');
 
-const db            = new sqlite3.Database('test.sqlite');
+const db            = require("./_shared.js").db;
+const testObjects   = require("./_shared.js").testObjects;
 const periodDAO     = require("../dao/period.js");
 const accountDAO    = require("../dao/account.js");
 const accountingDAO = require("../dao/accounting.js");
-const testObjects   = require("./objects.js");
 
 const beforeEach = require("mocha").beforeEach;
 const describe   = require("mocha").describe;
@@ -132,7 +131,6 @@ describe("Accounting DAO", function () {
     });
 
     // Test getByPeriodAndDate
-    // TODO Finish
     it(".getByPeriodAndDate", function () {
         return Promise.resolve()
             .then(() => { return accountingDAO.add(db, accounting0); })
