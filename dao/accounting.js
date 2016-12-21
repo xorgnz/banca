@@ -89,15 +89,15 @@ var add     = function (db, accounting) {
 exports.add = add;
 
 
-var createAccountingForPeriods     = function (db, period_ids, account_id) {
-    logger.trace("Accounting DAO - createAccountingForPeriods: [" + period_ids + "], " + account_id);
+var createForPeriods     = function (db, period_ids, account_id) {
+    logger.trace("Accounting DAO - createForPeriods: [" + period_ids + "], " + account_id);
     var promises = [];
     for (var i = 0; i < period_ids.length; i++) {
         promises.push(add(db, new Accounting(null, period_ids[i], account_id, 0, 0)));
     }
     return Promise.all(promises);
 };
-exports.createAccountingForPeriods = createAccountingForPeriods;
+exports.createForPeriods = createForPeriods;
 
 
 exports.get = function (db, id) {
@@ -121,12 +121,14 @@ exports.get = function (db, id) {
 };
 
 
-var getByPeriodAndAccount = function (db, period_id, account_id) {
+var getByPeriodAndAccount     = function (db, period_id, account_id) {
     logger.trace("Accounting DAO - getByPeriodAndAccount: P: " + period_id + ", A: " + account_id);
     return new Promise((resolve, reject) => {
         db.get(
             "SELECT * FROM accounting " +
-            "WHERE accounting_period_id = ? AND accounting_account_id = ?",
+            "WHERE " +
+            "   accounting_period_id = ? AND " +
+            "   accounting_account_id = ?",
             period_id,
             account_id,
             function (err, row) {
@@ -144,8 +146,8 @@ var getByPeriodAndAccount = function (db, period_id, account_id) {
 exports.getByPeriodAndAccount = getByPeriodAndAccount;
 
 
-var getByPeriodAndDate = function (db, date, account_id) {
-    logger.trace("Accounting DAO - getByPeriodAndDate: D: " + new Date(date) + ", A: " + account_id);
+var getByDateAndAccount     = function (db, date, account_id) {
+    logger.trace("Accounting DAO - getByDateAndAccount: D: " + new Date(date) + ", A: " + account_id);
     return new Promise((resolve, reject) => {
         db.get(
             "SELECT accounting.* FROM accounting " +
@@ -168,7 +170,7 @@ var getByPeriodAndDate = function (db, date, account_id) {
         );
     });
 };
-exports.getByPeriodAndDate = getByPeriodAndDate;
+exports.getByDateAndAccount = getByDateAndAccount;
 
 
 exports.listAll = function (db) {

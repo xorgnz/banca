@@ -76,7 +76,7 @@ var add     = function (db, period) {
 };
 exports.add = add;
 
-exports.createPeriodRange = function (db, date_start, date_end) {
+exports.createOverRange = function (db, date_start, date_end) {
     logger.trace("Period DAO - Create Period Range: ");
 
     var sDate  = new Date(date_start);
@@ -126,12 +126,14 @@ exports.get = function (db, id) {
     });
 };
 
-var getPeriodContainingDate     = function (db, date) {
-    logger.trace("Period DAO - getPeriodContainingDate: " + date);
+var getByDate     = function (db, date) {
+    logger.trace("Period DAO - getByDate: " + date);
     return new Promise((resolve, reject) => {
         db.get(
             "SELECT * FROM period " +
-            "WHERE period_date_start <= ? AND period_date_end >= ?",
+            "WHERE " +
+            "   period_date_start <= ? AND " +
+            "   period_date_end >= ?",
             date, date,
             function (err, row) {
                 console.log(this);
@@ -147,7 +149,7 @@ var getPeriodContainingDate     = function (db, date) {
     });
 
 };
-exports.getPeriodContainingDate = getPeriodContainingDate;
+exports.getByDate = getByDate;
 
 
 exports.listAll = function (db) {

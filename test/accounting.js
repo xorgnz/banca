@@ -73,10 +73,10 @@ describe("Accounting DAO", function () {
     });
 
     // Test Create accountings for single period
-    it(".createAccountingForPeriods (single period)", function () {
+    it(".createForPeriods (single period)", function () {
         return Promise.resolve()
             .then(() => {
-                return accountingDAO.createAccountingForPeriods(db,
+                return accountingDAO.createForPeriods(db,
                     [period0.id],
                     account0.id);
             })
@@ -89,10 +89,10 @@ describe("Accounting DAO", function () {
     });
 
     // Test Create accountings for multiple periods
-    it(".createAccountingForPeriods (multiple periods)", function () {
+    it(".createForPeriods (multiple periods)", function () {
         return Promise.resolve()
             .then(() => {
-                return accountingDAO.createAccountingForPeriods(db,
+                return accountingDAO.createForPeriods(db,
                     [period0.id, period1.id, period2.id],
                     account0.id);
             })
@@ -130,41 +130,41 @@ describe("Accounting DAO", function () {
             });
     });
 
-    // Test getByPeriodAndDate
-    it(".getByPeriodAndDate", function () {
+    // Test getByDateAndAccount
+    it(".getByDateAndAccount", function () {
         return Promise.resolve()
             .then(() => { return accountingDAO.add(db, accounting0); })
             .then(() => { return accountingDAO.add(db, accounting1); })
             .then(() => { return accountingDAO.add(db, accounting2); })
             .then(() => {
-                return accountingDAO.getByPeriodAndDate(db, new Date("2000-01-20").getTime(), account0.id);
+                return accountingDAO.getByDateAndAccount(db, new Date("2000-01-20").getTime(), account0.id);
             })
             .then((obj) => {
                 for (var key of accountingDAO.Accounting.equivalenceFields())
                     assert(obj[key] === accounting0[key], "Incorrect accounting found");
             })
             .then(() => {
-                return accountingDAO.getByPeriodAndDate(db, new Date("2001-01-31T23:59:59.999Z").getTime(), account1.id);
+                return accountingDAO.getByDateAndAccount(db, new Date("2001-01-31T23:59:59.999Z").getTime(), account1.id);
             })
             .then((obj) => {
                 for (var key of accountingDAO.Accounting.equivalenceFields())
                     assert(obj[key] === accounting1[key], "Incorrect accounting found");
             })
             .then(() => {
-                return accountingDAO.getByPeriodAndDate(db, new Date("2002-01-01T00:00:00.000Z").getTime(), account2.id);
+                return accountingDAO.getByDateAndAccount(db, new Date("2002-01-01T00:00:00.000Z").getTime(), account2.id);
             })
             .then((obj) => {
                 for (var key of accountingDAO.Accounting.equivalenceFields())
                     assert(obj[key] === accounting2[key], "Incorrect accounting found");
             })
             .then(() => {
-                return accountingDAO.getByPeriodAndDate(db, new Date("2000-04-20").getTime(), account0.id);
+                return accountingDAO.getByDateAndAccount(db, new Date("2000-04-20").getTime(), account0.id);
             })
             .then((obj) => {
                 assert(obj === null, "Expecting null - no period should match - bad date");
             })
             .then(() => {
-                return accountingDAO.getByPeriodAndDate(db, new Date("2000-01-20").getTime(), 999999999);
+                return accountingDAO.getByDateAndAccount(db, new Date("2000-01-20").getTime(), 999999999);
             })
             .then((obj) => {
                 assert(obj === null, "Expecting null - no period should match - bad account");

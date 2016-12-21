@@ -13,7 +13,7 @@ function usage() {
     console.log("node --harmony tools/import-csv.js [account_id] [filename]");
     process.exit();
 }
-if (process.argv[2] == "-hno") {
+if (process.argv[2] == "-h") {
     usage();
 }
 
@@ -34,6 +34,20 @@ if (! fs.existsSync(filename)) {
     console.log("Cannot proceed - specified CSV file '" + filename + "' does not exist");
     process.exit();
 }
+
+// Pseudo
+// Verify account exists.
+// Load entries from CSV
+// Filter entries
+// Create entries
+// Create periods over entry range
+// Get periods over entry range
+// Create accountings for periods
+// Get accountings for periods
+// Calc accountings
+// Cascade descendant accountings
+
+
 
 // Verify that specified account exists
 var p = new Promise((resolve, reject) => {

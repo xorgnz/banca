@@ -90,27 +90,27 @@ describe("Period DAO", function () {
     });
 
     // Test Get period containing date
-    it(".getPeriodContainingDate", function () {
+    it(".getByDate", function () {
         return Promise.resolve()
             .then(() => { return periodDAO.add(db, period0); })
             .then(() => { return periodDAO.add(db, period1); })
             .then(() => { return periodDAO.add(db, period2); })
-            .then(() => { return periodDAO.getPeriodContainingDate(db, new Date("2000-01-20").getTime()); })
+            .then(() => { return periodDAO.getByDate(db, new Date("2000-01-20").getTime()); })
             .then((obj) => {
                 for (var key of periodDAO.Period.equivalenceFields())
                     assert(obj[key] === period0[key], "Incorrect period found");
             })
-            .then(() => { return periodDAO.getPeriodContainingDate(db, new Date("2001-01-31T23:59:59.999Z").getTime()); })
+            .then(() => { return periodDAO.getByDate(db, new Date("2001-01-31T23:59:59.999Z").getTime()); })
             .then((obj) => {
                 for (var key of periodDAO.Period.equivalenceFields())
                     assert(obj[key] === period1[key], "Incorrect period found");
             })
-            .then(() => { return periodDAO.getPeriodContainingDate(db, new Date("2002-01-01T00:00:00.000Z").getTime()); })
+            .then(() => { return periodDAO.getByDate(db, new Date("2002-01-01T00:00:00.000Z").getTime()); })
             .then((obj) => {
                 for (var key of periodDAO.Period.equivalenceFields())
                     assert(obj[key] === period2[key], "Incorrect period found");
             })
-            .then(() => { return periodDAO.getPeriodContainingDate(db, new Date("2003-01-01T00:00:00.000Z").getTime()); })
+            .then(() => { return periodDAO.getByDate(db, new Date("2003-01-01T00:00:00.000Z").getTime()); })
             .then((obj) => {
                 assert(obj === null, "Expecting null - no period should match - bad date");
             });
