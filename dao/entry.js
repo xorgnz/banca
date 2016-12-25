@@ -1,23 +1,38 @@
-const _             = require('lodash');
-const logger        = require("../lib/debug.js").logger;
-const dbUtils       = require("../lib/db-utils.js");
-const periodDAO     = require("../dao/period.js");
+const _ = require('lodash');
+
+const logger  = require("../lib/debug.js").logger;
+const dbUtils = require("../lib/db-utils.js");
+const check   = require('../lib/check-types-wrapper.js').check;
+
+const accountDAO    = require("../dao/account.js");
 const accountingDAO = require("../dao/accounting.js");
+const periodDAO     = require("../dao/period.js");
+
 
 const table_name = "entry";
 
 class Entry {
     constructor(id, account, amount, date, bank_note, note, tag, where, what) {
+        check.assert.equal(true, id === null || check.number(id));
+        check.assert.equal(true, check.number(account) || check.instance(account, accountDAO.Account));
+        check.assert.number(amount);
+        check.assert.number(date);
+        check.assert.string(bank_note);
+        check.assert.string(note);
+        check.assert.string(tag);
+        check.assert.string(where);
+        check.assert.string(what);
+
         this._id = id ? id : -1;
-        this._amount = amount ? amount  : "";
-        this._date = date ? date  : "";
+        this._amount = amount ? amount : _.round(amount, 2);
+        this._date = date ? date  : 0;
         this._bank_note = bank_note ? bank_note : -1;
         this._note = note ? note : "";
         this._tag = tag ? tag  : "";
         this._where = where ? where  : "";
         this._what = what ? what  : "";
 
-        if (typeof(account) === "object")
+        if (check.object(account))
             this._account = account;
         else
             this._account_id = account;
@@ -44,6 +59,19 @@ class Entry {
     set account(v)      { this._account = v; }
     set account_id(v)   { if (this._account) this._account = null; this._account_id = v; }
 
+    static fromObject(obj) {
+        return new Entry(
+            obj.id,
+            obj.account ? obj.account : obj.account_id,
+            obj.amount,
+            obj.date,
+            obj.bank_note,
+            obj.note,
+            obj.tag,
+            obj.where,
+            obj.what);
+    }
+
     static fieldNames() {
         return ["id", "account_id", "amount", "date", "bank_note", "note", "tag", "where", "what"];
     }
@@ -54,6 +82,8 @@ exports.Entry = Entry;
 exports.add = function(db, entry) {
     logger.trace("Entry DAO - Add:");
     logger.trace(entry);
+    check.assert.equal(db.constructor.name, "Database");
+    check.assert.instance(entry, Entry);
     entry.amount = _.round(entry.amount, 2);
     return dbUtils.db_insert(db, table_name, Entry.fieldNames(), entry);
 };
@@ -61,12 +91,14 @@ exports.add = function(db, entry) {
 
 exports.get = function (db, id) {
     logger.trace("Entry DAO - get: " + id);
+    check.assert.equal(db.constructor.name, "Database");
+    check.assert.number(id);
     return new Promise((resolve, reject) => {
         db.get(
             "SELECT * FROM entry " +
             "WHERE entry_id = ?",
             id,
-            dbUtils.generateDBResponseFunctionGet(resolve, reject)
+            dbUtils.generateDBResponseFunctionGet(resolve, reject, Entry.fromObject)
         );
     });
 };
@@ -74,6 +106,7 @@ exports.get = function (db, id) {
 
 exports.listAll = function(db) {
     logger.trace("Entry DAO - listAll");
+    check.assert.equal(db.constructor.name, "Database");
     return new Promise((resolve, reject) => {
         db.all(
             "SELECT * FROM entry " +
@@ -86,11 +119,12 @@ exports.listAll = function(db) {
 
 exports.listByAccounting = function(db, accounting_id) {
     logger.trace("Entry DAO - listByAccounting. ID: " + accounting_id);
+    check.assert.equal(db.constructor.name, "Database");
+    check.assert.number(accounting_id);
 
     return Promise.resolve()
         .then(() => { return accountingDAO.peekDatesAndAccount(db, accounting_id); })
         .then((peek) => {
-            console.log("peek" + peek);
             return new Promise((resolve, reject) => {
                 db.all(
                     "SELECT * FROM entry " +
@@ -102,7 +136,7 @@ exports.listByAccounting = function(db, accounting_id) {
                     peek.date_start,
                     peek.date_end,
                     peek.account_id,
-                    dbUtils.generateDBResponseFunctionGet(resolve, reject)
+                    dbUtils.generateDBResponseFunctionGet(resolve, reject, Entry.fromObject)
                 );
             });
         })
@@ -111,6 +145,8 @@ exports.listByAccounting = function(db, accounting_id) {
 
 exports.listByPeriod = function(db, period_id) {
     logger.trace("Entry DAO - listByPeriod");
+    check.assert.equal(db.constructor.name, "Database");
+    check.assert.number(period_id);
 
     return Promise.resolve()
         .then(() => { return periodDAO.get(db, period_id); })
@@ -124,7 +160,7 @@ exports.listByPeriod = function(db, period_id) {
                     "ORDER BY entry_date",
                     period.date_start,
                     period.date_end,
-                    dbUtils.generateDBResponseFunctionGet(resolve, reject)
+                    dbUtils.generateDBResponseFunctionGet(resolve, reject, Entry.fromObject)
                 );
             });
         });
@@ -133,12 +169,14 @@ exports.listByPeriod = function(db, period_id) {
 
 exports.remove  = function (db, id) {
     logger.trace("Entry DAO - remove: " + id);
+    check.assert.equal(db.constructor.name, "Database");
+    check.assert.number(id);
     return new Promise((resolve, reject) => {
         db.run(
             "DELETE FROM entry " +
             "WHERE entry_id = ?",
             id,
-            dbUtils.generateDBResponseFunctionGet(resolve, reject)
+            dbUtils.generateDBResponseFunctionDelete(resolve, reject)
         );
     });
 };
@@ -146,10 +184,11 @@ exports.remove  = function (db, id) {
 
 exports.removeAll = function (db) {
     logger.trace("Entry DAO - removeAll");
+    check.assert.equal(db.constructor.name, "Database");
     return new Promise((resolve, reject) => {
         db.run(
             "DELETE FROM entry",
-            dbUtils.generateDBResponseFunctionGet(resolve, reject)
+            dbUtils.generateDBResponseFunctionDelete(resolve, reject)
         );
     });
 };
@@ -158,7 +197,8 @@ exports.removeAll = function (db) {
 exports.update = function(db, entry) {
     logger.trace("Entry DAO - update:");
     logger.trace(entry);
-    entry.amount = _.round(entry.amount, 2);
+    check.assert.equal(db.constructor.name, "Database");
+    check.assert.instance(entry, Entry);
     return new Promise((resolve, reject) => {
         db.run(
             "UPDATE entry SET           " +

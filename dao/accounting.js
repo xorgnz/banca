@@ -1,22 +1,33 @@
-const logger   = require("../lib/debug.js").logger;
-const dbUtils  = require("../lib/db-utils.js");
-const _        = require('lodash');
+const _     = require('lodash');
+const check = require('../lib/check-types-wrapper.js').check;
+
+const dbUtils = require("../lib/db-utils.js");
+const logger  = require("../lib/debug.js").logger;
+
 const entryDAO = require("../dao/entry.js");
+const periodDAO = require("../dao/period.js");
+const accountDAO = require("../dao/account.js");
 
 const table_name = "accounting";
 
 class Accounting {
     constructor(id, period, account, amount_start, amount_end) {
-        this._id           = id ? id : -1;
-        this._amount_start = isNaN(amount_start) ? 0 : Number.parseFloat(amount_start);
-        this._amount_end   = isNaN(amount_end) ? 0 : Number.parseFloat(amount_end);
+        check.assert.equal(true, id === null || check.number(id));
+        check.assert.equal(true, check.number(period) || check.instance(period, periodDAO.Period));
+        check.assert.equal(true, check.number(account) || check.instance(account, accountDAO.Account));
+        check.assert.number(amount_start);
+        check.assert.number(amount_end);
 
-        if (typeof(account) === "object")
+        this._id           = id ? id : -1;
+        this._amount_start = isNaN(amount_start) ? 0 : _.round(Number.parseFloat(amount_start), 2);
+        this._amount_end   = isNaN(amount_end) ? 0 : _.round(Number.parseFloat(amount_end), 2);
+
+        if (check.object(account))
             this._account = account;
         else
             this._account_id = account;
 
-        if (typeof(period) === "object")
+        if (check.object(period))
             this._period = period;
         else
             this._period_id = period;
@@ -45,24 +56,34 @@ class Accounting {
         this._period_id = v;
     }
 
+    static fromObject(obj) {
+        return new Accounting(
+            obj.id,
+            obj.period ? obj.period : obj.period_id,
+            obj.account ? obj.account : obj.account_id,
+            obj.amount_start,
+            obj.amount_end);
+    }
+
     static fieldNames() {
         return ["id", "amount_start", "amount_end", "account_id", "period_id"];
     }
 }
 exports.Accounting = Accounting;
 
-
 exports.add = function (db, accounting) {
     logger.trace("Accounting DAO - Add:");
     logger.trace(accounting);
-    accounting.amount_start = _.round(accounting.amount_start, 2);
-    accounting.amount_end = _.round(accounting.amount_end, 2);
+    check.assert.equal(db.constructor.name, "Database");
+    check.assert.instanceStrict(accounting, Accounting);
     return dbUtils.db_insert(db, table_name, Accounting.fieldNames(), accounting);
 };
 
 
 exports.calc = function (db, id) {
     logger.trace("Accounting DAO - calc: " + id);
+    check.assert.equal(db.constructor.name, "Database");
+    check.assert.number(id);
     var amount = 0;
     return Promise.resolve()
         .then(() => { return entryDAO.listByAccounting(db, id); })
@@ -79,6 +100,8 @@ exports.calc = function (db, id) {
 
 exports.cascade = function (db, id) {
     logger.trace("Accounting DAO - cascade: " + id);
+    check.assert.equal(db.constructor.name, "Database");
+    check.assert.number(id);
     return Promise.resolve()
         .then(() => { return exports.listSelfAndFollowing(db, id); })
         .then((rows) => {
@@ -98,18 +121,13 @@ exports.cascade = function (db, id) {
 
 exports.createForPeriods = function (db, period_ids, account_id) {
     logger.trace("Accounting DAO - createForPeriods: [" + period_ids + "], " + account_id);
-
+    check.assert.equal(db.constructor.name, "Database");
+    check.assert.array.of.number(period_ids);
+    check.assert.number(account_id);
     return Promise.resolve()
-        .then(() => {
-            _.each(period_ids, (pid) => {
-                if (isNaN(pid))
-                    throw new Error("period_ids contains non-numbers");
-            });
-        })
         .then(() => { return exports.listByAccount(db, account_id); })
         .then((periods) => {
             var period_ids_extant = _.map(periods, "period_id");
-            console.log(period_ids_extant);
             var promises = [];
             for (var i = 0; i < period_ids.length; i++) {
                 if (_.indexOf(period_ids_extant, period_ids[i]) == -1) {
@@ -125,12 +143,14 @@ exports.createForPeriods = function (db, period_ids, account_id) {
 
 exports.get = function (db, id) {
     logger.trace("Accounting DAO - get: " + id);
+    check.assert.equal(db.constructor.name, "Database");
+    check.assert.number(id);
     return new Promise((resolve, reject) => {
         db.get(
             "SELECT * FROM accounting " +
             "WHERE accounting_id = ?",
             id,
-            dbUtils.generateDBResponseFunctionGet(resolve, reject)
+            dbUtils.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObject)
         );
     });
 };
@@ -138,6 +158,9 @@ exports.get = function (db, id) {
 
 exports.getByPeriodAndAccount = function (db, period_id, account_id) {
     logger.trace("Accounting DAO - getByPeriodAndAccount: P: " + period_id + ", A: " + account_id);
+    check.assert.equal(db.constructor.name, "Database");
+    check.assert.number(account_id);
+    check.assert.number(period_id);
     return new Promise((resolve, reject) => {
         db.get(
             "SELECT * FROM accounting " +
@@ -146,7 +169,7 @@ exports.getByPeriodAndAccount = function (db, period_id, account_id) {
             "   accounting_account_id = ?",
             period_id,
             account_id,
-            dbUtils.generateDBResponseFunctionGet(resolve, reject)
+            dbUtils.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObject)
         );
     });
 };
@@ -154,6 +177,9 @@ exports.getByPeriodAndAccount = function (db, period_id, account_id) {
 
 exports.getByDateAndAccount = function (db, date, account_id) {
     logger.trace("Accounting DAO - getByDateAndAccount: D: " + new Date(date) + ", A: " + account_id);
+    check.assert.equal(db.constructor.name, "Database");
+    check.assert.number(date);
+    check.assert.number(account_id);
     return new Promise((resolve, reject) => {
         db.get(
             "SELECT accounting.* FROM accounting " +
@@ -164,7 +190,7 @@ exports.getByDateAndAccount = function (db, date, account_id) {
             "   accounting_account_id = ?",
             date, date,
             account_id,
-            dbUtils.generateDBResponseFunctionGet(resolve, reject)
+            dbUtils.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObject)
         );
     });
 };
@@ -172,10 +198,11 @@ exports.getByDateAndAccount = function (db, date, account_id) {
 
 exports.listAll = function (db) {
     logger.trace("Accounting DAO - listAll");
+    check.assert.equal(db.constructor.name, "Database");
     return new Promise((resolve, reject) => {
         db.all(
             "SELECT * FROM accounting",
-            dbUtils.generateDBResponseFunctionGet(resolve, reject)
+            dbUtils.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObject)
         );
     });
 };
@@ -183,7 +210,8 @@ exports.listAll = function (db) {
 
 exports.listSelfAndFollowing = function (db, accounting_id) {
     logger.trace("Accounting DAO - listFollowing: " + accounting_id);
-
+    check.assert.equal(db.constructor.name, "Database");
+    check.assert.number(accounting_id);
     return Promise.resolve()
         .then(() => { return exports.peekDatesAndAccount(db, accounting_id); })
         .then((peek) => {
@@ -197,7 +225,7 @@ exports.listSelfAndFollowing = function (db, accounting_id) {
                     "ORDER BY period_date_start",
                     peek.account_id,
                     peek.date_start,
-                    dbUtils.generateDBResponseFunctionGet(resolve, reject)
+                    dbUtils.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObject)
                 );
             });
         });
@@ -206,6 +234,8 @@ exports.listSelfAndFollowing = function (db, accounting_id) {
 
 exports.listByAccount = function (db, account_id) {
     logger.trace("Accounting DAO - listByAccount: " + account_id);
+    check.assert.equal(db.constructor.name, "Database");
+    check.assert.number(account_id);
     return new Promise((resolve, reject) => {
         db.all(
             "SELECT accounting.* FROM accounting " +
@@ -213,18 +243,20 @@ exports.listByAccount = function (db, account_id) {
             "WHERE accounting_account_id = ? " +
             "ORDER BY period_date_start",
             account_id,
-            dbUtils.generateDBResponseFunctionGet(resolve, reject)
+            dbUtils.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObject)
         );
     });
 };
 
 
-// TODO - Take accounting as well (why ever would we not??)
 exports.listOverDateRange = function (db, date_start, date_end, account_id) {
     logger.trace("Accounting DAO - listOverDateRange:");
-    console.log("S: " + new Date(date_start));
-    console.log("E: " + new Date(date_end));
-
+    logger.trace("S: " + new Date(date_start));
+    logger.trace("E: " + new Date(date_end));
+    check.assert.equal(db.constructor.name, "Database");
+    check.assert.number(date_start);
+    check.assert.number(date_end);
+    check.assert.number(account_id);
     return new Promise((resolve, reject) => {
         db.all(
             "SELECT accounting.* FROM accounting " +
@@ -237,7 +269,7 @@ exports.listOverDateRange = function (db, date_start, date_end, account_id) {
             date_end,
             date_start,
             account_id,
-            dbUtils.generateDBResponseFunctionGet(resolve, reject)
+            dbUtils.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObject)
         );
     });
 };
@@ -245,6 +277,8 @@ exports.listOverDateRange = function (db, date_start, date_end, account_id) {
 
 exports.peekDatesAndAccount = function (db, id) {
     logger.trace("Accounting DAO - peekDatesAndAccount: " + id);
+    check.assert.equal(db.constructor.name, "Database");
+    check.assert.number(id);
     return new Promise((resolve, reject) => {
         db.get(
             "SELECT " +
@@ -263,12 +297,14 @@ exports.peekDatesAndAccount = function (db, id) {
 
 exports.remove = function (db, id) {
     logger.trace("Accounting DAO - remove: " + id);
+    check.assert.equal(db.constructor.name, "Database");
+    check.assert.number(id);
     return new Promise((resolve, reject) => {
         db.run(
             "DELETE FROM accounting " +
             "WHERE accounting_id = ?",
             id,
-            dbUtils.generateDBResponseFunctionGet(resolve, reject)
+            dbUtils.generateDBResponseFunctionDelete(resolve, reject)
         );
     });
 };
@@ -276,10 +312,11 @@ exports.remove = function (db, id) {
 
 exports.removeAll = function (db) {
     logger.trace("Accounting DAO - removeAll");
+    check.assert.equal(db.constructor.name, "Database");
     return new Promise((resolve, reject) => {
         db.run(
             "DELETE FROM accounting",
-            dbUtils.generateDBResponseFunctionGet(resolve, reject)
+            dbUtils.generateDBResponseFunctionDelete(resolve, reject)
         );
     });
 };
@@ -290,7 +327,8 @@ exports.update = function (db, accounting) {
     accounting.amount_start = _.round(accounting.amount_start, 2);
     accounting.amount_end = _.round(accounting.amount_end, 2);
     logger.trace(accounting);
-
+    check.assert.equal(db.constructor.name, "Database");
+    check.assert.instanceStrict(accounting, Accounting);
     return new Promise((resolve, reject) => {
         db.run(
             "UPDATE accounting SET          " +

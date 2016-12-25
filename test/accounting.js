@@ -99,8 +99,6 @@ describe("Accounting DAO", function () {
                     entryDAO.add(db, entry_bad0),
                     entryDAO.add(db, entry_bad1)]);
             })
-            .then(() => { return entryDAO.listAll(db) })
-            .then((rows) => { console.log("rr"); console.log(rows); })
             .then(() => { return accountingDAO.calc(db, accounting2.id); })
             .then(() => { return accountingDAO.get(db, accounting2.id); })
             .then((obj) => {
@@ -153,7 +151,6 @@ describe("Accounting DAO", function () {
             })
             .then(() => { return accountingDAO.get(db, accounting_sp2.id); })
             .then((accounting) => {
-                console.log(accounting);
                 assert(accounting.amount_start === 13.24);
                 assert(accounting.amount_end === 28.24);
             })
@@ -196,24 +193,13 @@ describe("Accounting DAO", function () {
                 var a = new accountingDAO.Accounting(null, period1.id, account1.id, 0, 0);
                 return accountingDAO.add(db, a);
             })
-            .then(() => { return accountingDAO.listAll(db); })
-            .then((rows) => {
-                console.log("Accountings before");
-                console.log(rows);
-            })
             .then(() => {
                 return accountingDAO.createForPeriods(db,
                     [period0.id, period1.id, period2.id],
                     account0.id);
             })
-            .then(() => { return accountingDAO.listAll(db); })
-            .then((rows) => {
-                console.log("Accountings after");
-                console.log(rows);
-            })
             .then(() => { return accountingDAO.listByAccount(db, account0.id); })
             .then((rows) => {
-                console.log(rows);
                 assert(rows.length === 3, "Incorrect number of accountings created");
                 assert(rows[0].period_id == period0.id, "Incorrect period ID on accounting");
                 assert(rows[0].account_id == account0.id, "Incorrect account ID on accounting");
@@ -326,7 +312,6 @@ describe("Accounting DAO", function () {
                     new Date("2015-09-05").getTime(), account0.id);
             })
             .then((rows) => {
-                console.log(rows);
                 assert(rows.length === 3, "Incorrect number of accountings retrieved");
             })
             .then(() => {
@@ -378,7 +363,6 @@ describe("Accounting DAO", function () {
             .then(() => { return accountingDAO.add(db, accounting_sp4); })
             .then(() => { return accountingDAO.listSelfAndFollowing(db, accounting_sp1.id); })
             .then((rows) => {
-                console.log(rows);
                 assert(rows.length === 3, "Incorrect number of accountings retrieved");
                 assert(rows[0].id == accounting_sp1.id);
                 assert(rows[1].id == accounting_sp2.id);
