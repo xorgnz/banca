@@ -6,7 +6,9 @@
   "private": true,
   "scripts": {
     "start": "nodemon ./bin/www.js",
-    "import-csv": "node --harmony ./tools/import-csv.js",
+    "import": "node --harmony ./tools/import-csv.js",
+    "init": "node --harmony ./tools/init-db live",
+    "init-test": "node --harmony ./tools/init-db,js test",
     "test": "./node_modules/.bin/mocha --reporter spec"
   },
   "repository": {

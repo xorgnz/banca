@@ -4,19 +4,17 @@ const uiUtils = require("../lib/ui-utils.js");
 const validation = require("../lib/validation.js");
 const HTTP = require("http-status");
 
+const accountDAO = require("../dao/account.js");
+
 /* GET list of all accounts */
 router.get('/', function (req, res, next) {
-    req.db.all("SELECT * FROM account",
-        function (err, rows) {
-            if (err) {
-                res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message);
-            }
-            else {
-                res.setHeader('Content-Type', 'application/json');
-                res.status(HTTP.OK).json({success: true, data: uiUtils.stripDatabasePrefix(rows)});
-            }
-        }
-    );
+    Promise.resolve()
+        .then(() => { return accountDAO.listAll(req.db); })
+        .then((rows) => {
+            res.setHeader('Content-Type', 'application/json');
+            res.status(HTTP.OK).json({success: true, data: rows});
+        })
+        .catch((err) => { res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message) });
 });
 
 
@@ -44,19 +42,10 @@ router.post('/', function (req, res, next) {
 
 /* DELETE - Delete specified account */
 router.delete("/:id", function (req, res, next) {
-    req.db.run(
-        "DELETE FROM account WHERE account_id = ?",
-        req.params.id,
-        function (err, row) {
-            if (err) {
-                res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message);
-            }
-            else {
-                console.log("Successfully deleted account with ID " + req.params.id);
-                res.status(HTTP.OK).json({success: true});
-            }
-        }
-    );
+    Promise.resolve()
+        .then(() => { accountDAO.remove(req.db, req.params.id); })
+        .then(() => { res.status(HTTP.OK).json({success: true}); })
+        .catch((err) => { res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message); });
 });
 
 

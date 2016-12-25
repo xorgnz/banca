@@ -1,6 +1,7 @@
 "use strict";
 const logger  = require("../lib/debug.js").logger;
 const dbUtils = require("../lib/db-utils.js");
+const _      = require('lodash');
 const pad     = require("pad-number");
 
 const months = [
@@ -18,6 +19,8 @@ const months = [
     "December"
 ];
 
+const table_name = "period";
+
 class Period {
     constructor(id, name, date_start, date_end) {
         this._id         = id ? id : -1;
@@ -26,83 +29,62 @@ class Period {
         this._date_end   = isNaN(date_end) ? 0 : Number.parseInt(date_end);
     };
 
-    get id() { return this._id; }
+    get id()            { return this._id; }
+    get name()          { return this._name; }
+    get date_start()    { return this._date_start; }
+    get date_end()      { return this._date_end; }
+    set id(v)           { this._id = v; }
+    set name(v)         { this._name = v; }
+    set date_start(v)   { this._date_start = v; }
+    set date_end(v)     { this._date_end = v; }
 
-    get name() { return this._name; }
-
-    get date_start() { return this._date_start; }
-
-    get date_end() { return this._date_end; }
-
-    set id(v) { this._id = v; }
-
-    set name(v) { this._name = v; }
-
-    set date_start(v) { this._date_start = v; }
-
-    set date_end(v) { this._date_end = v; }
-
-    static equivalenceFields() {
+    static fieldNames() {
         return ["id", "name", "date_start", "date_end"];
     }
 }
 exports.Period = Period;
 
 
-var add     = function (db, period) {
-    logger.trace("Period DAO - Add:");
+exports.add     = function (db, period) {
+    logger.trace("Period DAO - add:");
     logger.trace(period);
-    return new Promise((resolve, reject) => {
-        db.run(
-            "INSERT INTO period (" +
-            "   period_name, " +
-            "   period_date_start, " +
-            "   period_date_end) VALUES (?, ?, ?)",
-            period.name,
-            period.date_start,
-            period.date_end,
-            function (err) {
-                if (err) {
-                    logger.error(err);
-                    reject(err);
-                }
-                else {
-                    period.id = this.lastID;
-                    resolve(this.lastID);
-                }
-            }
-        );
-    });
+    return dbUtils.db_insert(db, table_name, Period.fieldNames(), period);
 };
-exports.add = add;
 
-exports.createOverRange = function (db, date_start, date_end) {
-    logger.trace("Period DAO - Create Period Range: ");
 
-    var sDate  = new Date(date_start);
+exports.createOverDateRange = function (db, date_start, date_end) {
+    logger.trace("Period DAO - createOverDateRange: ");
+
+    var sDate = new Date(date_start);
+    var eDate = new Date(date_end);
+    console.log("S: " + sDate);
+    console.log("E: " + eDate);
+
     var sMonth = sDate.getUTCMonth();
     var sYear  = sDate.getUTCFullYear();
-    var eDate  = new Date(date_end);
     var eMonth = eDate.getUTCMonth();
     var eYear  = eDate.getUTCFullYear();
 
-    console.log("starting " + sDate);
-    console.log("ending " + eDate);
+    return Promise.resolve()
+        .then(() => { return exports.listOverDateRange(db, date_start, date_end); })
+        .then((periods) => {
+            var periodNames = _.map(periods, "name");
+            var promises = [];
+            for (var y = sYear; y <= eYear; y++) {
+                for (var m = sMonth; m <= ((y < eYear) ? 11 : eMonth) ; m++) {
+                    var period = new Period(
+                        null,
+                        months[m] + "-" + y,
+                        new Date(y + "-" + pad(m + 1, 2) + "-01T00:00:00.000Z").getTime(),
+                        new Date((m < 11 ? y : y + 1) + "-" + pad(1 + ((m + 1) % 12), 2) + "-01T00:00:00.000Z").getTime() - 1);
+                    if (_.indexOf(periodNames, period.name) == -1)
+                        promises.push(exports.add(db, period));
+                }
+                sMonth = 0;
+            }
 
-    var promises = [];
-    for (var y = sYear; y <= eYear; y++) {
-        for (var m = sMonth; m <= eMonth; m++) {
-            var period = new Period(
-                null,
-                months[m] + "-" + y,
-                new Date(y + "-" + pad(m + 1, 2) + "-01T00:00:00.000Z").getTime(),
-                new Date((m < 11 ? y : y + 1) + "-" + pad(1 + ((m + 1) % 12), 2) + "-01T00:00:00.000Z").getTime() - 1);
-            promises.push(add(db, period));
-        }
-        sMonth = 0;
-    }
-
-    return Promise.all(promises);
+            return Promise.all(promises);
+        });
 };
 
 
@@ -113,20 +95,13 @@ exports.get = function (db, id) {
             "SELECT * FROM period " +
             "WHERE period_id = ?",
             id,
-            function (err, row) {
-                if (err) {
-                    logger.error(err);
-                    reject(err);
-                }
-                else {
-                    resolve(dbUtils.stripDatabasePrefix(row));
-                }
-            }
+            dbUtils.generateDBResponseFunctionGet(resolve, reject)
         );
     });
 };
 
-var getByDate     = function (db, date) {
+
+exports.getByDate = function (db, date) {
     logger.trace("Period DAO - getByDate: " + date);
     return new Promise((resolve, reject) => {
         db.get(
@@ -135,36 +110,38 @@ var getByDate     = function (db, date) {
             "   period_date_start <= ? AND " +
             "   period_date_end >= ?",
             date, date,
-            function (err, row) {
-                console.log(this);
-                if (err) {
-                    logger.error(err);
-                    reject(err);
-                }
-                else {
-                    resolve(dbUtils.stripDatabasePrefix(row));
-                }
-            }
+            dbUtils.generateDBResponseFunctionGet(resolve, reject)
         );
     });
-
 };
-exports.getByDate = getByDate;
 
 
 exports.listAll = function (db) {
     logger.trace("Period DAO - listAll");
     return new Promise((resolve, reject) => {
-        db.all("SELECT * FROM period",
-            function (err, rows) {
-                if (err) {
-                    logger.error(this);
-                    reject(err);
-                }
-                else {
-                    resolve(dbUtils.stripDatabasePrefix(rows));
-                }
-            }
+        db.all(
+            "SELECT * FROM period " +
+            "ORDER BY period_date_start",
+            dbUtils.generateDBResponseFunctionGet(resolve, reject)
+        );
+    });
+};
+
+
+exports.listOverDateRange = function (db, date_start, date_end) {
+    logger.trace("Period DAO - listOverDateRange:");
+    console.log("S: " + new Date(date_start));
+    console.log("E: " + new Date(date_end));
+    return new Promise((resolve, reject) => {
+        db.all(
+            "SELECT * FROM period " +
+            "WHERE " +
+            "   period_date_start <= ? AND " +
+            "   period_date_end >= ? " +
+            "ORDER BY period_date_start",
+            date_end,
+            date_start,
+            dbUtils.generateDBResponseFunctionGet(resolve, reject)
         );
     });
 };
@@ -177,15 +154,7 @@ exports.remove = function (db, id) {
             "DELETE FROM period " +
             "WHERE period_id = ?",
             id,
-            function (err, rows) {
-                if (err) {
-                    logger.error(err);
-                    reject(err);
-                }
-                else {
-                    resolve(dbUtils.stripDatabasePrefix(rows));
-                }
-            }
+            dbUtils.generateDBResponseFunctionDelete(resolve, reject)
         );
     });
 };
@@ -196,15 +165,7 @@ exports.removeAll = function (db) {
     return new Promise((resolve, reject) => {
         db.run(
             "DELETE FROM period",
-            function (err, rows) {
-                if (err) {
-                    logger.error(err);
-                    reject(err);
-                }
-                else {
-                    resolve(dbUtils.stripDatabasePrefix(rows));
-                }
-            }
+            dbUtils.generateDBResponseFunctionGet(resolve, reject)
         );
     });
 };
@@ -224,15 +185,7 @@ exports.update = function (db, period) {
             period.date_start,
             period.date_end,
             period.id,
-            function (err, row) {
-                if (err) {
-                    logger.error(err);
-                    reject(err);
-                }
-                else {
-                    resolve(dbUtils.stripDatabasePrefix(row));
-                }
-            }
+            dbUtils.generateDBResponseFunctionUpdate(resolve, reject)
         );
     });
 };

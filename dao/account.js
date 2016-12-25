@@ -1,6 +1,8 @@
 const logger = require("../lib/debug.js").logger;
 const dbUtils = require("../lib/db-utils.js");
 
+const table_name = "account";
+
 class Account {
     constructor(id, name, description) {
         this._id = id ? id : -1;
@@ -14,7 +16,7 @@ class Account {
     set name(v)         { this._name = v; }
     set description(v)  { this._description = v; }
 
-    static equivalenceFields() {
+    static fieldNames() {
         return ["id", "name", "description"];
     }
 }
@@ -24,25 +26,7 @@ exports.Account = Account;
 exports.add = function(db, account) {
     logger.trace("Account DAO - Add:");
     logger.trace(account);
-    return new Promise((resolve, reject) => {
-        db.run(
-            "INSERT INTO account (" +
-            "   account_name, " +
-            "   account_description) VALUES (?, ?)",
-            account.name,
-            account.description,
-            function (err) {
-                if (err) {
-                    logger.error(err);
-                    reject(err);
-                }
-                else {
-                    account.id = this.lastID;
-                    resolve(this.lastID);
-                }
-            }
-        );
-    });
+    return dbUtils.db_insert(db, table_name, Account.fieldNames(), account);
 };
 
 
@@ -53,15 +37,7 @@ exports.get = function (db, id) {
             "SELECT * FROM account " +
             "WHERE account_id = ?",
             id,
-            function (err, row) {
-                if (err) {
-                    logger.error(err);
-                    reject(err);
-                }
-                else {
-                    resolve(dbUtils.stripDatabasePrefix(row));
-                }
-            }
+            dbUtils.generateDBResponseFunctionGet(resolve, reject)
         );
     });
 };
@@ -70,16 +46,9 @@ exports.get = function (db, id) {
 exports.listAll = function(db) {
     logger.trace("Account DAO - listAll");
     return new Promise((resolve, reject) => {
-        db.all("SELECT * FROM account",
-            function (err, rows) {
-                if (err) {
-                    logger.error(this);
-                    reject(err);
-                }
-                else {
-                    resolve(dbUtils.stripDatabasePrefix(rows));
-                }
-            }
+        db.all(
+            "SELECT * FROM account",
+            dbUtils.generateDBResponseFunctionGet(resolve, reject)
         );
     });
 };
@@ -92,15 +61,7 @@ exports.remove  = function (db, id) {
             "DELETE FROM account " +
             "WHERE account_id = ?",
             id,
-            function (err, rows) {
-                if (err) {
-                    logger.error(err);
-                    reject(err);
-                }
-                else {
-                    resolve(dbUtils.stripDatabasePrefix(rows));
-                }
-            }
+            dbUtils.generateDBResponseFunctionGet(resolve, reject)
         );
     });
 };
@@ -111,15 +72,7 @@ exports.removeAll = function (db) {
     return new Promise((resolve, reject) => {
         db.run(
             "DELETE FROM account",
-            function (err, rows) {
-                if (err) {
-                    logger.error(err);
-                    reject(err);
-                }
-                else {
-                    resolve(dbUtils.stripDatabasePrefix(rows));
-                }
-            }
+            dbUtils.generateDBResponseFunctionGet(resolve, reject)
         );
     });
 };
@@ -137,15 +90,7 @@ exports.update = function(db, account) {
             account.name,
             account.description,
             account.id,
-            function (err, row) {
-                if (err) {
-                    logger.error(err);
-                    reject(err);
-                }
-                else {
-                    resolve(dbUtils.stripDatabasePrefix(row));
-                }
-            }
+            dbUtils.generateDBResponseFunctionUpdate(resolve, reject)
         );
     });
 };

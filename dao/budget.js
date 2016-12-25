@@ -1,6 +1,8 @@
 const logger = require("../lib/debug.js").logger;
 const dbUtils = require("../lib/db-utils.js");
 
+const table_name = "budget";
+
 class Budget {
     constructor(id, code, type, amount) {
         this._id     = id ? id : -1;
@@ -17,7 +19,7 @@ class Budget {
     set type(v)         { this._type = v; }
     set amount(v)       { this._amount = v; }
 
-    static equivalenceFields() {
+    static fieldNames() {
         return ["id", "code", "type", "amount"];
     }
 }
@@ -27,27 +29,7 @@ exports.Budget = Budget;
 exports.add = function(db, budget) {
     logger.trace("budget DAO - Add:");
     logger.trace(budget);
-    return new Promise((resolve, reject) => {
-        db.run(
-            "INSERT INTO budget (" +
-            "   budget_code, " +
-            "   budget_type, " +
-            "   budget_amount) VALUES (?, ?, ?)",
-            budget.code,
-            budget.type,
-            budget.amount,
-            function (err) {
-                if (err) {
-                    logger.error(err);
-                    reject(err);
-                }
-                else {
-                    budget.id = this.lastID;
-                    resolve(this.lastID);
-                }
-            }
-        );
-    });
+    return dbUtils.db_insert(db, table_name, Budget.fieldNames(), budget);
 };
 
 
@@ -58,15 +40,7 @@ exports.get = function (db, id) {
             "SELECT * FROM budget " +
             "WHERE budget_id = ?",
             id,
-            function (err, row) {
-                if (err) {
-                    logger.error(err);
-                    reject(err);
-                }
-                else {
-                    resolve(dbUtils.stripDatabasePrefix(row));
-                }
-            }
+            dbUtils.generateDBResponseFunctionGet(resolve, reject)
         );
     });
 };
@@ -75,16 +49,9 @@ exports.get = function (db, id) {
 exports.listAll = function(db) {
     logger.trace("budget DAO - listAll");
     return new Promise((resolve, reject) => {
-        db.all("SELECT * FROM budget",
-            function (err, rows) {
-                if (err) {
-                    logger.error(this);
-                    reject(err);
-                }
-                else {
-                    resolve(dbUtils.stripDatabasePrefix(rows));
-                }
-            }
+        db.all(
+            "SELECT * FROM budget",
+            dbUtils.generateDBResponseFunctionGet(resolve, reject)
         );
     });
 };
@@ -97,15 +64,7 @@ exports.remove  = function (db, id) {
             "DELETE FROM budget " +
             "WHERE budget_id = ?",
             id,
-            function (err, rows) {
-                if (err) {
-                    logger.error(err);
-                    reject(err);
-                }
-                else {
-                    resolve(dbUtils.stripDatabasePrefix(rows));
-                }
-            }
+            dbUtils.generateDBResponseFunctionGet(resolve, reject)
         );
     });
 };
@@ -116,15 +75,7 @@ exports.removeAll = function (db) {
     return new Promise((resolve, reject) => {
         db.run(
             "DELETE FROM budget",
-            function (err, rows) {
-                if (err) {
-                    logger.error(err);
-                    reject(err);
-                }
-                else {
-                    resolve(dbUtils.stripDatabasePrefix(rows));
-                }
-            }
+            dbUtils.generateDBResponseFunctionGet(resolve, reject)
         );
     });
 };
@@ -144,15 +95,7 @@ exports.update = function(db, budget) {
             budget.type,
             budget.amount,
             budget.id,
-            function (err, row) {
-                if (err) {
-                    logger.error(err);
-                    reject(err);
-                }
-                else {
-                    resolve(dbUtils.stripDatabasePrefix(row));
-                }
-            }
+            dbUtils.generateDBResponseFunctionUpdate(resolve, reject)
         );
     });
 };

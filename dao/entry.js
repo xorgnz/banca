@@ -1,5 +1,10 @@
-const logger = require("../lib/debug.js").logger;
-const dbUtils = require("../lib/db-utils.js");
+const _             = require('lodash');
+const logger        = require("../lib/debug.js").logger;
+const dbUtils       = require("../lib/db-utils.js");
+const periodDAO     = require("../dao/period.js");
+const accountingDAO = require("../dao/accounting.js");
+
+const table_name = "entry";
 
 class Entry {
     constructor(id, account, amount, date, bank_note, note, tag, where, what) {
@@ -26,7 +31,7 @@ class Entry {
     get where()         { return this._where; }
     get what()          { return this._what; }
     set id(v)           { this._id = v; }
-    set amount(v)       { this._amount = v; }
+    set amount(v)       { this._amount = _.round(v, 2) }
     set date(v)         { this._date = v; }
     set bank_note(v)    { this._bank_note = v; }
     set note(v)         { this._note = v; }
@@ -39,7 +44,7 @@ class Entry {
     set account(v)      { this._account = v; }
     set account_id(v)   { if (this._account) this._account = null; this._account_id = v; }
 
-    static equivalenceFields() {
+    static fieldNames() {
         return ["id", "account_id", "amount", "date", "bank_note", "note", "tag", "where", "what"];
     }
 }
@@ -49,37 +54,8 @@ exports.Entry = Entry;
 exports.add = function(db, entry) {
     logger.trace("Entry DAO - Add:");
     logger.trace(entry);
-    return new Promise((resolve, reject) => {
-        db.run(
-            "INSERT INTO entry (" +
-            "   entry_account_id, " +
-            "   entry_amount, " +
-            "   entry_date, " +
-            "   entry_bank_note, " +
-            "   entry_note, " +
-            "   entry_tag, " +
-            "   entry_what, " +
-            "   entry_where) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-            entry.account_id,
-            entry.amount,
-            entry.date,
-            entry.bank_note,
-            entry.note,
-            entry.tag,
-            entry.what,
-            entry.where,
-            function (err) {
-                if (err) {
-                    logger.error(err);
-                    reject(err);
-                }
-                else {
-                    entry.id = this.lastID;
-                    resolve(this.lastID);
-                }
-            }
-        );
-    });
+    entry.amount = _.round(entry.amount, 2);
+    return dbUtils.db_insert(db, table_name, Entry.fieldNames(), entry);
 };
 
 
@@ -90,15 +66,7 @@ exports.get = function (db, id) {
             "SELECT * FROM entry " +
             "WHERE entry_id = ?",
             id,
-            function (err, row) {
-                if (err) {
-                    logger.error(err);
-                    reject(err);
-                }
-                else {
-                    resolve(dbUtils.stripDatabasePrefix(row));
-                }
-            }
+            dbUtils.generateDBResponseFunctionGet(resolve, reject)
         );
     });
 };
@@ -107,18 +75,59 @@ exports.get = function (db, id) {
 exports.listAll = function(db) {
     logger.trace("Entry DAO - listAll");
     return new Promise((resolve, reject) => {
-        db.all("SELECT * FROM entry",
-            function (err, rows) {
-                if (err) {
-                    logger.error(this);
-                    reject(err);
-                }
-                else {
-                    resolve(dbUtils.stripDatabasePrefix(rows));
-                }
-            }
+        db.all(
+            "SELECT * FROM entry " +
+            "ORDER BY entry_date",
+            dbUtils.generateDBResponseFunctionGet(resolve, reject)
         );
     });
+};
+
+
+exports.listByAccounting = function(db, accounting_id) {
+    logger.trace("Entry DAO - listByAccounting. ID: " + accounting_id);
+
+    return Promise.resolve()
+        .then(() => { return accountingDAO.peekDatesAndAccount(db, accounting_id); })
+        .then((peek) => {
+            console.log("peek" + peek);
+            return new Promise((resolve, reject) => {
+                db.all(
+                    "SELECT * FROM entry " +
+                    "WHERE " +
+                    "   entry_date >= ? AND " +
+                    "   entry_date <= ? AND " +
+                    "   entry_account_id = ? " +
+                    "ORDER BY entry_date",
+                    peek.date_start,
+                    peek.date_end,
+                    peek.account_id,
+                    dbUtils.generateDBResponseFunctionGet(resolve, reject)
+                );
+            });
+        })
+};
+
+
+exports.listByPeriod = function(db, period_id) {
+    logger.trace("Entry DAO - listByPeriod");
+
+    return Promise.resolve()
+        .then(() => { return periodDAO.get(db, period_id); })
+        .then((period) => {
+            return new Promise((resolve, reject) => {
+                db.all(
+                    "SELECT * FROM entry " +
+                    "WHERE " +
+                    "   entry_date >= ? AND" +
+                    "   entry_date <= ?" +
+                    "ORDER BY entry_date",
+                    period.date_start,
+                    period.date_end,
+                    dbUtils.generateDBResponseFunctionGet(resolve, reject)
+                );
+            });
+        });
 };
 
 
@@ -129,15 +138,7 @@ exports.remove  = function (db, id) {
             "DELETE FROM entry " +
             "WHERE entry_id = ?",
             id,
-            function (err, rows) {
-                if (err) {
-                    logger.error(err);
-                    reject(err);
-                }
-                else {
-                    resolve(dbUtils.stripDatabasePrefix(rows));
-                }
-            }
+            dbUtils.generateDBResponseFunctionGet(resolve, reject)
         );
     });
 };
@@ -148,15 +149,7 @@ exports.removeAll = function (db) {
     return new Promise((resolve, reject) => {
         db.run(
             "DELETE FROM entry",
-            function (err, rows) {
-                if (err) {
-                    logger.error(err);
-                    reject(err);
-                }
-                else {
-                    resolve(dbUtils.stripDatabasePrefix(rows));
-                }
-            }
+            dbUtils.generateDBResponseFunctionGet(resolve, reject)
         );
     });
 };
@@ -165,6 +158,7 @@ exports.removeAll = function (db) {
 exports.update = function(db, entry) {
     logger.trace("Entry DAO - update:");
     logger.trace(entry);
+    entry.amount = _.round(entry.amount, 2);
     return new Promise((resolve, reject) => {
         db.run(
             "UPDATE entry SET           " +
@@ -186,15 +180,7 @@ exports.update = function(db, entry) {
             entry.what,
             entry.where,
             entry.id,
-            function (err, row) {
-                if (err) {
-                    logger.error(err);
-                    reject(err);
-                }
-                else {
-                    resolve(dbUtils.stripDatabasePrefix(row));
-                }
-            }
+            dbUtils.generateDBResponseFunctionUpdate(resolve, reject)
         );
     });
 };

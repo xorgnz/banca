@@ -27,7 +27,7 @@ describe("Account DAO", function () {
             .then((id) => { return accountDAO.get(db, id); })
             .then((obj) => {
                 assert(obj.id, "ID not set");
-                for (var key of accountDAO.Account.equivalenceFields())
+                for (var key of accountDAO.Account.fieldNames())
                     assert(obj[key] === account0[key], "Field '" + key + "' did not add");
             })
             .then(() => { return accountDAO.listAll(db); })
@@ -40,7 +40,7 @@ describe("Account DAO", function () {
             .then(() => { return accountDAO.update(db, account1); })
             .then(() => { return accountDAO.get(db, account1.id); })
             .then((obj) => {
-                for (var key of accountDAO.Account.equivalenceFields())
+                for (var key of accountDAO.Account.fieldNames())
                     assert(obj[key] === account1[key], "Field '" + key + "' did not update");
             })
 

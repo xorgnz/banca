@@ -28,7 +28,7 @@ describe("Budget DAO", function () {
             .then((id) => { return budgetDAO.get(db, id); })
             .then((obj) => {
                 assert(obj.id, "ID not set");
-                for (var key of budgetDAO.Budget.equivalenceFields())
+                for (var key of budgetDAO.Budget.fieldNames())
                     assert(obj[key] === budget0[key], "Field '" + key + "' did not add");
             })
             .then(() => { return budgetDAO.listAll(db); })
@@ -41,7 +41,7 @@ describe("Budget DAO", function () {
             .then(() => { return budgetDAO.update(db, budget1); })
             .then(() => { return budgetDAO.get(db, budget1.id); })
             .then((obj) => {
-                for (var key of budgetDAO.Budget.equivalenceFields())
+                for (var key of budgetDAO.Budget.fieldNames())
                     assert(obj[key] === budget1[key], "Field '" + key + "' did not update");
             })
 
