@@ -14,21 +14,6 @@ const describe   = require("mocha").describe;
 const it         = require("mocha").it;
 
 
-var createTestEntry     = function (num, account) {
-    return new entryDAO.Entry(
-        null,
-        account,
-        num * 0.01,
-        num + 1000,
-        "Bank Note " + num,
-        "Note " + num,
-        "Tag " + num,
-        "Where " + num,
-        "What " + num)
-};
-exports.createTestEntry = createTestEntry;
-
-
 describe("Entry DAO", function () {
     const account0 = testObjects.createTestAccount(0);
     const account1 = testObjects.createTestAccount(1);

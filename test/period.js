@@ -11,12 +11,6 @@ const describe   = require("mocha").describe;
 const it         = require("mocha").it;
 
 
-var createTestPeriod     = function (num) {
-    return new periodDAO.Period(null, "Name " + num, num, num + 1000);
-};
-exports.createTestPeriod = createTestPeriod;
-
-
 describe("Period DAO", function () {
     const period0 = testObjects.createTestPeriod(0);
     const period1 = testObjects.createTestPeriod(1);

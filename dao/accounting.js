@@ -100,7 +100,6 @@ exports.createForPeriods = function (db, period_ids, account_id) {
     logger.trace("Accounting DAO - createForPeriods: [" + period_ids + "], " + account_id);
 
     return Promise.resolve()
-        // contract - period_ids is array of numbers
         .then(() => {
             _.each(period_ids, (pid) => {
                 if (isNaN(pid))
