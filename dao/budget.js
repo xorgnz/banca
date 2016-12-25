@@ -46,7 +46,18 @@ exports.add = function(db, budget) {
     logger.trace(budget);
     check.assert.equal(db.constructor.name, "Database");
     check.assert.instance(budget, Budget);
-    return dbUtils.db_insert(db, table_name, Budget.fieldNames(), budget);
+    return new Promise((resolve, reject) => {
+        db.run(
+            "INSERT INTO budget (" +
+            "   budget_code, " +
+            "   budget_type, " +
+            "   budget_amount) VALUES (?, ?, ?)",
+            budget.code,
+            budget.type,
+            budget.amount,
+            dbUtils.generateDBResponseFunctionInsert(resolve, reject, budget)
+        );
+    });
 };
 
 

@@ -85,7 +85,28 @@ exports.add = function(db, entry) {
     check.assert.equal(db.constructor.name, "Database");
     check.assert.instance(entry, Entry);
     entry.amount = _.round(entry.amount, 2);
-    return dbUtils.db_insert(db, table_name, Entry.fieldNames(), entry);
+    return new Promise((resolve, reject) => {
+        db.run(
+            "INSERT INTO entry (" +
+            "   entry_account_id, " +
+            "   entry_amount, " +
+            "   entry_date, " +
+            "   entry_bank_note, " +
+            "   entry_note, " +
+            "   entry_tag, " +
+            "   entry_what, " +
+            "   entry_where) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            entry.account_id,
+            entry.amount,
+            entry.date,
+            entry.bank_note,
+            entry.note,
+            entry.tag,
+            entry.what,
+            entry.where,
+            dbUtils.generateDBResponseFunctionInsert(resolve, reject, entry)
+        );
+    });
 };
 
 

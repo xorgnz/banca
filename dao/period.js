@@ -66,7 +66,18 @@ exports.add     = function (db, period) {
     check.assert.equal(db.constructor.name, "Database");
     check.assert.instanceStrict(period, Period);
 
-    return dbUtils.db_insert(db, table_name, Period.fieldNames(), period);
+    return new Promise((resolve, reject) => {
+        db.run(
+            "INSERT INTO period (" +
+            "   period_name, " +
+            "   period_date_start, " +
+            "   period_date_end) VALUES (?, ?, ?)",
+            period.name,
+            period.date_start,
+            period.date_end,
+            dbUtils.generateDBResponseFunctionInsert(resolve, reject, period)
+        );
+    });
 };
 
 

@@ -76,7 +76,20 @@ exports.add = function (db, accounting) {
     logger.trace(accounting);
     check.assert.equal(db.constructor.name, "Database");
     check.assert.instanceStrict(accounting, Accounting);
-    return dbUtils.db_insert(db, table_name, Accounting.fieldNames(), accounting);
+    return new Promise((resolve, reject) => {
+        db.run(
+            "INSERT INTO accounting (" +
+            "   accounting_period_id, " +
+            "   accounting_account_id, " +
+            "   accounting_amount_start, " +
+            "   accounting_amount_end) VALUES (?, ?, ?, ?)",
+            accounting.period_id,
+            accounting.account_id,
+            accounting.amount_start,
+            accounting.amount_end,
+            dbUtils.generateDBResponseFunctionInsert(resolve, reject, accounting)
+        );
+    });
 };
 
 

@@ -39,7 +39,16 @@ exports.add = function(db, account) {
     logger.trace(account);
     check.assert.equal(db.constructor.name, "Database");
     check.assert.instance(account, Account);
-    return dbUtils.db_insert(db, table_name, Account.fieldNames(), account);
+    return new Promise((resolve, reject) => {
+        db.run(
+            "INSERT INTO account (" +
+            "   account_name, " +
+            "   account_description) VALUES (?, ?)",
+            account.name,
+            account.description,
+            dbUtils.generateDBResponseFunctionInsert(resolve, reject, account)
+        );
+    });
 };
 
 
