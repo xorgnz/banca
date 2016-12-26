@@ -1,9 +1,15 @@
-const logger = require("../lib/debug.js").logger;
+const check   = require('../lib/check-types-wrapper.js').check;
 const dbUtils = require("../lib/db-utils.js");
-const check = require('../lib/check-types-wrapper.js').check;
+const logger  = require("../lib/debug.js").logger;
 
 
-const table_name = "budget";
+exports.types = [
+    {id: 1, description: "Monthly Regular"},
+    {id: 2, description: "Yearly Regular"},
+    {id: 3, description: "One Off Special"},
+    {id: 4, description: "Ongoing Special"},
+];
+
 
 class Budget {
     constructor(id, code, type, amount) {

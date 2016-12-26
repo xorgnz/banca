@@ -67,6 +67,36 @@ describe("Entry DAO", function () {
     });
 
     // ------------------------------------------------------------- TEST
+    it(".listByAccount", function () {
+        var period0     = testObjects.createTestPeriod(0);
+        var entry_sp_0  = testObjects.createTestEntry(0, account0);
+        var entry_sp_1  = testObjects.createTestEntry(1, account0);
+        var entry_sp_2  = testObjects.createTestEntry(2, account1);
+
+        return Promise.resolve()
+            .then(() => {
+                return Promise.all([
+                    periodDAO.add(db, period0),
+                    entryDAO.add(db, entry_sp_0),
+                    entryDAO.add(db, entry_sp_1),
+                    entryDAO.add(db, entry_sp_2)]);
+            })
+            .then(() => { return entryDAO.listByAccount(db, account0.id) })
+            .then((rows) => {
+                console.log(rows);
+                assert(rows.length === 2, "Incorrect number of entries retrieved");
+                assert(rows[0].id == entry_sp_0.id);
+                assert(rows[1].id == entry_sp_1.id);
+            })
+            .then(() => { return entryDAO.listByAccount(db, account1.id) })
+            .then((rows) => {
+                console.log(rows);
+                assert(rows.length === 1, "Incorrect number of entries retrieved");
+                assert(rows[0].id == entry_sp_2.id);
+            });
+    });
+
+    // ------------------------------------------------------------- TEST
     it(".listByAccounting", function () {
         var period0     = testObjects.createTestPeriod(0);
         var period1     = testObjects.createTestPeriod(1);
@@ -86,7 +116,7 @@ describe("Entry DAO", function () {
             .then(() => {
                 return Promise.all([
                     periodDAO.add(db, period0),
-                    periodDAO.add(db, period0),
+                    periodDAO.add(db, period1),
                     entryDAO.add(db, entry_sp_0),
                     entryDAO.add(db, entry_sp_1),
                     entryDAO.add(db, entry_sp_2),
@@ -120,7 +150,7 @@ describe("Entry DAO", function () {
             .then(() => {
                 return Promise.all([
                     periodDAO.add(db, period0),
-                    periodDAO.add(db, period0),
+                    periodDAO.add(db, period1),
                     entryDAO.add(db, entry_sp_0),
                     entryDAO.add(db, entry_sp_1),
                     entryDAO.add(db, entry_sp_2)]);

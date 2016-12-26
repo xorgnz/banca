@@ -3,7 +3,6 @@ const pad = require("pad-number");
 const _   = require("lodash");
 
 const mathUtils     = require('../lib/math-utils.js');
-const tags          = require('../lib/tags.js');
 const accountDAO    = require("../dao/account.js");
 const accountingDAO = require("../dao/accounting.js");
 const entryDAO      = require("../dao/entry.js");
@@ -29,15 +28,15 @@ function verifyAccount(db, account_id) {
 // Load import data from CSV
 function loadFromCsv(filename) {
     return new Promise((resolve, reject) => {
-            var converter = new (require("csvtojson").Converter)({
-                noheader: true,
-                headers:  ["date", "tag", "where", "what", "note", "amount_pre", "amount_pre2"]
-            });
+        var converter = new (require("csvtojson").Converter)({
+            noheader: true,
+            headers:  ["date", "tag", "where", "what", "note", "amount_pre", "amount_pre2"]
+        });
 
-            var stream = require("fs").createReadStream(filename);
-            stream.on("error", () => { reject(new Error("Import file does not exist")); });
-            converter.on("end_parsed", (data) => { resolve(data); });
-            stream.pipe(converter);
+        var stream = require("fs").createReadStream(filename);
+        stream.on("error", () => { reject(new Error("Import file does not exist")); });
+        converter.on("end_parsed", (data) => { resolve(data); });
+        stream.pipe(converter);
     });
 }
 
@@ -73,7 +72,7 @@ function processImportedRows(rows) {
             }
 
             // Clean up tags - use Unknown if not available
-            row.tag = tags.isValidTagString(row.tag) ? row.tag : tags.UNKNOWN_TAG;
+            row.tag = entryDAO.isValidTagString(row.tag) ? row.tag : entryDAO.tags.UNKNOWN_TAG;
 
             if (reasons.length > 0) {
                 row.reasons = reasons;

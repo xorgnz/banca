@@ -51,6 +51,7 @@ describe("Account DAO", function () {
                 assert(rows.length === 0, "Record remains after remove");
             });
     });
+
     // Test removeAll
     it(".removeAll", function () {
         return Promise.resolve()

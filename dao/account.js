@@ -1,8 +1,6 @@
-const logger  = require("../lib/debug.js").logger;
-const dbUtils = require("../lib/db-utils.js");
 const check   = require('../lib/check-types-wrapper.js').check;
-
-const table_name = "account";
+const dbUtils = require("../lib/db-utils.js");
+const logger  = require("../lib/debug.js").logger;
 
 class Account {
     constructor(id, name, description) {

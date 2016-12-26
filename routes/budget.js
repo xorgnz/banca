@@ -1,103 +1,55 @@
-const express = require('express');
-const router = express.Router();
-const utils = require("../lib/ui-utils.js");
+const router     = require('express').Router();
 const validation = require('../lib/validation');
-const HTTP = require('http-status');
+const HTTP       = require('http-status');
 
-const types = [
-    {id: 1, description: "Monthly Regular"},
-    {id: 2, description: "Yearly Regular"},
-    {id: 3, description: "One Off Special"},
-    {id: 4, description: "Ongoing Special"},
-];
+const budgetDAO = require("../dao/budget.js");
 
 
 /* GET - List all budgets */
 router.get('/', function (req, res, next) {
-    req.db.all("SELECT * FROM budget",
-        function (err, rows) {
-            if (err) {
-                res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message);
-            }
-            else {
-                res.setHeader('Content-Type', 'application/json');
-                res.status(HTTP.OK).json({success: true, data: utils.stripDatabasePrefix(rows)});
-            }
-        }
-    );
+    Promise.resolve()
+        .then(() => { return budgetDAO.listAll(req.db); })
+        .then((rows) => { res.status(HTTP.OK).json({success: true, data: rows}); })
+        .catch((err) => { res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message) });
 });
 
+
 /* POST - Create new budget */
+router.post('/', function (req, res, next) { validation.validateBudget(req, res, next) });
 router.post('/', function (req, res, next) {
-    validation.validateBudget(req, res, next)
+    var budget = budgetDAO.Budget.fromObject(req.body);
+    Promise.resolve()
+        .then(() => { return budgetDAO.add(req.db, budget); })
+        .then((rows) => { res.status(HTTP.OK).json({success: true, data: {id: budget.id}}); })
+        .catch((err) => { res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message) });
 });
-router.post('/', function (req, res, next) {
-    req.db.run(
-        "INSERT INTO budget (budget_code, budget_type, budget_amount) VALUES (?, ?, ?)",
-        req.body.code,
-        req.body.type,
-        req.body.amount,
-        function (err, row) {
-            if (err) {
-                res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message);
-            }
-            else {
-                console.log("Successfully created budget '" + req.body.code + "' (" + this.lastID + ")");
-                res.status(HTTP.OK).json({success: true, data: {id: this.lastID}});
-            }
-        }
-    );
-});
+
 
 /* DELETE - Delete specified budget */
 router.delete("/:id", function (req, res, next) {
-    req.db.run(
-        "DELETE FROM budget WHERE budget_id = ?",
-        req.params.id,
-        function (err, row) {
-            if (err) {
-                res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message);
-            }
-            else {
-                console.log("Successfully deleted budget with ID " + req.params.id);
-                res.status(HTTP.OK).json({success: true});
-            }
-        }
-    );
+    Promise.resolve()
+        .then(() => { budgetDAO.remove(req.db, req.params.id); })
+        .then(() => { res.status(HTTP.OK).json({success: true}); })
+        .catch((err) => { res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message); });
 });
 
+
 /* PATCH - Update specified budget */
-router.patch('/:id', function (req, res, next) {
-    validation.validateBudget(req, res, next)
-});
+router.patch('/:id', function (req, res, next) { validation.validateBudget(req, res, next) });
 router.patch("/:id", function (req, res, next) {
-    req.db.run(
-        "UPDATE budget SET             " +
-        "   budget_code = ?,           " +
-        "   budget_type = ?,           " +
-        "   budget_amount = ?          " +
-        "WHERE budget_id = ?",
-        req.body.code,
-        req.body.type,
-        req.body.amount,
-        req.params.id,
-        function (err, row) {
-            if (err) {
-                res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message);
-            }
-            else {
-                console.log("Successfully updated budget with ID " + req.params.id);
-                res.status(HTTP.OK).json({success: true, data: { amount: req.body.amount }});
-            }
-        }
-    );
+    req.body.id = req.params.id;
+    var budget  = budgetDAO.Budget.fromObject(req.body);
+    Promise.resolve()
+        .then(() => { return budgetDAO.update(req.db, budget); })
+        .then((rows) => { res.status(HTTP.OK).json({success: true}); })
+        .catch((err) => { res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message) });
 });
+
 
 /* SPECIAL GET - List allowed budget types */
 router.get('/types', function (req, res, next) {
-    res.status(HTTP.OK).json({success: true, data: types});
+    res.status(HTTP.OK).json({success: true, data: budgetDAO.types});
 });
 
 
 module.exports = router;
-module.exports.types = types;

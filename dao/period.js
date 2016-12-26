@@ -1,10 +1,9 @@
-"use strict";
 const _   = require('lodash');
 const pad = require("pad-number");
 
-const logger  = require("../lib/debug.js").logger;
-const dbUtils = require("../lib/db-utils.js");
 const check   = require('../lib/check-types-wrapper.js').check;
+const dbUtils = require("../lib/db-utils.js");
+const logger  = require("../lib/debug.js").logger;
 
 const months = [
     "January",
@@ -21,7 +20,6 @@ const months = [
     "December"
 ];
 
-const table_name = "period";
 
 class Period {
     constructor(id, name, date_start, date_end) {

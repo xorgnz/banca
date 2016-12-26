@@ -1,15 +1,48 @@
 const _ = require('lodash');
 
-const logger  = require("../lib/debug.js").logger;
-const dbUtils = require("../lib/db-utils.js");
 const check   = require('../lib/check-types-wrapper.js').check;
+const dbUtils = require("../lib/db-utils.js");
+const logger  = require("../lib/debug.js").logger;
 
 const accountDAO    = require("../dao/account.js");
 const accountingDAO = require("../dao/accounting.js");
 const periodDAO     = require("../dao/period.js");
 
+var tags = [
+    "Bank",
+    "Books",
+    "Cash out",
+    "Clothes",
+    "Donation",
+    "Education",
+    "Entertainment",
+    "Food out",
+    "Games",
+    "Groceries",
+    "Health",
+    "Insurance",
+    "Joint",
+    "Liquor",
+    "Misc",
+    "Music",
+    "Pay",
+    "Phone",
+    "Project",
+    "Purchase",
+    "Sport",
+    "Tech",
+    "Transfer",
+    "Travel",
+    "Unknown",
+];
+exports.tags = tags;
 
-const table_name = "entry";
+exports.UNKNOWN_TAG = "Unknown";
+
+exports.isValidTagString = function (str) {
+    return _.indexOf(tags, str) != -1;
+};
+
 
 class Entry {
     constructor(id, account, amount, date, bank_note, note, tag, where, what) {
@@ -138,9 +171,34 @@ exports.listAll = function(db) {
 };
 
 
+exports.listByAccount = function(db, account_id) {
+    logger.trace("Entry DAO - listByAccount. ID: " + account_id);
+    check.assert.equal(db.constructor.name, "Database");
+    if (check.string(account_id))
+        account_id = Number.parseInt(account_id);
+    check.assert.number(account_id);
+
+    return Promise.resolve()
+        .then(() => {
+            return new Promise((resolve, reject) => {
+                db.all(
+                    "SELECT * FROM entry " +
+                    "WHERE " +
+                    "   entry_account_id = ? " +
+                    "ORDER BY entry_date",
+                    account_id,
+                    dbUtils.generateDBResponseFunctionGet(resolve, reject, Entry.fromObject)
+                );
+            });
+        })
+};
+
+
 exports.listByAccounting = function(db, accounting_id) {
     logger.trace("Entry DAO - listByAccounting. ID: " + accounting_id);
     check.assert.equal(db.constructor.name, "Database");
+    if (check.string(account_id))
+        accounting_id = Number.parseInt(accounting_id);
     check.assert.number(accounting_id);
 
     return Promise.resolve()

@@ -1,118 +1,49 @@
-/**
- * Created by xorgnz on 2016-12-13.
- */
-const express = require('express');
-const router = express.Router();
-const uiUtils = require("../lib/ui-utils.js");
+const router     = require('express').Router();
 const validation = require("../lib/validation.js");
-const HTTP = require("http-status");
-const tags = require("../lib/tags.js");
+const HTTP       = require("http-status");
 
-/* GET list of all entries */
+const entryDAO = require("../dao/entry.js");
+
+
+/* GET list of all objects of this type */
 router.get('/', function (req, res, next) {
-    req.db.all("SELECT * FROM entry",
-        function (err, rows) {
-            if (err) {
-                res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message);
-            }
-            else {
-                res.setHeader('Content-Type', 'application/json');
-                res.status(HTTP.OK).json({success: true, data: uiUtils.stripDatabasePrefix(rows)});
-            }
-        }
-    );
+    Promise.resolve()
+        .then(() => { return entryDAO.listAll(req.db); })
+        .then((rows) => { res.status(HTTP.OK).json({success: true, data: rows}); })
+        .catch((err) => { res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message) });
 });
 
 
-/* POST - Create new entry */
+/* POST - Create new object */
+router.post('/', function (req, res, next) { validation.validateEntry(req, res, next); });
 router.post('/', function (req, res, next) {
-    validation.validateEntry(req, res, next);
-});
-router.post('/', function (req, res, next) {
-    req.db.run(
-        "INSERT INTO entry (" +
-        "   entry_account_id, " +
-        "   entry_amount, " +
-        "   entry_date, " +
-        "   entry_bank_note, " +
-        "   entry_note, " +
-        "   entry_tag, " +
-        "   entry_what, " +
-        "   entry_where) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        req.body.account_id,
-        req.body.amount,
-        req.body.date,
-        req.body.bank_note,
-        req.body.note,
-        req.body.tag,
-        req.body.what,
-        req.body.where,
-        function (err, row) {
-            if (err) {
-                res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message);
-            }
-            else {
-                console.log("Created entry with name '" + req.body.name + "' (" + this.lastID + ")");
-                res.status(HTTP.OK).json({success: true, data: {id: this.lastID}});
-            }
-        }
-    );
+    var entry = entryDAO.Entry.fromObject(req.body);
+    Promise.resolve()
+        .then(() => { return entryDAO.add(req.db, entry); })
+        .then((rows) => { res.status(HTTP.OK).json({success: true, data: {id: entry.id}}); })
+        .catch((err) => { res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message) });
 });
 
 
-/* DELETE - Delete specified budget */
+/* DELETE - Delete specified object */
 router.delete("/:id", function (req, res, next) {
-    req.db.run(
-        "DELETE FROM entry WHERE entry_id = ?",
-        req.params.id,
-        function (err, row) {
-            if (err) {
-                res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message);
-            }
-            else {
-                console.log("Successfully deleted entry with ID " + req.params.id);
-                res.status(HTTP.OK).json({success: true});
-            }
-        }
-    );
+    Promise.resolve()
+        .then(() => { entryDAO.remove(req.db, req.params.id); })
+        .then(() => { res.status(HTTP.OK).json({success: true}); })
+        .catch((err) => { res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message); });
 });
 
 
-/* PATCH - Update specified budget */
-router.patch('/:id', function (req, res, next) {
-    validation.validateEntry(req, res, next)
-});
+/* PATCH - Update specified object */
+router.patch('/:id', function (req, res, next) { validation.validateEntry(req, res, next) });
 router.patch("/:id", function (req, res, next) {
-    req.db.run(
-        "UPDATE entry SET           " +
-        "   entry_account_id = ?,   " +
-        "   entry_amount = ?,       " +
-        "   entry_date = ?,         " +
-        "   entry_bank_note = ?,    " +
-        "   entry_note = ?,         " +
-        "   entry_tag = ?,          " +
-        "   entry_what = ?,         " +
-        "   entry_where = ?         " +
-        "WHERE entry_id = ?",
-        req.body.account_id,
-        req.body.amount,
-        req.body.date,
-        req.body.bank_note,
-        req.body.note,
-        req.body.tag,
-        req.body.what,
-        req.body.where,
-        req.params.id,
-        function (err, row) {
-            if (err) {
-                res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message);
-            }
-            else {
-                console.log("Successfully updated entry with ID " + req.params.id);
-                res.status(HTTP.OK).json({success: true, data: { amount: req.body.amount }});
-            }
-        }
-    );
+    req.body.id = req.params.id;
+    var entry   = entryDAO.Entry.fromObject(req.body);
+    Promise.resolve()
+        .then(() => { return entryDAO.update(req.db, entry); })
+        .then((rows) => { res.status(HTTP.OK).json({success: true}); })
+        .catch((err) => { res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message) });
 });
+
 
 module.exports = router;

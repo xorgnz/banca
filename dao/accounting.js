@@ -1,14 +1,12 @@
 const _     = require('lodash');
-const check = require('../lib/check-types-wrapper.js').check;
 
+const check = require('../lib/check-types-wrapper.js').check;
 const dbUtils = require("../lib/db-utils.js");
 const logger  = require("../lib/debug.js").logger;
 
 const entryDAO = require("../dao/entry.js");
 const periodDAO = require("../dao/period.js");
 const accountDAO = require("../dao/account.js");
-
-const table_name = "accounting";
 
 class Accounting {
     constructor(id, period, account, amount_start, amount_end) {
