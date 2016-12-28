@@ -1,9 +1,7 @@
-const _     = require('lodash');
-
-const check = require('../lib/check-types-wrapper.js').check;
-const dbUtils = require("../lib/db-utils.js");
-const logger  = require("../lib/debug.js").logger;
-const shared  = require("./_shared.js");
+const _ = require('lodash');
+const check  = require('../lib/check-types-wrapper.js').check;
+const logger = require("../lib/debug.js").logger;
+const shared = require("./_shared.js");
 
 const entryDAO = require("../dao/entry.js");
 const periodDAO = require("../dao/period.js");
@@ -110,7 +108,7 @@ exports.add = function (db, accounting) {
             accounting.account_id,
             accounting.amount_start,
             accounting.amount_end,
-            dbUtils.generateDBResponseFunctionInsert(resolve, reject, accounting)
+            shared.generateDBResponseFunctionInsert(resolve, reject, accounting)
         );
     });
 };
@@ -186,7 +184,7 @@ exports.get = function (db, id) {
             "SELECT * FROM accounting " +
             "WHERE accounting_id = ?",
             id,
-            dbUtils.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObject)
+            shared.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObject)
         );
     });
 };
@@ -205,7 +203,7 @@ exports.getByPeriodAndAccount = function (db, period_id, account_id) {
             "   accounting_account_id = ?",
             period_id,
             account_id,
-            dbUtils.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObject)
+            shared.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObject)
         );
     });
 };
@@ -226,7 +224,7 @@ exports.getByDateAndAccount = function (db, date, account_id) {
             "   accounting_account_id = ?",
             date, date,
             account_id,
-            dbUtils.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObject)
+            shared.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObject)
         );
     });
 };
@@ -238,7 +236,7 @@ exports.listAll = function (db) {
     return new Promise((resolve, reject) => {
         db.all(
             "SELECT * FROM accounting",
-            dbUtils.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObject)
+            shared.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObject)
         );
     });
 };
@@ -261,7 +259,7 @@ exports.listSelfAndFollowing = function (db, id) {
                     "ORDER BY period_date_start",
                     peek.account_id,
                     peek.date_start,
-                    dbUtils.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObject)
+                    shared.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObject)
                 );
             });
         });
@@ -279,7 +277,7 @@ exports.listByAccount = function (db, account_id) {
             "WHERE accounting_account_id = ? " +
             "ORDER BY period_date_start",
             account_id,
-            dbUtils.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObject)
+            shared.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObject)
         );
     });
 };
@@ -305,7 +303,7 @@ exports.listOverDateRange = function (db, date_start, date_end, account_id) {
             date_end,
             date_start,
             account_id,
-            dbUtils.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObject)
+            shared.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObject)
         );
     });
 };
@@ -325,7 +323,7 @@ exports.peekDatesAndAccount = function (db, id) {
             "INNER JOIN period ON period_id = accounting_period_id " +
             "WHERE accounting_id = ?",
             id,
-            dbUtils.generateDBResponseFunctionGet(resolve, reject)
+            shared.generateDBResponseFunctionGet(resolve, reject)
         );
     });
 };
@@ -340,7 +338,7 @@ exports.remove = function (db, id) {
             "DELETE FROM accounting " +
             "WHERE accounting_id = ?",
             id,
-            dbUtils.generateDBResponseFunctionDelete(resolve, reject)
+            shared.generateDBResponseFunctionDelete(resolve, reject)
         );
     });
 };
@@ -352,7 +350,7 @@ exports.removeAll = function (db) {
     return new Promise((resolve, reject) => {
         db.run(
             "DELETE FROM accounting",
-            dbUtils.generateDBResponseFunctionDelete(resolve, reject)
+            shared.generateDBResponseFunctionDelete(resolve, reject)
         );
     });
 };
@@ -378,7 +376,7 @@ exports.update = function (db, accounting) {
             accounting.amount_start,
             accounting.amount_end,
             accounting.id,
-            dbUtils.generateDBResponseFunctionUpdate(resolve, reject)
+            shared.generateDBResponseFunctionUpdate(resolve, reject)
         );
     });
 };

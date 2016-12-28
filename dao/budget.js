@@ -1,7 +1,6 @@
-const check   = require('../lib/check-types-wrapper.js').check;
-const dbUtils = require("../lib/db-utils.js");
-const logger  = require("../lib/debug.js").logger;
-const shared  = require("./_shared.js");
+const check  = require('../lib/check-types-wrapper.js').check;
+const logger = require("../lib/debug.js").logger;
+const shared = require("./_shared.js");
 
 
 exports.types = [
@@ -59,7 +58,7 @@ exports.add = function(db, budget) {
             budget.code,
             budget.type,
             budget.amount,
-            dbUtils.generateDBResponseFunctionInsert(resolve, reject, budget)
+            shared.generateDBResponseFunctionInsert(resolve, reject, budget)
         );
     });
 };
@@ -74,7 +73,7 @@ exports.get = function (db, id) {
             "SELECT * FROM budget " +
             "WHERE budget_id = ?",
             id,
-            dbUtils.generateDBResponseFunctionGet(resolve, reject, Budget.fromObject)
+            shared.generateDBResponseFunctionGet(resolve, reject, Budget.fromObject)
         );
     });
 };
@@ -86,7 +85,7 @@ exports.listAll = function(db) {
     return new Promise((resolve, reject) => {
         db.all(
             "SELECT * FROM budget",
-            dbUtils.generateDBResponseFunctionGet(resolve, reject, Budget.fromObject)
+            shared.generateDBResponseFunctionGet(resolve, reject, Budget.fromObject)
         );
     });
 };
@@ -101,7 +100,7 @@ exports.remove  = function (db, id) {
             "DELETE FROM budget " +
             "WHERE budget_id = ?",
             id,
-            dbUtils.generateDBResponseFunctionDelete(resolve, reject)
+            shared.generateDBResponseFunctionDelete(resolve, reject)
         );
     });
 };
@@ -113,7 +112,7 @@ exports.removeAll = function (db) {
     return new Promise((resolve, reject) => {
         db.run(
             "DELETE FROM budget",
-            dbUtils.generateDBResponseFunctionDelete(resolve, reject)
+            shared.generateDBResponseFunctionDelete(resolve, reject)
         );
     });
 };
@@ -135,7 +134,7 @@ exports.update = function(db, budget) {
             budget.type,
             budget.amount,
             budget.id,
-            dbUtils.generateDBResponseFunctionUpdate(resolve, reject)
+            shared.generateDBResponseFunctionUpdate(resolve, reject)
         );
     });
 };

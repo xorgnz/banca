@@ -1,9 +1,7 @@
-const _ = require('lodash');
-
-const check   = require('../lib/check-types-wrapper.js').check;
-const dbUtils = require("../lib/db-utils.js");
-const logger  = require("../lib/debug.js").logger;
-const shared  = require("./_shared.js");
+const _      = require('lodash');
+const check  = require('../lib/check-types-wrapper.js').check;
+const logger = require("../lib/debug.js").logger;
+const shared = require("./_shared.js");
 
 const accountDAO    = require("../dao/account.js");
 const accountingDAO = require("../dao/accounting.js");
@@ -159,7 +157,7 @@ exports.add = function(db, entry) {
             entry.tag,
             entry.what,
             entry.where,
-            dbUtils.generateDBResponseFunctionInsert(resolve, reject, entry)
+            shared.generateDBResponseFunctionInsert(resolve, reject, entry)
         );
     });
 };
@@ -174,7 +172,7 @@ exports.get = function (db, id) {
             "SELECT * FROM entry " +
             "WHERE entry_id = ?",
             id,
-            dbUtils.generateDBResponseFunctionGet(resolve, reject, Entry.fromObject)
+            shared.generateDBResponseFunctionGet(resolve, reject, Entry.fromObject)
         );
     });
 };
@@ -187,7 +185,7 @@ exports.listAll = function(db) {
         db.all(
             "SELECT * FROM entry " +
             "ORDER BY entry_date",
-            dbUtils.generateDBResponseFunctionGet(resolve, reject, Entry.fromObject)
+            shared.generateDBResponseFunctionGet(resolve, reject, Entry.fromObject)
         );
     });
 };
@@ -207,7 +205,7 @@ exports.listByAccount = function(db, account_id) {
                     "   entry_account_id = ? " +
                     "ORDER BY entry_date",
                     account_id,
-                    dbUtils.generateDBResponseFunctionGet(resolve, reject, Entry.fromObject)
+                    shared.generateDBResponseFunctionGet(resolve, reject, Entry.fromObject)
                 );
             });
         })
@@ -233,7 +231,7 @@ exports.listByAccounting = function(db, accounting_id) {
                     peek.date_start,
                     peek.date_end,
                     peek.account_id,
-                    dbUtils.generateDBResponseFunctionGet(resolve, reject, Entry.fromObject)
+                    shared.generateDBResponseFunctionGet(resolve, reject, Entry.fromObject)
                 );
             });
         })
@@ -257,7 +255,7 @@ exports.listByPeriod = function(db, period_id) {
                     "ORDER BY entry_date",
                     period.date_start,
                     period.date_end,
-                    dbUtils.generateDBResponseFunctionGet(resolve, reject, Entry.fromObject)
+                    shared.generateDBResponseFunctionGet(resolve, reject, Entry.fromObject)
                 );
             });
         });
@@ -273,7 +271,7 @@ exports.remove  = function (db, id) {
             "DELETE FROM entry " +
             "WHERE entry_id = ?",
             id,
-            dbUtils.generateDBResponseFunctionDelete(resolve, reject)
+            shared.generateDBResponseFunctionDelete(resolve, reject)
         );
     });
 };
@@ -285,7 +283,7 @@ exports.removeAll = function (db) {
     return new Promise((resolve, reject) => {
         db.run(
             "DELETE FROM entry",
-            dbUtils.generateDBResponseFunctionDelete(resolve, reject)
+            shared.generateDBResponseFunctionDelete(resolve, reject)
         );
     });
 };
@@ -317,7 +315,7 @@ exports.update = function(db, entry) {
             entry.what,
             entry.where,
             entry.id,
-            dbUtils.generateDBResponseFunctionUpdate(resolve, reject)
+            shared.generateDBResponseFunctionUpdate(resolve, reject)
         );
     });
 };

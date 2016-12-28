@@ -1,8 +1,6 @@
-const check   = require('../lib/check-types-wrapper.js').check;
-
-const dbUtils = require("../lib/db-utils.js");
-const logger  = require("../lib/debug.js").logger;
-const shared  = require("./_shared.js");
+const check  = require('../lib/check-types-wrapper.js').check;
+const logger = require("../lib/debug.js").logger;
+const shared = require("./_shared.js");
 
 class Account extends shared.BancaObject {
     constructor(id, name, description) {
@@ -43,7 +41,7 @@ exports.add = function(db, account) {
             "   account_description) VALUES (?, ?)",
             account.name,
             account.description,
-            dbUtils.generateDBResponseFunctionInsert(resolve, reject, account)
+            shared.generateDBResponseFunctionInsert(resolve, reject, account)
         );
     });
 };
@@ -58,7 +56,7 @@ exports.get = function (db, id) {
             "SELECT * FROM account " +
             "WHERE account_id = ?",
             id,
-            dbUtils.generateDBResponseFunctionGet(resolve, reject, Account.fromObject)
+            shared.generateDBResponseFunctionGet(resolve, reject, Account.fromObject)
         );
     });
 };
@@ -70,7 +68,7 @@ exports.listAll = function(db) {
     return new Promise((resolve, reject) => {
         db.all(
             "SELECT * FROM account",
-            dbUtils.generateDBResponseFunctionGet(resolve, reject, Account.fromObject)
+            shared.generateDBResponseFunctionGet(resolve, reject, Account.fromObject)
         );
     });
 };
@@ -85,7 +83,7 @@ exports.remove  = function (db, id) {
             "DELETE FROM account " +
             "WHERE account_id = ?",
             id,
-            dbUtils.generateDBResponseFunctionDelete(resolve, reject)
+            shared.generateDBResponseFunctionDelete(resolve, reject)
         );
     });
 };
@@ -97,7 +95,7 @@ exports.removeAll = function (db) {
     return new Promise((resolve, reject) => {
         db.run(
             "DELETE FROM account",
-            dbUtils.generateDBResponseFunctionDelete(resolve, reject)
+            shared.generateDBResponseFunctionDelete(resolve, reject)
         );
     });
 };
@@ -117,7 +115,7 @@ exports.update = function(db, account) {
             account.name,
             account.description,
             account.id,
-            dbUtils.generateDBResponseFunctionUpdate(resolve, reject)
+            shared.generateDBResponseFunctionUpdate(resolve, reject)
         );
     });
 };

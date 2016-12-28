@@ -1,10 +1,8 @@
-const _   = require('lodash');
-const pad = require("pad-number");
-
-const check   = require('../lib/check-types-wrapper.js').check;
-const dbUtils = require("../lib/db-utils.js");
-const logger  = require("../lib/debug.js").logger;
-const shared  = require("./_shared.js");
+const _      = require('lodash');
+const check  = require('../lib/check-types-wrapper.js').check;
+const logger = require("../lib/debug.js").logger;
+const pad    = require("pad-number");
+const shared = require("./_shared.js");
 
 const months = [
     "January",
@@ -71,7 +69,7 @@ exports.add     = function (db, period) {
             period.name,
             period.date_start,
             period.date_end,
-            dbUtils.generateDBResponseFunctionInsert(resolve, reject, period)
+            shared.generateDBResponseFunctionInsert(resolve, reject, period)
         );
     });
 };
@@ -125,7 +123,7 @@ exports.get = function (db, id) {
             "SELECT * FROM period " +
             "WHERE period_id = ?",
             id,
-            dbUtils.generateDBResponseFunctionGet(resolve, reject, Period.fromObject)
+            shared.generateDBResponseFunctionGet(resolve, reject, Period.fromObject)
         );
     });
 };
@@ -142,7 +140,7 @@ exports.getByDate = function (db, date) {
             "   period_date_start <= ? AND " +
             "   period_date_end >= ?",
             date, date,
-            dbUtils.generateDBResponseFunctionGet(resolve, reject, Period.fromObject)
+            shared.generateDBResponseFunctionGet(resolve, reject, Period.fromObject)
         );
     });
 };
@@ -155,7 +153,7 @@ exports.listAll = function (db) {
         db.all(
             "SELECT * FROM period " +
             "ORDER BY period_date_start",
-            dbUtils.generateDBResponseFunctionGet(resolve, reject, Period.fromObject)
+            shared.generateDBResponseFunctionGet(resolve, reject, Period.fromObject)
         );
     });
 };
@@ -177,7 +175,7 @@ exports.listOverDateRange = function (db, date_start, date_end) {
             "ORDER BY period_date_start",
             date_end,
             date_start,
-            dbUtils.generateDBResponseFunctionGet(resolve, reject, Period.fromObject)
+            shared.generateDBResponseFunctionGet(resolve, reject, Period.fromObject)
         );
     });
 };
@@ -192,7 +190,7 @@ exports.remove = function (db, id) {
             "DELETE FROM period " +
             "WHERE period_id = ?",
             id,
-            dbUtils.generateDBResponseFunctionDelete(resolve, reject)
+            shared.generateDBResponseFunctionDelete(resolve, reject)
         );
     });
 };
@@ -203,7 +201,7 @@ exports.removeAll = function (db) {
     return new Promise((resolve, reject) => {
         db.run(
             "DELETE FROM period",
-            dbUtils.generateDBResponseFunctionDelete(resolve, reject)
+            shared.generateDBResponseFunctionDelete(resolve, reject)
         );
     });
 };
@@ -226,7 +224,7 @@ exports.update = function (db, period) {
             period.date_start,
             period.date_end,
             period.id,
-            dbUtils.generateDBResponseFunctionUpdate(resolve, reject)
+            shared.generateDBResponseFunctionUpdate(resolve, reject)
         );
     });
 };
