@@ -1,70 +1,45 @@
-#!/usr/bin/env node
-
 //  Module dependencies.
-const app    = require('../app');
-const logger = require("../lib/debug.js").logger;
-const http   = require('http');
+const createApp = require('../app').createApp;
+const logger    = require("../lib/debug.js").logger;
+const http      = require('http');
 
-// Get port from environment and store in Express.
-var port = normalizePort(process.env.PORT || '3000');
-app.set('port', port);
-
-// Create HTTP server.
-var server = http.createServer(app);
-
-
-// Normalize a port into a number, string, or false.
-function normalizePort(val) {
-    var port = parseInt(val, 10);
-
-    // named pipe
-    if (isNaN(port))
-        return val;
-
-    // port number
-    if (port >= 0)
-        return port;
-
-    return false;
-}
-
+const PORT_LIVE = 3000;
+const PORT_TEST = 3001;
 
 // Listener function - HTTP error
-function onError(error) {
-    if (error.syscall !== 'listen')
-        throw error;
-
-    var bind = typeof port === 'string'
-        ? 'Pipe ' + port
-        : 'Port ' + port;
-
-    // handle specific listen errors with friendly messages
-    switch (error.code) {
-        case 'EACCES':
-            console.error(bind + ' requires elevated privileges');
-            process.exit(1);
-            break;
-        case 'EADDRINUSE':
-            console.error(bind + ' is already in use');
-            process.exit(1);
-            break;
-        default:
+function createErrorFunction (port) {
+    return function onError(error) {
+        if (error.syscall !== 'listen')
             throw error;
+
+        // handle specific listen errors with friendly messages
+        switch (error.code) {
+            case 'EACCES':
+                console.error(port + ' requires elevated privileges');
+                process.exit(1);
+                break;
+            case 'EADDRINUSE':
+                console.error(port + ' is already in use');
+                process.exit(1);
+                break;
+            default:
+                throw error;
+        }
     }
 }
 
+// Create live server
+var app_live = createApp("live");
+app_live.set('port', PORT_LIVE);
+var server_live = http.createServer(app_live);
+server_live.listen(PORT_LIVE);
+server_live.on('error', createErrorFunction(PORT_LIVE));
+server_live.on('listening', () => { logger.trace("Live server listening on " + server_live.address().port); });
 
-// Event listener for HTTP server "listening" event.
-function onListening() {
-    var addr = server.address();
-    var bind = typeof addr === 'string'
-        ? 'pipe ' + addr
-        : 'port ' + addr.port;
-    logger.trace('Listening on ' + bind);
-}
-
-
-// Listen on provided port, on all network interfaces.
-server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
+// Create test server
+var app_test = createApp("test");
+app_test.set('port', PORT_TEST);
+var server_test = http.createServer(app_test);
+server_test.listen(PORT_TEST);
+server_test.on('error', createErrorFunction(PORT_TEST));
+server_test.on('listening', () => { logger.trace("Test Server listening on " + server_test.address().port); });
