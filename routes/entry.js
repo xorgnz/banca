@@ -10,7 +10,7 @@ router.get('/', function (req, res, next) {
     Promise.resolve()
         .then(() => { return entryDAO.listAll(req.db); })
         .then((rows) => { res.status(HTTP.OK).json({success: true, data: rows}); })
-        .catch((err) => { res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message) });
+        .catch(next);
 });
 
 
@@ -21,7 +21,7 @@ router.post('/', function (req, res, next) {
     Promise.resolve()
         .then(() => { return entryDAO.add(req.db, entry); })
         .then((rows) => { res.status(HTTP.OK).json({success: true, data: {id: entry.id}}); })
-        .catch((err) => { res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message) });
+        .catch(next);
 });
 
 
@@ -30,7 +30,7 @@ router.delete("/:id", function (req, res, next) {
     Promise.resolve()
         .then(() => { entryDAO.remove(req.db, req.params.id); })
         .then(() => { res.status(HTTP.OK).json({success: true}); })
-        .catch((err) => { res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message); });
+        .catch(next);
 });
 
 
@@ -42,7 +42,7 @@ router.patch("/:id", function (req, res, next) {
     Promise.resolve()
         .then(() => { return entryDAO.update(req.db, entry); })
         .then((rows) => { res.status(HTTP.OK).json({success: true}); })
-        .catch((err) => { res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message) });
+        .catch(next);
 });
 
 

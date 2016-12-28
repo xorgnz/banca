@@ -7,21 +7,30 @@ const budgetDAO = require("../dao/budget.js");
 
 /* GET - List all budgets */
 router.get('/', function (req, res, next) {
-    Promise.resolve()
+    return Promise.resolve()
         .then(() => { return budgetDAO.listAll(req.db); })
         .then((rows) => { res.status(HTTP.OK).json({success: true, data: rows}); })
-        .catch((err) => { res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message) });
+        .catch(next);
+});
+
+
+/* GET - Retrieve particular budget */
+router.get('/:id', function (req, res, next) {
+    Promise.resolve()
+        .then(() => { return budgetDAO.get(req.db, req.params.id); })
+        .then((row) => { res.status(HTTP.OK).json({success: true, data: row}); })
+        .catch(next);
 });
 
 
 /* POST - Create new budget */
-router.post('/', function (req, res, next) { validation.validateBudget(req, res, next) });
+router.post('/', function (req, res, next) { validation.validateBudget(req, res, next); });
 router.post('/', function (req, res, next) {
     var budget = budgetDAO.Budget.fromObject(req.body);
     Promise.resolve()
         .then(() => { return budgetDAO.add(req.db, budget); })
         .then((rows) => { res.status(HTTP.OK).json({success: true, data: {id: budget.id}}); })
-        .catch((err) => { res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message) });
+        .catch(next);
 });
 
 
@@ -30,7 +39,7 @@ router.delete("/:id", function (req, res, next) {
     Promise.resolve()
         .then(() => { budgetDAO.remove(req.db, req.params.id); })
         .then(() => { res.status(HTTP.OK).json({success: true}); })
-        .catch((err) => { res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message); });
+        .catch(next);
 });
 
 
@@ -42,7 +51,7 @@ router.patch("/:id", function (req, res, next) {
     Promise.resolve()
         .then(() => { return budgetDAO.update(req.db, budget); })
         .then((rows) => { res.status(HTTP.OK).json({success: true}); })
-        .catch((err) => { res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message) });
+        .catch(next);
 });
 
 
