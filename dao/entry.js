@@ -197,7 +197,7 @@ exports.listByAccount = function(db, account_id) {
 exports.listByAccounting = function(db, accounting_id) {
     logger.trace("Entry DAO - listByAccounting. ID: " + accounting_id);
     check.assert.equal(db.constructor.name, "Database");
-    if (check.string(account_id))
+    if (check.string(accounting_id))
         accounting_id = Number.parseInt(accounting_id);
     check.assert.number(accounting_id);
 
