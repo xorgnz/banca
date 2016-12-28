@@ -1,6 +1,5 @@
-const assert = require("chai").assert;
-const logger = require("../lib/debug.js").logger;
-const _      = require('lodash');
+const check = require('../lib/check-types-wrapper.js').check;
+const _     = require('lodash');
 
 const importer      = require("../tools/importer.js");
 const db            = require("./_shared.js").db;
@@ -43,9 +42,9 @@ describe("Importer", function () {
     it("Fails correctly if account is missing", () => {
         return Promise.resolve()
             .then(() => { return importer.importFromCsv(db, "test/import/import_success.csv", account1.id + 100); })
-            .then(() => { assert(false, "Error was not detected"); })
+            .then(() => { check.assert(false, "Error was not detected"); })
             .catch((err) => {
-                assert.include(err.message, "no account exists", "Bad error message");
+                check.assert.contains(err.message, "no account exists", "Bad error message");
             });
     });
 
@@ -53,14 +52,14 @@ describe("Importer", function () {
     it("Fails correctly if amount is missing", () => {
         return Promise.resolve()
             .then(() => { return importer.importFromCsv(db, "test/import/import_fail_amount.csv", account0.id); })
-            .then(() => { assert(false, "Error was not detected"); })
+            .then(() => { check.assert(false, "Error was not detected"); })
             .catch((err) => {
-                assert(err.badRows !== undefined, "Bad rows construct does not exist");
-                assert.equal(err.badRows.length, 1, "Incorrect number of bad rows detected");
-                assert.isNaN(err.badRows[0].amount_pre, "amount_pre column should be NaN");
-                assert.isNaN(err.badRows[0].amount_pre2, "amount_pre2 column should be NaN");
-                assert.equal(err.badRows[0].reasons.length, 1, "Incorrect number of reasons for failure");
-                assert.equal(err.badRows[0].reasons[0], "Amount columns empty or non-numeric", "Bad reason");
+                check.assert.not.undefined(err.badRows, "Bad rows construct does not exist");
+                check.assert.equal(err.badRows.length, 1, "Incorrect number of bad rows detected");
+                check.assert.not.number(err.badRows[0].amount_pre, "amount_pre column should be NaN");
+                check.assert.not.number(err.badRows[0].amount_pre2, "amount_pre2 column should be NaN");
+                check.assert.equal(err.badRows[0].reasons.length, 1, "Incorrect number of reasons for failure");
+                check.assert.equal(err.badRows[0].reasons[0], "Amount columns empty or non-numeric", "Bad reason");
             });
     });
 
@@ -68,16 +67,16 @@ describe("Importer", function () {
     it("Fails correctly if date is missing", () => {
         return Promise.resolve()
             .then(() => { return importer.importFromCsv(db, "test/import/import_fail_date.csv", account0.id); })
-            .then(() => { assert(false, "Error was not detected"); })
+            .then(() => { check.assert(false, "Error was not detected"); })
             .catch((err) => {
-                assert(err.badRows !== undefined, "Bad rows construct does not exist");
-                assert.equal(err.badRows.length, 3, "Incorrect number of bad rows detected");
-                assert.equal(err.badRows[0].reasons.length, 1, "Incorrect number of reasons for failure");
-                assert.equal(err.badRows[0].reasons[0], "Date column is empty", "Bad reason");
-                assert.equal(err.badRows[1].reasons.length, 1, "Incorrect number of reasons for failure");
-                assert.include(err.badRows[1].reasons[0], "cannot be parsed", "Bad reason");
-                assert.equal(err.badRows[2].reasons.length, 1, "Incorrect number of reasons for failure");
-                assert.include(err.badRows[2].reasons[0], "cannot be parsed", "Bad reason");
+                check.assert.not.undefined(err.badRows, "Bad rows construct does not exist");
+                check.assert.equal(err.badRows.length, 3, "Incorrect number of bad rows detected");
+                check.assert.equal(err.badRows[0].reasons.length, 1, "Incorrect number of reasons for failure");
+                check.assert.equal(err.badRows[0].reasons[0], "Date column is empty", "Bad reason");
+                check.assert.equal(err.badRows[1].reasons.length, 1, "Incorrect number of reasons for failure");
+                check.assert.contains(err.badRows[1].reasons[0], "cannot be parsed", "Bad reason");
+                check.assert.equal(err.badRows[2].reasons.length, 1, "Incorrect number of reasons for failure");
+                check.assert.contains(err.badRows[2].reasons[0], "cannot be parsed", "Bad reason");
             });
     });
 
@@ -85,9 +84,9 @@ describe("Importer", function () {
     it("Fails correctly if file is empty", () => {
         return Promise.resolve()
             .then(() => { return importer.importFromCsv(db, "test/import/does_not_exist.csv", account0.id); })
-            .then(() => { assert(false, "Error was not detected"); })
+            .then(() => { check.assert(false, "Error was not detected"); })
             .catch((err) => {
-                assert.include(err.message, "file does not exist", "Bad error message");
+                check.assert.contains(err.message, "file does not exist", "Bad error message");
             });
     });
 
@@ -97,33 +96,31 @@ describe("Importer", function () {
             .then(() => { return importer.importFromCsv(db, "test/import/import_success.csv", account0.id); })
             .then(() => { return periodDAO.listAll(db); })
             .then((rows) => {
-                console.log(rows);
-                assert.equal(rows.length, 5, "Incorrect number of periods post import");
+                check.assert.equal(rows.length, 5, "Incorrect number of periods post import");
             })
             .then(() => { return accountingDAO.listAll(db); })
             .then((rows) => {
-                console.log(rows);
-                assert.equal(rows.length, 5, "Incorrect number of accountings post import");
-                assert.equal(rows[0].amount_start, 0);
-                assert.equal(rows[0].amount_end, 1);
-                assert.equal(rows[1].amount_start, 1);
-                assert.equal(rows[1].amount_end, 3);
-                assert.equal(rows[2].amount_start, 3);
-                assert.equal(rows[2].amount_end, 10);
-                assert.equal(rows[3].amount_start, 10);
-                assert.equal(rows[3].amount_end, 15);
-                assert.equal(rows[4].amount_start, 15);
-                assert.equal(rows[4].amount_end, 21);
+                check.assert.equal(rows.length, 5, "Incorrect number of accountings post import");
+                check.assert.equal(rows[0].amount_start, 0);
+                check.assert.equal(rows[0].amount_end, 1);
+                check.assert.equal(rows[1].amount_start, 1);
+                check.assert.equal(rows[1].amount_end, 3);
+                check.assert.equal(rows[2].amount_start, 3);
+                check.assert.equal(rows[2].amount_end, 10);
+                check.assert.equal(rows[3].amount_start, 10);
+                check.assert.equal(rows[3].amount_end, 15);
+                check.assert.equal(rows[4].amount_start, 15);
+                check.assert.equal(rows[4].amount_end, 21);
             })
             .then(() => { return entryDAO.listAll(db); })
             .then((rows) => {
-                assert.equal(rows.length, 6, "Incorrect number of entries created");
-                for (var i = 0 ; i < rows.length ; i++) {
-                    assert.equal(rows[i].amount, i+1);
-                    assert.equal(rows[i].tag, "Games");
-                    assert.equal(rows[i].where, "Where");
-                    assert.equal(rows[i].what, "What");
-                    assert.equal(rows[i].note, "Note");
+                check.assert.equal(rows.length, 6, "Incorrect number of entries created");
+                for (var i = 0; i < rows.length; i++) {
+                    check.assert.equal(rows[i].amount, i + 1);
+                    check.assert.equal(rows[i].tag, "Games");
+                    check.assert.equal(rows[i].where, "Where");
+                    check.assert.equal(rows[i].what, "What");
+                    check.assert.equal(rows[i].note, "Note");
                 }
             });
     });

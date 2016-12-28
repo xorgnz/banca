@@ -4,6 +4,7 @@ const pad = require("pad-number");
 const check   = require('../lib/check-types-wrapper.js').check;
 const dbUtils = require("../lib/db-utils.js");
 const logger  = require("../lib/debug.js").logger;
+const shared  = require("./_shared.js");
 
 const months = [
     "January",
@@ -21,8 +22,9 @@ const months = [
 ];
 
 
-class Period {
+class Period extends shared.BancaObject {
     constructor(id, name, date_start, date_end) {
+        super();
         check.assert.equal(true, id === null || check.number(id));
         check.assert.string(name);
         check.assert.number(date_start);
@@ -49,10 +51,6 @@ class Period {
             obj.name,
             obj.date_start,
             obj.date_end);
-    }
-
-    static fieldNames() {
-        return ["id", "name", "date_start", "date_end"];
     }
 }
 exports.Period = Period;

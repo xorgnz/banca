@@ -3,44 +3,47 @@ const _     = require('lodash');
 const check = require('../lib/check-types-wrapper.js').check;
 const dbUtils = require("../lib/db-utils.js");
 const logger  = require("../lib/debug.js").logger;
+const shared  = require("./_shared.js");
 
 const entryDAO = require("../dao/entry.js");
 const periodDAO = require("../dao/period.js");
 const accountDAO = require("../dao/account.js");
 
-class Accounting {
+class Accounting extends shared.BancaObject {
     constructor(id, period, account, amount_start, amount_end) {
+        super();
         check.assert.equal(true, id === null || check.number(id));
         check.assert.equal(true, check.number(period) || check.instance(period, periodDAO.Period));
         check.assert.equal(true, check.number(account) || check.instance(account, accountDAO.Account));
         check.assert.number(amount_start);
         check.assert.number(amount_end);
 
-        this._id           = id ? id : -1;
-        this._amount_start = isNaN(amount_start) ? 0 : _.round(Number.parseFloat(amount_start), 2);
-        this._amount_end   = isNaN(amount_end) ? 0 : _.round(Number.parseFloat(amount_end), 2);
-
-        if (check.object(account))
-            this._account = account;
-        else
-            this._account_id = account;
-
-        if (check.object(period))
-            this._period = period;
-        else
-            this._period_id = period;
+        this.id = id;
+        this.period = period;
+        this.account = account;
+        this.amount_start = amount_start;
+        this.amount_end   = amount_end;
     }
 
     get id()            { return this._id; }
-    set id(v)           { this._id = v; }
+    set id(v)           { this._id = v ? v : -1; }
     get amount_start()  { return this._amount_start; }
-    set amount_start(v) { this._amount_start = _.round(v, 2); }
+    set amount_start(v) { this._amount_start = isNaN(v) ? 0 : _.round(Number.parseFloat(v), 2); }
     get amount_end()    { return this._amount_end; }
-    set amount_end(v)   { this._amount_end = _.round(v, 2) }
+    set amount_end(v)   { this._amount_end = isNaN(v) ? 0 : _.round(Number.parseFloat(v), 2); }
 
     get account()     { return this._account; }
     get account_id()  { return this._account ? this._account.id : this._account_id; }
-    set account(v)    { this._account = v; }
+    set account(v)    {
+        if (check.object(v)) {
+            this._account    = v;
+            this._account_id = v.id;
+        }
+        else {
+            this._account    = null;
+            this._account_id = v;
+        }
+    }
     set account_id(v) {
         if (this._account) this._account = null;
         this._account_id = v;
@@ -48,7 +51,16 @@ class Accounting {
 
     get period()     { return this._period; }
     get period_id()  { return this._period ? this._period.id : this._period_id; }
-    set period(v)    { this._period = v; }
+    set period(v)    {
+        if (check.object(v)) {
+            this._period    = v;
+            this._period_id = v.id;
+        }
+        else {
+            this._period    = null;
+            this._period_id = v;
+        }
+    }
     set period_id(v) {
         if (this._period) this._period = null;
         this._period_id = v;
@@ -63,8 +75,15 @@ class Accounting {
             obj.amount_end);
     }
 
-    static fieldNames() {
-        return ["id", "amount_start", "amount_end", "account_id", "period_id"];
+    assertEquivalence(obj) {
+        this.assertEquivalenceIgnoreFields(obj, ["_account", "_period"]);
+    }
+
+    toJSON() {
+        var json = super.toJSON();
+        _.unset(json, "account");
+        _.unset(json, "period");
+        return json;
     }
 }
 exports.Accounting = Accounting;

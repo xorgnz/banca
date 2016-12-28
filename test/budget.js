@@ -1,6 +1,4 @@
-const assert = require("chai").assert;
-const logger = require("../lib/debug.js").logger;
-const _      = require('lodash');
+const check = require('../lib/check-types-wrapper.js').check;
 
 const db          = require("./_shared.js").db;
 const testObjects = require("./_shared.js").testObjects;
@@ -27,29 +25,26 @@ describe("Budget DAO", function () {
             .then(() => { return budgetDAO.add(db, budget0); })
             .then((id) => { return budgetDAO.get(db, id); })
             .then((obj) => {
-                assert(obj.id, "ID not set");
-                for (var key of budgetDAO.Budget.fieldNames())
-                    assert(obj[key] === budget0[key], "Field '" + key + "' did not add");
+                check.assert.assigned(obj, "Added object is null");
+                check.assert.assigned(obj.id, "ID not set");
+                obj.assertEquivalence(budget0);
             })
             .then(() => { return budgetDAO.listAll(db); })
             .then((rows) => {
-                assert(rows.length == 1, "Record not found by listAll after add");
+                check.assert.equal(rows.length, 1, "Record not found by listAll after add");
             })
 
             // Test Update
             .then(() => { budget1.id = budget0.id; })
             .then(() => { return budgetDAO.update(db, budget1); })
             .then(() => { return budgetDAO.get(db, budget1.id); })
-            .then((obj) => {
-                for (var key of budgetDAO.Budget.fieldNames())
-                    assert(obj[key] === budget1[key], "Field '" + key + "' did not update");
-            })
+            .then((obj) => { obj.assertEquivalence(budget1); })
 
             // Test remove
             .then(() => { return budgetDAO.remove(db, budget0.id); })
             .then(() => { return budgetDAO.listAll(db); })
             .then((rows) => {
-                assert(rows.length === 0, "Record remains after remove");
+                check.assert.equal(rows.length, 0, "Record remains after remove");
             });
     });
 
@@ -61,7 +56,7 @@ describe("Budget DAO", function () {
             .then(() => { return budgetDAO.removeAll(db); })
             .then(() => { return budgetDAO.listAll(db); })
             .then((rows) => {
-                assert(rows.length === 0, "Records remain after removeAll");
+                check.assert.equal(rows.length, 0, "Records remain after removeAll");
             })
     });
 });

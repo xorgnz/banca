@@ -3,6 +3,7 @@ const _ = require('lodash');
 const check   = require('../lib/check-types-wrapper.js').check;
 const dbUtils = require("../lib/db-utils.js");
 const logger  = require("../lib/debug.js").logger;
+const shared  = require("./_shared.js");
 
 const accountDAO    = require("../dao/account.js");
 const accountingDAO = require("../dao/accounting.js");
@@ -44,8 +45,9 @@ exports.isValidTagString = function (str) {
 };
 
 
-class Entry {
+class Entry extends shared.BancaObject {
     constructor(id, account, amount, date, bank_note, note, tag, where, what) {
+        super();
         check.assert.equal(true, id === null || check.number(id));
         check.assert.equal(true, check.number(account) || check.instance(account, accountDAO.Account));
         check.assert.number(amount);
@@ -56,19 +58,15 @@ class Entry {
         check.assert.string(where);
         check.assert.string(what);
 
-        this._id = id ? id : -1;
-        this._amount = amount ? amount : _.round(amount, 2);
-        this._date = date ? date  : 0;
-        this._bank_note = bank_note ? bank_note : -1;
-        this._note = note ? note : "";
-        this._tag = tag ? tag  : "";
-        this._where = where ? where  : "";
-        this._what = what ? what  : "";
-
-        if (check.object(account))
-            this._account = account;
-        else
-            this._account_id = account;
+        this.id = id;
+        this.account = account;
+        this.amount = amount;
+        this.date = date;
+        this.bank_note = bank_note;
+        this.note = note;
+        this.tag = tag;
+        this.where = where;
+        this.what = what;
     }
     get id()            { return this._id; }
     get amount()        { return this._amount; }
@@ -78,19 +76,32 @@ class Entry {
     get tag()           { return this._tag; }
     get where()         { return this._where; }
     get what()          { return this._what; }
-    set id(v)           { this._id = v; }
-    set amount(v)       { this._amount = _.round(v, 2) }
-    set date(v)         { this._date = v; }
-    set bank_note(v)    { this._bank_note = v; }
-    set note(v)         { this._note = v; }
-    set tag(v)          { this._tag = v; }
-    set where(v)        { this._where = v; }
-    set what(v)         { this._what = v; }
+    set id(v)           { this._id = v ? v : -1; }
+    set amount(v)       { this._amount = isNaN(v) ? 0 : _.round(Number.parseFloat(v), 2); }
+    set date(v)         { this._date = v ? new Date(v).getTime() : 0; }
+    set bank_note(v)    { this._bank_note = v ? v : ""; }
+    set note(v)         { this._note = v ? v : ""; }
+    set tag(v)          { this._tag = v ? v : ""; }
+    set where(v)        { this._where = v ? v : ""; }
+    set what(v)         { this._what = v ? v : ""; }
 
     get account()       { return this._account; }
     get account_id()    { return this._account ? this._account.id : this._account_id; }
-    set account(v)      { this._account = v; }
-    set account_id(v)   { if (this._account) this._account = null; this._account_id = v; }
+    set account(v)      {
+        if (check.object(v)) {
+            this._account    = v;
+            this._account_id = v.id;
+        }
+        else {
+            this._account    = null;
+            this._account_id = v;
+        }
+    }
+    set account_id(v) {
+        if (this._account)
+            this._account = null;
+        this._account_id = v;
+    }
 
     static fromObject(obj) {
         return new Entry(
@@ -105,8 +116,14 @@ class Entry {
             obj.what);
     }
 
-    static fieldNames() {
-        return ["id", "account_id", "amount", "date", "bank_note", "note", "tag", "where", "what"];
+    assertEquivalence(obj) {
+        this.assertEquivalenceIgnoreFields(obj, ["_account"]);
+    }
+
+    toJSON() {
+        var json = super.toJSON();
+        _.unset(json, "account");
+        return json;
     }
 }
 exports.Entry = Entry;
@@ -165,7 +182,7 @@ exports.listAll = function(db) {
         db.all(
             "SELECT * FROM entry " +
             "ORDER BY entry_date",
-            dbUtils.generateDBResponseFunctionGet(resolve, reject)
+            dbUtils.generateDBResponseFunctionGet(resolve, reject, Entry.fromObject)
         );
     });
 };

@@ -1,6 +1,7 @@
 const check   = require('../lib/check-types-wrapper.js').check;
 const dbUtils = require("../lib/db-utils.js");
 const logger  = require("../lib/debug.js").logger;
+const shared  = require("./_shared.js");
 
 
 exports.types = [
@@ -11,8 +12,9 @@ exports.types = [
 ];
 
 
-class Budget {
+class Budget extends shared.BancaObject {
     constructor(id, code, type, amount) {
+        super();
         check.assert.equal(true, id === null || check.number(id));
         check.assert.string(code);
         check.assert.number(type);
@@ -38,10 +40,6 @@ class Budget {
             obj.code,
             obj.type,
             obj.amount);
-    }
-
-    static fieldNames() {
-        return ["id", "code", "type", "amount"];
     }
 }
 exports.Budget = Budget;

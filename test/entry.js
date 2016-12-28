@@ -1,6 +1,5 @@
-const assert = require("chai").assert;
-const logger = require("../lib/debug.js").logger;
-const _      = require('lodash');
+const check = require('../lib/check-types-wrapper.js').check;
+const _     = require('lodash');
 
 const db            = require("./_shared.js").db;
 const testObjects   = require("./_shared.js").testObjects;
@@ -39,39 +38,36 @@ describe("Entry DAO", function () {
             // Test Add
             .then(() => { return entryDAO.add(db, entry0); })
             .then((id) => { return entryDAO.get(db, id); })
-            .then((entry) => {
-                assert(entry.id, "ID not set");
-                for (var key of entryDAO.Entry.fieldNames())
-                    assert(entry[key] === entry0[key], "Field '" + key + "' did not add");
+            .then((obj) => {
+                check.assert.assigned(obj, "Added object is null");
+                check.assert.assigned(obj.id, "ID not set");
+                obj.assertEquivalence(entry0);
             })
             .then(() => { return entryDAO.listAll(db); })
             .then((rows) => {
-                assert(rows.length == 1, "Record not found by listAll after add");
+                check.assert.equal(rows.length, 1, "Record not found by listAll after add");
             })
 
             // Test Update
             .then(() => { entry1.id = entry0.id; })
             .then(() => { return entryDAO.update(db, entry1); })
             .then(() => { return entryDAO.get(db, entry1.id); })
-            .then((entry) => {
-                for (var key of entryDAO.Entry.fieldNames())
-                    assert(entry[key] === entry1[key], "Field '" + key + "' did not update");
-            })
+            .then((obj) => { obj.assertEquivalence(entry1); })
 
             // Test remove
             .then(() => { return entryDAO.remove(db, entry0.id); })
             .then(() => { return entryDAO.listAll(db); })
             .then((rows) => {
-                assert(rows.length === 0, "Record remains after remove");
+                check.assert.equal(rows.length, 0, "Record remains after remove");
             });
     });
 
     // ------------------------------------------------------------- TEST
     it(".listByAccount", function () {
-        var period0     = testObjects.createTestPeriod(0);
-        var entry_sp_0  = testObjects.createTestEntry(0, account0);
-        var entry_sp_1  = testObjects.createTestEntry(1, account0);
-        var entry_sp_2  = testObjects.createTestEntry(2, account1);
+        var period0    = testObjects.createTestPeriod(0);
+        var entry_sp_0 = testObjects.createTestEntry(0, account0);
+        var entry_sp_1 = testObjects.createTestEntry(1, account0);
+        var entry_sp_2 = testObjects.createTestEntry(2, account1);
 
         return Promise.resolve()
             .then(() => {
@@ -83,16 +79,14 @@ describe("Entry DAO", function () {
             })
             .then(() => { return entryDAO.listByAccount(db, account0.id) })
             .then((rows) => {
-                console.log(rows);
-                assert(rows.length === 2, "Incorrect number of entries retrieved");
-                assert(rows[0].id == entry_sp_0.id);
-                assert(rows[1].id == entry_sp_1.id);
+                check.assert.equal(rows.length, 2, "Incorrect number of entries retrieved");
+                rows[0].assertEquivalence(entry_sp_0);
+                rows[1].assertEquivalence(entry_sp_1);
             })
             .then(() => { return entryDAO.listByAccount(db, account1.id) })
             .then((rows) => {
-                console.log(rows);
-                assert(rows.length === 1, "Incorrect number of entries retrieved");
-                assert(rows[0].id == entry_sp_2.id);
+                check.assert.equal(rows.length, 1, "Incorrect number of entries retrieved");
+                rows[0].assertEquivalence(entry_sp_2);
             });
     });
 
@@ -123,15 +117,11 @@ describe("Entry DAO", function () {
                     entryDAO.add(db, entry_sp_3)]);
             })
             .then(() => { return accountingDAO.add(db, accounting0); })
-            .then(() => { console.log(accounting0); })
-            .then(() => { return accountingDAO.listAll(db); })
-            .then((rows) => { console.log(rows); })
             .then(() => { return entryDAO.listByAccounting(db, accounting0.id) })
             .then((rows) => {
-                console.log(rows);
-                assert(rows.length === 2, "Incorrect number of entries retrieved");
-                assert(rows[0].id == entry_sp_0.id);
-                assert(rows[1].id == entry_sp_1.id);
+                check.assert.equal(rows.length, 2, "Incorrect number of entries retrieved");
+                rows[0].assertEquivalence(entry_sp_0);
+                rows[1].assertEquivalence(entry_sp_1);
             });
     });
 
@@ -157,10 +147,9 @@ describe("Entry DAO", function () {
             })
             .then(() => { return entryDAO.listByPeriod(db, period0.id) })
             .then((rows) => {
-                console.log(rows);
-                assert(rows.length === 2, "Incorrect number of entries retrieved");
-                assert(rows[0].id == entry_sp_0.id);
-                assert(rows[1].id == entry_sp_1.id);
+                check.assert.equal(rows.length, 2, "Incorrect number of entries retrieved");
+                rows[0].assertEquivalence(entry_sp_0);
+                rows[1].assertEquivalence(entry_sp_1);
             });
     });
 
@@ -172,7 +161,7 @@ describe("Entry DAO", function () {
             .then(() => { return entryDAO.removeAll(db); })
             .then(() => { return entryDAO.listAll(db); })
             .then((rows) => {
-                assert(rows.length === 0, "Records remain after removeAll");
+                check.assert.equal(rows.length, 0, "Records remain after removeAll");
             })
     });
 });

@@ -1,6 +1,4 @@
-const assert = require("chai").assert;
-const logger = require("../lib/debug.js").logger;
-const _      = require('lodash');
+const check = require('../lib/check-types-wrapper.js').check;
 
 const db          = require("./_shared.js").db;
 const testObjects = require("./_shared.js").testObjects;
@@ -26,29 +24,26 @@ describe("Account DAO", function () {
             .then(() => { return accountDAO.add(db, account0); })
             .then((id) => { return accountDAO.get(db, id); })
             .then((obj) => {
-                assert(obj.id, "ID not set");
-                for (var key of accountDAO.Account.fieldNames())
-                    assert(obj[key] === account0[key], "Field '" + key + "' did not add");
+                check.assert.assigned(obj, "Added object is null");
+                check.assert.assigned(obj.id, "ID not set");
+                obj.assertEquivalence(account0);
             })
             .then(() => { return accountDAO.listAll(db); })
             .then((rows) => {
-                assert(rows.length == 1, "Record not found by listAll after add");
+                check.assert.equal(rows.length, 1, "Record not found by listAll after add");
             })
 
             // Test Update
             .then(() => { account1.id = account0.id; })
             .then(() => { return accountDAO.update(db, account1); })
             .then(() => { return accountDAO.get(db, account1.id); })
-            .then((obj) => {
-                for (var key of accountDAO.Account.fieldNames())
-                    assert(obj[key] === account1[key], "Field '" + key + "' did not update");
-            })
+            .then((obj) => { obj.assertEquivalence(account1); })
 
             // Test remove
             .then(() => { return accountDAO.remove(db, account0.id); })
             .then(() => { return accountDAO.listAll(db); })
             .then((rows) => {
-                assert(rows.length === 0, "Record remains after remove");
+                check.assert.equal(rows.length, 0, "Record remains after remove");
             });
     });
 
@@ -60,7 +55,7 @@ describe("Account DAO", function () {
             .then(() => { return accountDAO.removeAll(db); })
             .then(() => { return accountDAO.listAll(db); })
             .then((rows) => {
-                assert(rows.length === 0, "Records remain after removeAll");
+                check.assert.equal(rows.length, 0, "Records remain after removeAll");
             })
     });
 });

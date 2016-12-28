@@ -1,9 +1,12 @@
 const check   = require('../lib/check-types-wrapper.js').check;
+
 const dbUtils = require("../lib/db-utils.js");
 const logger  = require("../lib/debug.js").logger;
+const shared  = require("./_shared.js");
 
-class Account {
+class Account extends shared.BancaObject {
     constructor(id, name, description) {
+        super();
         check.assert.equal(true, id === null || check.number(id));
         check.assert.string(name);
         check.assert.string(description);
@@ -23,10 +26,6 @@ class Account {
             obj.id,
             obj.name,
             obj.description);
-    }
-
-    static fieldNames() {
-        return ["id", "name", "description"];
     }
 }
 exports.Account = Account;
@@ -59,7 +58,7 @@ exports.get = function (db, id) {
             "SELECT * FROM account " +
             "WHERE account_id = ?",
             id,
-            dbUtils.generateDBResponseFunctionGet(resolve, reject)
+            dbUtils.generateDBResponseFunctionGet(resolve, reject, Account.fromObject)
         );
     });
 };
@@ -71,7 +70,7 @@ exports.listAll = function(db) {
     return new Promise((resolve, reject) => {
         db.all(
             "SELECT * FROM account",
-            dbUtils.generateDBResponseFunctionGet(resolve, reject)
+            dbUtils.generateDBResponseFunctionGet(resolve, reject, Account.fromObject)
         );
     });
 };

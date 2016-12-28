@@ -50,12 +50,8 @@ router.patch("/:id", function (req, res, next) {
 router.get('/:id/entries', function (req, res, next) {
     Promise.resolve()
         .then(() => { return entryDAO.listByAccount(req.db, req.params.id); })
-        .then((rows) => {
-            console.log(rows);
-            res.status(HTTP.OK).json({success: true, data: rows}); })
-        .catch((err) => {
-            console.log(err);
-        res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message) });
+        .then((rows) => { res.status(HTTP.OK).json({success: true, data: rows}); })
+        .catch((err) => { res.status(HTTP.INTERNAL_SERVER_ERROR).send(err.message) });
 });
 
 

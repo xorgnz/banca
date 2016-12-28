@@ -1,6 +1,5 @@
-const assert = require("chai").assert;
-const logger = require("../lib/debug.js").logger;
-const _      = require('lodash');
+const check = require('../lib/check-types-wrapper.js').check;
+const _     = require('lodash');
 
 const db            = require("./_shared.js").db;
 const testObjects   = require("./_shared.js").testObjects;
@@ -49,27 +48,24 @@ describe("Accounting DAO", function () {
             .then(() => { return accountingDAO.add(db, accounting0); })
             .then((id) => { return accountingDAO.get(db, id); })
             .then((obj) => {
-                assert(obj.id, "ID not set");
-                for (var key of accountingDAO.Accounting.fieldNames())
-                    assert(obj[key] === accounting0[key], "Field '" + key + "' did not add");
+                check.assert.assigned(obj, "Added object is null");
+                check.assert.assigned(obj.id, "ID not set");
+                obj.assertEquivalence(accounting0);
             })
             .then(() => { return accountingDAO.listAll(db); })
             .then((rows) => {
-                assert(rows.length == 1, "Record not found by listAll after add");
+                check.assert.equal(rows.length, 1, "Record not found by listAll after add");
             })
 
             .then(() => { accounting1.id = accounting0.id; })
             .then(() => { return accountingDAO.update(db, accounting1); })
             .then(() => { return accountingDAO.get(db, accounting1.id); })
-            .then((obj) => {
-                for (var key of accountingDAO.Accounting.fieldNames())
-                    assert(obj[key] === accounting1[key], "Field '" + key + "' did not update");
-            })
+            .then((obj) => { obj.assertEquivalence(accounting1); })
 
             .then(() => { return accountingDAO.remove(db, accounting0.id); })
             .then(() => { return accountingDAO.listAll(db); })
             .then((rows) => {
-                assert(rows.length === 0, "Record remains after remove");
+                check.assert.equal(rows.length, 0, "Record remains after remove");
             });
     });
 
@@ -102,8 +98,8 @@ describe("Accounting DAO", function () {
             .then(() => { return accountingDAO.calc(db, accounting2.id); })
             .then(() => { return accountingDAO.get(db, accounting2.id); })
             .then((obj) => {
-                assert(obj.amount_start == 0.02);
-                assert(obj.amount_end == 5.79); // 2.95 - 1.00 + 3.82 + 0.02 (from test obj)
+                check.assert.equal(obj.amount_start, 0.02);
+                check.assert.equal(obj.amount_end, 5.79); // 2.95 - 1.00 + 3.82 + 0.02 (from test obj)
             });
     });
 
@@ -139,30 +135,23 @@ describe("Accounting DAO", function () {
             .then(() => { return accountingDAO.add(db, accounting_sp4); })
             .then(() => { return accountingDAO.cascade(db, accounting_sp1.id); })
             .then(() => { return accountingDAO.get(db, accounting_sp0.id); })
-            .then((accounting) => {
-                assert(accounting.amount_start === accounting_sp0.amount_start);
-                assert(accounting.amount_end === accounting_sp0.amount_end);
-            })
-
+            .then((obj) => { obj.assertEquivalence(accounting_sp0); })
             .then(() => { return accountingDAO.get(db, accounting_sp1.id); })
-            .then((accounting) => {
-                assert(accounting.amount_start === accounting_sp1.amount_start);
-                assert(accounting.amount_end === accounting_sp1.amount_end);
-            })
+            .then((obj) => { obj.assertEquivalence(accounting_sp1); })
             .then(() => { return accountingDAO.get(db, accounting_sp2.id); })
             .then((accounting) => {
-                assert(accounting.amount_start === 13.24);
-                assert(accounting.amount_end === 28.24);
+                check.assert.equal(accounting.amount_start, 13.24);
+                check.assert.equal(accounting.amount_end, 28.24);
             })
             .then(() => { return accountingDAO.get(db, accounting_sp3.id); })
             .then((accounting) => {
-                assert(accounting.amount_start === 28.24);
-                assert(accounting.amount_end === 18.24);
+                check.assert.equal(accounting.amount_start, 28.24);
+                check.assert.equal(accounting.amount_end, 18.24);
             })
             .then(() => { return accountingDAO.get(db, accounting_sp4.id); })
             .then((accounting) => {
-                assert(accounting.amount_start === accounting_sp4.amount_start);
-                assert(accounting.amount_end === accounting_sp4.amount_end);
+                check.assert.equal(accounting.amount_start, accounting_sp4.amount_start);
+                check.assert.equal(accounting.amount_end, accounting_sp4.amount_end);
             });
     });
 
@@ -176,9 +165,9 @@ describe("Accounting DAO", function () {
             })
             .then(() => { return accountingDAO.listAll(db); })
             .then((rows) => {
-                assert(rows.length === 1, "Incorrect number of accountings created");
-                assert(rows[0].period_id == period0.id, "Incorrect period ID on accounting");
-                assert(rows[0].account_id == account0.id, "Incorrect account ID on accounting");
+                check.assert.equal(rows.length, 1, "Incorrect number of accountings created");
+                check.assert.equal(rows[0].period_id, period0.id, "Incorrect period ID on accounting");
+                check.assert.equal(rows[0].account_id, account0.id, "Incorrect account ID on accounting");
             });
     });
 
@@ -200,13 +189,13 @@ describe("Accounting DAO", function () {
             })
             .then(() => { return accountingDAO.listByAccount(db, account0.id); })
             .then((rows) => {
-                assert(rows.length === 3, "Incorrect number of accountings created");
-                assert(rows[0].period_id == period0.id, "Incorrect period ID on accounting");
-                assert(rows[0].account_id == account0.id, "Incorrect account ID on accounting");
-                assert(rows[1].period_id == period1.id, "Incorrect period ID on accounting");
-                assert(rows[1].account_id == account0.id, "Incorrect account ID on accounting");
-                assert(rows[2].period_id == period2.id, "Incorrect period ID on accounting");
-                assert(rows[2].account_id == account0.id, "Incorrect account ID on accounting");
+                check.assert.equal(rows.length, 3, "Incorrect number of accountings created");
+                check.assert.equal(rows[0].period_id, period0.id, "Incorrect period ID on accounting");
+                check.assert.equal(rows[0].account_id, account0.id, "Incorrect account ID on accounting");
+                check.assert.equal(rows[1].period_id, period1.id, "Incorrect period ID on accounting");
+                check.assert.equal(rows[1].account_id, account0.id, "Incorrect account ID on accounting");
+                check.assert.equal(rows[2].period_id, period2.id, "Incorrect period ID on accounting");
+                check.assert.equal(rows[2].account_id, account0.id, "Incorrect account ID on accounting");
             });
     });
 
@@ -219,35 +208,26 @@ describe("Accounting DAO", function () {
             .then(() => {
                 return accountingDAO.getByDateAndAccount(db, new Date("2000-01-20").getTime(), account0.id);
             })
-            .then((obj) => {
-                for (var key of accountingDAO.Accounting.fieldNames())
-                    assert(obj[key] === accounting0[key], "Incorrect accounting found");
-            })
+            .then((obj) => { obj.assertEquivalence(accounting0); })
             .then(() => {
                 return accountingDAO.getByDateAndAccount(db, new Date("2001-01-31T23:59:59.999Z").getTime(), account1.id);
             })
-            .then((obj) => {
-                for (var key of accountingDAO.Accounting.fieldNames())
-                    assert(obj[key] === accounting1[key], "Incorrect accounting found");
-            })
+            .then((obj) => { obj.assertEquivalence(accounting1); })
             .then(() => {
                 return accountingDAO.getByDateAndAccount(db, new Date("2002-01-01T00:00:00.000Z").getTime(), account2.id);
             })
-            .then((obj) => {
-                for (var key of accountingDAO.Accounting.fieldNames())
-                    assert(obj[key] === accounting2[key], "Incorrect accounting found");
-            })
+            .then((obj) => { obj.assertEquivalence(accounting2); })
             .then(() => {
                 return accountingDAO.getByDateAndAccount(db, new Date("2000-04-20").getTime(), account0.id);
             })
             .then((obj) => {
-                assert(obj === null, "Expecting null - no period should match - bad date");
+                check.assert.equal(obj, null, "Expecting null - no period should match - bad date");
             })
             .then(() => {
                 return accountingDAO.getByDateAndAccount(db, new Date("2000-01-20").getTime(), 999999999);
             })
             .then((obj) => {
-                assert(obj === null, "Expecting null - no period should match - bad account");
+                check.assert.equal(obj, null, "Expecting null - no period should match - bad account");
             });
     });
 
@@ -257,19 +237,13 @@ describe("Accounting DAO", function () {
             .then(() => { return accountingDAO.add(db, accounting0); })
             .then(() => { return accountingDAO.add(db, accounting1); })
             .then(() => { return accountingDAO.getByPeriodAndAccount(db, period0.id, account0.id); })
-            .then((obj) => {
-                for (var key of accountingDAO.Accounting.fieldNames())
-                    assert(obj[key] === accounting0[key], "Incorrect accounting found");
-            })
+            .then((obj) => { obj.assertEquivalence(accounting0); })
             .then(() => { return accountingDAO.getByPeriodAndAccount(db, period0.id, account1.id); })
             .then((obj) => {
-                assert(obj === null, "Accounting found when should have been null");
+                check.assert.equal(obj, null, "Accounting found when should have been null");
             })
             .then(() => { return accountingDAO.getByPeriodAndAccount(db, period1.id, account1.id); })
-            .then((obj) => {
-                for (var key of accountingDAO.Accounting.fieldNames())
-                    assert(obj[key] === accounting1[key], "Incorrect accounting found");
-            });
+            .then((obj) => { obj.assertEquivalence(accounting1); });
     });
 
     // ------------------------------------------------------------- TEST
@@ -284,9 +258,9 @@ describe("Accounting DAO", function () {
             })
             .then(() => { return accountingDAO.listByAccount(db, account0.id); })
             .then((rows) => {
-                assert(rows.length === 2, "Incorrect number of accountings retrieved");
-                assert(rows[0].period_id == period0.id);
-                assert(rows[1].period_id == period1.id);
+                check.assert.equal(rows.length, 2, "Incorrect number of accountings retrieved");
+                check.assert.equal(rows[0].period_id, period0.id);
+                check.assert.equal(rows[1].period_id, period1.id);
             });
 
     });
@@ -312,7 +286,7 @@ describe("Accounting DAO", function () {
                     new Date("2015-09-05").getTime(), account0.id);
             })
             .then((rows) => {
-                assert(rows.length === 3, "Incorrect number of accountings retrieved");
+                check.assert.equal(rows.length, 3, "Incorrect number of accountings retrieved");
             })
             .then(() => {
                 return accountingDAO.listOverDateRange(db,
@@ -320,7 +294,7 @@ describe("Accounting DAO", function () {
                     new Date("2015-06-05").getTime(), account0.id);
             })
             .then((rows) => {
-                assert(rows.length === 1, "Incorrect number of accountings retrieved");
+                check.assert.equal(rows.length, 1, "Incorrect number of accountings retrieved");
             })
             .then(() => {
                 return accountingDAO.listOverDateRange(db,
@@ -328,7 +302,7 @@ describe("Accounting DAO", function () {
                     new Date("2016-02-05").getTime(), account0.id);
             })
             .then((rows) => {
-                assert(rows.length === 2, "Incorrect number of accountings retrieved");
+                check.assert.equal(rows.length, 2, "Incorrect number of accountings retrieved");
             });
     });
 
@@ -363,10 +337,10 @@ describe("Accounting DAO", function () {
             .then(() => { return accountingDAO.add(db, accounting_sp4); })
             .then(() => { return accountingDAO.listSelfAndFollowing(db, accounting_sp1.id); })
             .then((rows) => {
-                assert(rows.length === 3, "Incorrect number of accountings retrieved");
-                assert(rows[0].id == accounting_sp1.id);
-                assert(rows[1].id == accounting_sp2.id);
-                assert(rows[2].id == accounting_sp3.id);
+                check.assert.equal(rows.length, 3, "Incorrect number of accountings retrieved");
+                check.assert.equal(rows[0].id, accounting_sp1.id);
+                check.assert.equal(rows[1].id, accounting_sp2.id);
+                check.assert.equal(rows[2].id, accounting_sp3.id);
             });
     });
 
@@ -376,9 +350,9 @@ describe("Accounting DAO", function () {
             .then(() => { return accountingDAO.add(db, accounting0); })
             .then(() => { return accountingDAO.peekDatesAndAccount(db, accounting0.id); })
             .then((obj) => {
-                assert(obj["date_start"] === period0["date_start"], ".date_start does not match on peek");
-                assert(obj["date_end"] === period0["date_end"], ".date_end does not match on peek");
-                assert(obj["account_id"] === account0["id"], ".account_id does not match on peek");
+                check.assert.equal(obj["date_start"], period0["date_start"], ".date_start does not match on peek");
+                check.assert.equal(obj["date_end"], period0["date_end"], ".date_end does not match on peek");
+                check.assert.equal(obj["account_id"], account0["id"], ".account_id does not match on peek");
             });
     });
 
@@ -390,7 +364,7 @@ describe("Accounting DAO", function () {
             .then(() => { return accountingDAO.removeAll(db); })
             .then(() => { return accountingDAO.listAll(db); })
             .then((rows) => {
-                assert(rows.length === 0, "Records remain after removeAll");
+                check.assert.equal(rows.length, 0, "Records remain after removeAll");
             })
     });
 });
