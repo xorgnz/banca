@@ -117,7 +117,12 @@ class Entry extends shared.BancaObject {
     }
 
     assertEquivalence(obj) {
-        this.assertEquivalenceIgnoreFields(obj, ["_account"]);
+        this.assertEquivalenceIgnoreFields(obj, ["account"]);
+    }
+
+    assertEquivalence_IgnoreFields(obj, ignore) {
+        ignore.push("account");
+        this.assertEquivalenceIgnoreFields_internal(obj, ignore);
     }
 
     toJSON() {

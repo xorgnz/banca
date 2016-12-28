@@ -10,11 +10,16 @@ class BancaObject {
         return v;
     }
 
-    assertEquivalence(obj) { this.assertEquivalenceIgnoreFields(obj, []); }
-    assertEquivalenceIgnoreFields(obj, ignore) {
+    assertEquivalence(obj) { this.assertEquivalenceIgnoreFields_internal(obj, []); }
+    assertEquivalenceIgnoreFields(obj, ignore) { this.assertEquivalenceIgnoreFields_internal(obj, ignore); }
+    assertEquivalenceIgnoreFields_internal(obj, ignore) {
+        if (check.string(ignore))
+            ignore = [ ignore ];
+
         _.forIn(this, function (value, key) {
+            key = key.substr(0,1) == "_" ? key.substr(1) : key;
             if (_.indexOf(ignore, key) == -1) {
-                key = key.substr(1);
+                key = key.substr(0,1) == "_" ? key.substr(1) : key;
                 check.assert.not.undefined(obj[key], "Objects not equivalent - property '" + key + "' is missing");
                 check.assert.equal(value, obj[key], "Objects not equivalent - property '" + key + "' does not match");
             }

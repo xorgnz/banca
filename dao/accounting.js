@@ -76,7 +76,13 @@ class Accounting extends shared.BancaObject {
     }
 
     assertEquivalence(obj) {
-        this.assertEquivalenceIgnoreFields(obj, ["_account", "_period"]);
+        this.assertEquivalenceIgnoreFields(obj, ["account", "period"]);
+    }
+
+    assertEquivalence_IgnoreFields(obj, ignore) {
+        ignore.push("account");
+        ignore.push("period");
+        this.assertEquivalenceIgnoreFields_internal(obj, ignore);
     }
 
     toJSON() {
