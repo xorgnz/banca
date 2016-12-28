@@ -14,23 +14,23 @@ exports.types = [
 class Budget extends shared.BancaObject {
     constructor(id, code, type, amount) {
         super();
-        check.assert.equal(true, id === null || check.number(id));
+        check.assert.equal(true, id === null || check.__numberlike(id));
         check.assert.string(code);
         check.assert.number(type);
         check.assert.number(amount);
 
         this._id     = id ? id : -1;
         this._code   = code ? code : "";
-        this._type   = check.number(type) ? type  : -1;
+        this._type   = check.__numberlike(type) ? type  : -1;
         this._amount = amount ? amount  : "";
     }
     get id()            { return this._id; }
     get code()          { return this._code; }
     get type()          { return this._type; }
     get amount()        { return this._amount; }
-    set id(v)           { this._id = v; }
+    set id(v)           { this._id = Number.parseInt(v); }
     set code(v)         { this._code = v; }
-    set type(v)         { this._type = v; }
+    set type(v)         { this._type = Number.parseInt(v); }
     set amount(v)       { this._amount = v; }
 
     static fromObject(obj) {

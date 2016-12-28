@@ -31,7 +31,7 @@
     "morgan": "~1.7.0",
     "nunjucks": "^3.0.0",
     "pad-number": "0.0.4",
-    "request": "^2.79.0",
+    "request-json": "^0.6.1",
     "sqlite3": "^3.1.8"
   },
   "devDependencies": {

@@ -1,5 +1,5 @@
 const _      = require('lodash');
-const logger = require("./debug.js").logger;
+const logger = require("../lib/debug.js").logger;
 const check  = require('../lib/check-types-wrapper.js').check;
 
 var stripDatabasePrefix     = function (obj) {
@@ -84,6 +84,8 @@ exports.generateDBResponseFunctionUpdate = function (resolve, reject) {
     }
 };
 
+
+
 class BancaObject {
     toJSON() {
         var v = {};
@@ -110,4 +112,3 @@ class BancaObject {
     }
 }
 exports.BancaObject = BancaObject;
-
