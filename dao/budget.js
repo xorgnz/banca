@@ -22,7 +22,7 @@ class Budget extends shared.BancaObject {
 
         this._id     = id ? id : -1;
         this._code   = code ? code : "";
-        this._type   = type ? type  : -1;
+        this._type   = check.number(type) ? type  : -1;
         this._amount = amount ? amount  : "";
     }
     get id()            { return this._id; }
