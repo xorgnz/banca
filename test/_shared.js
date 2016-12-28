@@ -22,7 +22,11 @@ exports.testObjects.createTestAccounting = createTestAccounting;
 
 
 var createTestBudget     = function (num) {
-    return new budgetDAO.Budget(null, "Code " + num, num, num + 1000);
+    return new budgetDAO.Budget(
+        null,
+        "Code " + num,
+        (num % budgetDAO.types.length) + 1,
+        num + 1000);
 };
 exports.testObjects.createTestBudget = createTestBudget;
 
