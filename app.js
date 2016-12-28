@@ -1,7 +1,6 @@
 // Import libraries
 var express = require('express');
 var path = require('path');
-var favicon = require('serve-favicon');
 var bodyParser = require('body-parser');
 var sqlite3 = require('sqlite3');
 
@@ -19,12 +18,6 @@ app.use(require('morgan')('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(require('cookie-parser')());
-app.use(require('node-sass-middleware')({
-    src: path.join(__dirname, 'public'),
-    dest: path.join(__dirname, 'public'),
-    indentedSyntax: true,
-    sourceMap: true
-}));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Configure middleware - DB connection

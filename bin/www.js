@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 //  Module dependencies.
-var app = require('../app');
-var debug = require('debug')('banca:server');
-var http = require('http');
+const app    = require('../app');
+const logger = require("../lib/debug.js").logger;
+const http   = require('http');
 
 // Get port from environment and store in Express.
 var port = normalizePort(process.env.PORT || '3000');
@@ -14,8 +14,7 @@ var server = http.createServer(app);
 
 
 // Normalize a port into a number, string, or false.
-function normalizePort(val)
-{
+function normalizePort(val) {
     var port = parseInt(val, 10);
 
     // named pipe
@@ -31,8 +30,7 @@ function normalizePort(val)
 
 
 // Listener function - HTTP error
-function onError(error)
-{
+function onError(error) {
     if (error.syscall !== 'listen')
         throw error;
 
@@ -41,8 +39,7 @@ function onError(error)
         : 'Port ' + port;
 
     // handle specific listen errors with friendly messages
-    switch (error.code)
-    {
+    switch (error.code) {
         case 'EACCES':
             console.error(bind + ' requires elevated privileges');
             process.exit(1);
@@ -58,13 +55,12 @@ function onError(error)
 
 
 // Event listener for HTTP server "listening" event.
-function onListening()
-{
+function onListening() {
     var addr = server.address();
     var bind = typeof addr === 'string'
         ? 'pipe ' + addr
         : 'port ' + addr.port;
-    debug('Listening on ' + bind);
+    logger.trace('Listening on ' + bind);
 }
 
 
