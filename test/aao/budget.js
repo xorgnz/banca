@@ -1,7 +1,6 @@
-const request   = require("request-json");
-const logger    = require("../../lib/debug.js").logger;
-const parseJSON = require("request-parse-json");
-const shared    = require("./_shared.js");
+const request = require("request-json");
+const logger  = require("../../lib/debug.js").logger;
+const shared  = require("./_shared.js");
 
 const client = request.createClient('http://localhost:3001/');
 

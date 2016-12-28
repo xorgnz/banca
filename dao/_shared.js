@@ -2,8 +2,7 @@ const _      = require('lodash');
 const logger = require("../lib/debug.js").logger;
 const check  = require('../lib/check-types-wrapper.js').check;
 
-var stripDatabasePrefix     = function (obj) {
-
+var stripDatabasePrefix = function (obj) {
     if (obj === undefined) {
         return null;
     }
@@ -85,7 +84,6 @@ exports.generateDBResponseFunctionUpdate = function (resolve, reject) {
 };
 
 
-
 class BancaObject {
     toJSON() {
         var v = {};
@@ -96,15 +94,17 @@ class BancaObject {
     }
 
     assertEquivalence(obj) { this.assertEquivalenceIgnoreFields_internal(obj, []); }
+
     assertEquivalenceIgnoreFields(obj, ignore) { this.assertEquivalenceIgnoreFields_internal(obj, ignore); }
+
     assertEquivalenceIgnoreFields_internal(obj, ignore) {
         if (check.string(ignore))
-            ignore = [ ignore ];
+            ignore = [ignore];
 
         _.forIn(this, function (value, key) {
-            key = key.substr(0,1) == "_" ? key.substr(1) : key;
+            key = key.substr(0, 1) == "_" ? key.substr(1) : key;
             if (_.indexOf(ignore, key) == -1) {
-                key = key.substr(0,1) == "_" ? key.substr(1) : key;
+                key = key.substr(0, 1) == "_" ? key.substr(1) : key;
                 check.assert.not.undefined(obj[key], "Objects not equivalent - property '" + key + "' is missing");
                 check.assert.equal(value, obj[key], "Objects not equivalent - property '" + key + "' does not match");
             }
