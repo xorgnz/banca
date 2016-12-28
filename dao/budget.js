@@ -68,7 +68,7 @@ exports.add = function(db, budget) {
 exports.get = function (db, id) {
     logger.trace("budget DAO - get: " + id);
     check.assert.equal(db.constructor.name, "Database");
-    check.assert.number(id);
+    check.assert(check.__numberlike(id));
     return new Promise((resolve, reject) => {
         db.get(
             "SELECT * FROM budget " +
@@ -95,7 +95,7 @@ exports.listAll = function(db) {
 exports.remove  = function (db, id) {
     logger.trace("budget DAO - remove: " + id);
     check.assert.equal(db.constructor.name, "Database");
-    check.assert.number(id);
+    check.assert(check.__numberlike(id));
     return new Promise((resolve, reject) => {
         db.run(
             "DELETE FROM budget " +

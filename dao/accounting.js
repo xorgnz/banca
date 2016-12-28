@@ -113,7 +113,7 @@ exports.add = function (db, accounting) {
 exports.calc = function (db, id) {
     logger.trace("Accounting DAO - calc: " + id);
     check.assert.equal(db.constructor.name, "Database");
-    check.assert.number(id);
+    check.assert(check.__numberlike(id));
     var amount = 0;
     return Promise.resolve()
         .then(() => { return entryDAO.listByAccounting(db, id); })
@@ -131,7 +131,7 @@ exports.calc = function (db, id) {
 exports.cascade = function (db, id) {
     logger.trace("Accounting DAO - cascade: " + id);
     check.assert.equal(db.constructor.name, "Database");
-    check.assert.number(id);
+    check.assert(check.__numberlike(id));
     return Promise.resolve()
         .then(() => { return exports.listSelfAndFollowing(db, id); })
         .then((rows) => {
@@ -153,7 +153,7 @@ exports.createForPeriods = function (db, period_ids, account_id) {
     logger.trace("Accounting DAO - createForPeriods: [" + period_ids + "], " + account_id);
     check.assert.equal(db.constructor.name, "Database");
     check.assert.array.of.number(period_ids);
-    check.assert.number(account_id);
+    check.assert(check.__numberlike(account_id));
     return Promise.resolve()
         .then(() => { return exports.listByAccount(db, account_id); })
         .then((periods) => {
@@ -174,7 +174,7 @@ exports.createForPeriods = function (db, period_ids, account_id) {
 exports.get = function (db, id) {
     logger.trace("Accounting DAO - get: " + id);
     check.assert.equal(db.constructor.name, "Database");
-    check.assert.number(id);
+    check.assert(check.__numberlike(id));
     return new Promise((resolve, reject) => {
         db.get(
             "SELECT * FROM accounting " +
@@ -189,8 +189,8 @@ exports.get = function (db, id) {
 exports.getByPeriodAndAccount = function (db, period_id, account_id) {
     logger.trace("Accounting DAO - getByPeriodAndAccount: P: " + period_id + ", A: " + account_id);
     check.assert.equal(db.constructor.name, "Database");
-    check.assert.number(account_id);
-    check.assert.number(period_id);
+    check.assert(check.__numberlike(account_id));
+    check.assert(check.__numberlike(period_id));
     return new Promise((resolve, reject) => {
         db.get(
             "SELECT * FROM accounting " +
@@ -208,8 +208,8 @@ exports.getByPeriodAndAccount = function (db, period_id, account_id) {
 exports.getByDateAndAccount = function (db, date, account_id) {
     logger.trace("Accounting DAO - getByDateAndAccount: D: " + new Date(date) + ", A: " + account_id);
     check.assert.equal(db.constructor.name, "Database");
-    check.assert.number(date);
-    check.assert.number(account_id);
+    check.assert(check.__numberlike(date));
+    check.assert(check.__numberlike(account_id));
     return new Promise((resolve, reject) => {
         db.get(
             "SELECT accounting.* FROM accounting " +
@@ -238,12 +238,12 @@ exports.listAll = function (db) {
 };
 
 
-exports.listSelfAndFollowing = function (db, accounting_id) {
-    logger.trace("Accounting DAO - listFollowing: " + accounting_id);
+exports.listSelfAndFollowing = function (db, id) {
+    logger.trace("Accounting DAO - listFollowing: " + id);
     check.assert.equal(db.constructor.name, "Database");
-    check.assert.number(accounting_id);
+    check.assert(check.__numberlike(id));
     return Promise.resolve()
-        .then(() => { return exports.peekDatesAndAccount(db, accounting_id); })
+        .then(() => { return exports.peekDatesAndAccount(db, id); })
         .then((peek) => {
             return new Promise((resolve, reject) => {
                 db.all(
@@ -265,7 +265,7 @@ exports.listSelfAndFollowing = function (db, accounting_id) {
 exports.listByAccount = function (db, account_id) {
     logger.trace("Accounting DAO - listByAccount: " + account_id);
     check.assert.equal(db.constructor.name, "Database");
-    check.assert.number(account_id);
+    check.assert(check.__numberlike(account_id));
     return new Promise((resolve, reject) => {
         db.all(
             "SELECT accounting.* FROM accounting " +
@@ -284,9 +284,9 @@ exports.listOverDateRange = function (db, date_start, date_end, account_id) {
     logger.trace("S: " + new Date(date_start));
     logger.trace("E: " + new Date(date_end));
     check.assert.equal(db.constructor.name, "Database");
-    check.assert.number(date_start);
-    check.assert.number(date_end);
-    check.assert.number(account_id);
+    check.assert(check.__numberlike(date_start));
+    check.assert(check.__numberlike(date_end));
+    check.assert(check.__numberlike(account_id));
     return new Promise((resolve, reject) => {
         db.all(
             "SELECT accounting.* FROM accounting " +
@@ -308,7 +308,7 @@ exports.listOverDateRange = function (db, date_start, date_end, account_id) {
 exports.peekDatesAndAccount = function (db, id) {
     logger.trace("Accounting DAO - peekDatesAndAccount: " + id);
     check.assert.equal(db.constructor.name, "Database");
-    check.assert.number(id);
+    check.assert(check.__numberlike(id));
     return new Promise((resolve, reject) => {
         db.get(
             "SELECT " +
@@ -328,7 +328,7 @@ exports.peekDatesAndAccount = function (db, id) {
 exports.remove = function (db, id) {
     logger.trace("Accounting DAO - remove: " + id);
     check.assert.equal(db.constructor.name, "Database");
-    check.assert.number(id);
+    check.assert(check.__numberlike(id));
     return new Promise((resolve, reject) => {
         db.run(
             "DELETE FROM accounting " +

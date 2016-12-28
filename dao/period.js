@@ -82,8 +82,8 @@ exports.createOverDateRange = function (db, date_start, date_end) {
     logger.trace("S: " + new Date(date_start));
     logger.trace("E: " + new Date(date_end));
     check.assert.equal(db.constructor.name, "Database");
-    check.assert.number(date_start);
-    check.assert.number(date_end);
+    check.assert(check.__numberlike(date_start));
+    check.assert(check.__numberlike(date_end));
 
     return Promise.resolve()
         .then(() => { return exports.listOverDateRange(db, date_start, date_end); })
@@ -119,7 +119,7 @@ exports.createOverDateRange = function (db, date_start, date_end) {
 exports.get = function (db, id) {
     logger.trace("Period DAO - get: " + id);
     check.assert.equal(db.constructor.name, "Database");
-    check.assert.number(id);
+    check.assert(check.__numberlike(id));
     return new Promise((resolve, reject) => {
         db.get(
             "SELECT * FROM period " +
@@ -134,7 +134,7 @@ exports.get = function (db, id) {
 exports.getByDate = function (db, date) {
     logger.trace("Period DAO - getByDate: " + date);
     check.assert.equal(db.constructor.name, "Database");
-    check.assert.number(date);
+    check.assert(check.__numberlike(date));
     return new Promise((resolve, reject) => {
         db.get(
             "SELECT * FROM period " +
@@ -166,8 +166,8 @@ exports.listOverDateRange = function (db, date_start, date_end) {
     logger.trace("S: " + new Date(date_start));
     logger.trace("E: " + new Date(date_end));
     check.assert.equal(db.constructor.name, "Database");
-    check.assert.number(date_start);
-    check.assert.number(date_end);
+    check.assert(check.__numberlike(date_start));
+    check.assert(check.__numberlike(date_end));
     return new Promise((resolve, reject) => {
         db.all(
             "SELECT * FROM period " +
@@ -186,7 +186,7 @@ exports.listOverDateRange = function (db, date_start, date_end) {
 exports.remove = function (db, id) {
     logger.trace("Period DAO - remove: " + id);
     check.assert.equal(db.constructor.name, "Database");
-    check.assert.number(id);
+    check.assert(check.__numberlike(id));
     return new Promise((resolve, reject) => {
         db.run(
             "DELETE FROM period " +

@@ -52,7 +52,7 @@ exports.add = function(db, account) {
 exports.get = function (db, id) {
     logger.trace("Account DAO - get: " + id);
     check.assert.equal(db.constructor.name, "Database");
-    check.assert.number(id);
+    check.assert(check.__numberlike(id));
     return new Promise((resolve, reject) => {
         db.get(
             "SELECT * FROM account " +
@@ -79,7 +79,7 @@ exports.listAll = function(db) {
 exports.remove  = function (db, id) {
     logger.trace("Account DAO - remove: " + id);
     check.assert.equal(db.constructor.name, "Database");
-    check.assert.number(id);
+    check.assert(check.__numberlike(id));
     return new Promise((resolve, reject) => {
         db.run(
             "DELETE FROM account " +

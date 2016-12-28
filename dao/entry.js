@@ -163,7 +163,7 @@ exports.add = function(db, entry) {
 exports.get = function (db, id) {
     logger.trace("Entry DAO - get: " + id);
     check.assert.equal(db.constructor.name, "Database");
-    check.assert.number(id);
+    check.assert(check.__numberlike(id));
     return new Promise((resolve, reject) => {
         db.get(
             "SELECT * FROM entry " +
@@ -191,9 +191,7 @@ exports.listAll = function(db) {
 exports.listByAccount = function(db, account_id) {
     logger.trace("Entry DAO - listByAccount. ID: " + account_id);
     check.assert.equal(db.constructor.name, "Database");
-    if (check.string(account_id))
-        account_id = Number.parseInt(account_id);
-    check.assert.number(account_id);
+    check.assert(check.__numberlike(account_id));
 
     return Promise.resolve()
         .then(() => {
@@ -214,9 +212,7 @@ exports.listByAccount = function(db, account_id) {
 exports.listByAccounting = function(db, accounting_id) {
     logger.trace("Entry DAO - listByAccounting. ID: " + accounting_id);
     check.assert.equal(db.constructor.name, "Database");
-    if (check.string(accounting_id))
-        accounting_id = Number.parseInt(accounting_id);
-    check.assert.number(accounting_id);
+    check.assert(check.__numberlike(accounting_id));
 
     return Promise.resolve()
         .then(() => { return accountingDAO.peekDatesAndAccount(db, accounting_id); })
@@ -242,7 +238,7 @@ exports.listByAccounting = function(db, accounting_id) {
 exports.listByPeriod = function(db, period_id) {
     logger.trace("Entry DAO - listByPeriod");
     check.assert.equal(db.constructor.name, "Database");
-    check.assert.number(period_id);
+    check.assert(check.__numberlike(period_id));
 
     return Promise.resolve()
         .then(() => { return periodDAO.get(db, period_id); })
@@ -266,7 +262,7 @@ exports.listByPeriod = function(db, period_id) {
 exports.remove  = function (db, id) {
     logger.trace("Entry DAO - remove: " + id);
     check.assert.equal(db.constructor.name, "Database");
-    check.assert.number(id);
+    check.assert(check.__numberlike(id));
     return new Promise((resolve, reject) => {
         db.run(
             "DELETE FROM entry " +
