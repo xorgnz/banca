@@ -14,8 +14,15 @@ router.get('/', function (req, res, next) {
 });
 
 
+/* SPECIAL GET - List allowed budget types */
+router.get('/types', function (req, res, next) {
+    res.status(HTTP.OK).json({success: true, data: budgetDAO.types});
+});
+
+
 /* GET - Retrieve particular budget */
 router.get('/:id', function (req, res, next) {
+    console.log("fish");
     Promise.resolve()
         .then(() => { return budgetDAO.get(req.db, req.params.id); })
         .then((row) => { res.status(HTTP.OK).json({success: true, data: row}); })
@@ -50,14 +57,8 @@ router.patch("/:id", function (req, res, next) {
     var budget  = budgetDAO.Budget.fromObject(req.body);
     Promise.resolve()
         .then(() => { return budgetDAO.update(req.db, budget); })
-        .then((rows) => { res.status(HTTP.OK).json({success: true}); })
+        .then((rows) => { res.status(HTTP.OK).json({success: true, data: budget}); })
         .catch(next);
-});
-
-
-/* SPECIAL GET - List allowed budget types */
-router.get('/types', function (req, res, next) {
-    res.status(HTTP.OK).json({success: true, data: budgetDAO.types});
 });
 
 

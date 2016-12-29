@@ -56,7 +56,7 @@ function decorateAjaxRest(obj, id, type, ajax_endpoint, callbacks) {
     obj.editing = ko.observable(false);
     obj.disableUpdates = ko.observable(false);
     obj.update = function () {
-        if (obj.id !== null && ! obj.disableUpdates()) {
+        if (obj.id() !== null && ! obj.disableUpdates()) {
             $.ajax({
                 url: ajax_endpoint + id,
                 method: "patch",
