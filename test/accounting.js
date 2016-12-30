@@ -220,15 +220,29 @@ describe("Accounting DAO", function () {
             .then(() => {
                 return accountingDAO.getByDateAndAccount(db, new Date("2000-04-20").getTime(), account0.id);
             })
-            .then((obj) => {
-                check.assert.equal(obj, null, "Expecting null - no period should match - bad date");
-            })
+            .then((obj) => { check.assert.equal(obj, null, "Expected null - bad date"); })
             .then(() => {
                 return accountingDAO.getByDateAndAccount(db, new Date("2000-01-20").getTime(), 999999999);
             })
-            .then((obj) => {
-                check.assert.equal(obj, null, "Expecting null - no period should match - bad account");
-            });
+            .then((obj) => { check.assert.equal(obj, null, "Expected null - bad account"); });
+    });
+
+    // ------------------------------------------------------------- TEST
+    it.only(".getByEntry", function () {
+        var entry_sp0    = testObjects.createTestEntry(0, account0);
+        var entry_sp1    = testObjects.createTestEntry(0, account0);
+        entry_sp0.date = new Date("2000-01-20");
+        entry_sp1.date = new Date("2000-06-20");
+        return Promise.resolve()
+            .then(() => { return accountingDAO.add(db, accounting0); })
+            .then(() => { return accountingDAO.add(db, accounting1); })
+            .then(() => { return entryDAO.add(db, entry_sp0); })
+            .then(() => { return entryDAO.add(db, entry_sp1); })
+            .then(() => { return accountingDAO.listAll(db); })
+            .then(() => { return accountingDAO.getByEntry(db, entry_sp0.id); })
+            .then((obj) => { obj.assertEquivalence(accounting0); })
+            .then(() => { return accountingDAO.getByEntry(db, entry_sp1.id); })
+            .then((obj) => { check.assert.equal(obj, null, "Expected null - entry outside accountings"); })
     });
 
     // ------------------------------------------------------------- TEST

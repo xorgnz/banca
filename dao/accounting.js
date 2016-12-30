@@ -230,6 +230,16 @@ exports.getByDateAndAccount = function (db, date, account_id) {
 };
 
 
+exports.getByEntry = function (db, entry_id) {
+    logger.trace("Accounting DAO - getByEntry: " + entry_id);
+    check.assert.equal(db.constructor.name, "Database");
+    check.assert(check.__numberlike(entry_id));
+    return Promise.resolve()
+        .then(() => { return entryDAO.get(db, entry_id); })
+        .then((entry) => { return exports.getByDateAndAccount(db, entry.date, entry.account_id); });
+};
+
+
 exports.listAll = function (db) {
     logger.trace("Accounting DAO - listAll");
     check.assert.equal(db.constructor.name, "Database");
