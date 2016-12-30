@@ -34,6 +34,7 @@
     "nunjucks": "^3.0.0",
     "pad-number": "0.0.4",
     "request-json": "^0.6.1",
+    "serve-favicon": "^2.3.2",
     "sqlite3": "^3.1.8"
   },
   "devDependencies": {

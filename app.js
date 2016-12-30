@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const sqlite3    = require('sqlite3');
 const HTTP       = require('http-status');
 const logger     = require("./lib/debug.js").logger;
+const favicon    = require('serve-favicon');
 
 var createApp = function (type) {
     // Express engine
@@ -16,6 +17,7 @@ var createApp = function (type) {
     app.use(bodyParser.urlencoded({extended: false}));
     app.use(require('cookie-parser')());
     app.use(express.static(path.join(__dirname, 'public')));
+    app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 
     // Configure middleware - DB connection
     app.use(function (req, res, next) {
