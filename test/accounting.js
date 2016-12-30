@@ -228,7 +228,7 @@ describe("Accounting DAO", function () {
     });
 
     // ------------------------------------------------------------- TEST
-    it.only(".getByEntry", function () {
+    it(".getByEntry", function () {
         var entry_sp0    = testObjects.createTestEntry(0, account0);
         var entry_sp1    = testObjects.createTestEntry(0, account0);
         entry_sp0.date = new Date("2000-01-20");
