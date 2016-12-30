@@ -71,7 +71,7 @@ function processImportedRows(rows) {
             }
 
             // Clean up tags - use Unknown if not available
-            row.tag = entryDAO.isValidTagString(row.tag) ? row.tag : entryDAO.tags.UNKNOWN_TAG;
+            row.tag = entryDAO.isValidTagString(row.tag) ? row.tag : entryDAO.UNKNOWN_TAG;
 
             if (reasons.length > 0) {
                 row.reasons = reasons;
@@ -156,5 +156,9 @@ exports.importFromCsv = function (db, filename, account_id) {
         .then((entries) => { return importEntries(db, entries, account_id); })
         .then((entries) => { return createPeriodsAndAccountings(db, entries, account_id); })
         .then((accountings) => { return calcAndCascadeAccountings(db, accountings); })
-        .then(() => { console.log("Import complete!"); });
+        .then(() => { console.log("Import complete!"); })
+        .catch((e) => {
+            console.log("Import failed!");
+            throw e;
+        });
 };

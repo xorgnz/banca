@@ -6,10 +6,11 @@
   "private": true,
   "scripts": {
     "start": "nodemon ./bin/www.js",
-    "start-testing": "nodemon ./bin/www.js test",
+    "start-test": "nodemon ./bin/www.js test",
     "import": "node --harmony ./tools/import-csv.js",
     "init": "node --harmony ./tools/init-db live",
     "init-test": "node --harmony ./tools/init-db,js test",
+    "rebuild-accounting": "node --harmony ./tools/rebuild-accounting.js test",
     "test": "./node_modules/.bin/mocha --reporter spec"
   },
   "repository": {

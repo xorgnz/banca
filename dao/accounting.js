@@ -11,8 +11,8 @@ class Accounting extends shared.BancaObject {
     constructor(id, period, account, amount_start, amount_end) {
         super();
         check.assert.equal(true, id === null || check.number(id));
-        check.assert.equal(true, check.number(period) || check.instance(period, periodDAO.Period));
-        check.assert.equal(true, check.number(account) || check.instance(account, accountDAO.Account));
+        check.assert.equal(true, check.__numberlike(period) || check.instance(period, periodDAO.Period));
+        check.assert.equal(true, check.__numberlike(account) || check.instance(account, accountDAO.Account));
         check.assert.number(amount_start);
         check.assert.number(amount_end);
 
@@ -235,7 +235,9 @@ exports.listAll = function (db) {
     check.assert.equal(db.constructor.name, "Database");
     return new Promise((resolve, reject) => {
         db.all(
-            "SELECT * FROM accounting",
+            "SELECT accounting.* FROM accounting " +
+            "INNER JOIN period ON period_id = accounting_period_id " +
+            "ORDER BY period_date_start",
             shared.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObject)
         );
     });

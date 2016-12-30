@@ -40,16 +40,20 @@ var createApp = function (type) {
 
     // catch 404 and forward to error handler
     app.use(function (req, res, next) {
-        console.log("404 function");
-        var err    = new Error('Not Found');
+        var err    = new Error("Not Found");
         err.status = 404;
         next(err);
     });
 
     // error handler
     app.use(function (err, req, res, next) {
-        logger.error(err);
-        res.status(HTTP.INTERNAL_SERVER_ERROR).json({error: err.message});
+        if (err.status === undefined)
+            err.status = HTTP.INTERNAL_SERVER_ERROR;
+
+        if (err.status != HTTP.NOT_FOUND)
+            logger.error(err);
+
+        res.status(err.status).json({error: err.message});
     });
 
     return app;

@@ -102,25 +102,28 @@ describe("Importer", function () {
             .then((rows) => {
                 check.assert.equal(rows.length, 5, "Incorrect number of accountings post import");
                 check.assert.equal(rows[0].amount_start, 0);
-                check.assert.equal(rows[0].amount_end, 1);
-                check.assert.equal(rows[1].amount_start, 1);
-                check.assert.equal(rows[1].amount_end, 3);
-                check.assert.equal(rows[2].amount_start, 3);
-                check.assert.equal(rows[2].amount_end, 10);
-                check.assert.equal(rows[3].amount_start, 10);
-                check.assert.equal(rows[3].amount_end, 15);
-                check.assert.equal(rows[4].amount_start, 15);
-                check.assert.equal(rows[4].amount_end, 21);
+                check.assert.equal(rows[0].amount_end, 1.1);
+                check.assert.equal(rows[1].amount_start, 1.1);
+                check.assert.equal(rows[1].amount_end, 2.2);
+                check.assert.equal(rows[2].amount_start, 2.2);
+                check.assert.equal(rows[2].amount_end, 4.4);
+                check.assert.equal(rows[3].amount_start, 4.4);
+                check.assert.equal(rows[3].amount_end, 5.5);
+                check.assert.equal(rows[4].amount_start, 5.5);
+                check.assert.equal(rows[4].amount_end, 6.6);
             })
             .then(() => { return entryDAO.listAll(db); })
             .then((rows) => {
                 check.assert.equal(rows.length, 6, "Incorrect number of entries created");
                 for (var i = 0; i < rows.length; i++) {
-                    check.assert.equal(rows[i].amount, i + 1);
-                    check.assert.equal(rows[i].tag, "Games");
+                    check.assert.equal(rows[i].amount, 1.1);
                     check.assert.equal(rows[i].where, "Where");
                     check.assert.equal(rows[i].what, "What");
                     check.assert.equal(rows[i].note, "Note");
+                    if (i < 4)
+                        check.assert.equal(rows[i].tag, "Games");
+                    else
+                        check.assert.equal(rows[i].tag, "Unknown");
                 }
             });
     });
