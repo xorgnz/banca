@@ -28,8 +28,8 @@ class Period extends shared.BancaObject {
         check.assert.number(date_start);
         check.assert.number(date_end);
 
-        this._id        = id ? id : -1;
-        this.name       = name ? name : "";
+        this.id         = id;
+        this.name       = name;
         this.date_start = date_start;
         this.date_end   = date_end;
     };
@@ -38,8 +38,8 @@ class Period extends shared.BancaObject {
     get name()          { return this._name; }
     get date_start()    { return this._date_start; }
     get date_end()      { return this._date_end; }
-    set id(v)           { this._id = v ? v : -1; }
-    set name(v)         { this._name = v ? v : ""; }
+    set id(v)           { this._id = v ? Number.parseInt(v) : -1; }
+    set name(v)         { this._name = v ? v.toString() : ""; }
     set date_start(v)   { this._date_start = v ? new Date(v).getTime() : 0; }
     set date_end(v)     { this._date_end = v ? new Date(v).getTime() : 0; }
 

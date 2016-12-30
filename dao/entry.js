@@ -46,11 +46,8 @@ exports.isValidTagString = function (str) {
 class Entry extends shared.BancaObject {
     constructor(id, account, amount, date, bank_note, note, tag, where, what) {
         super();
-        console.log(arguments);
         check.assert.equal(true, id === null || check.__numberlike(id));
-        check.assert(
-            check.__numberlike(account) ||
-            check.instance(account, accountDAO.Account));
+        check.assert.equal(true, check.__numberlike(account) || check.instance(account, accountDAO.Account));
         check.assert.number(amount);
         check.assert.string(bank_note);
         check.assert.string(note);
@@ -59,7 +56,6 @@ class Entry extends shared.BancaObject {
         check.assert.string(what);
 
         this.id        = id;
-        this.account   = account;
         this.amount    = amount;
         this.date      = date;
         this.bank_note = bank_note;
@@ -67,6 +63,11 @@ class Entry extends shared.BancaObject {
         this.tag       = tag;
         this.where     = where;
         this.what      = what;
+
+        if (check.instance(account, accountDAO.Account))
+            this.account = account;
+        else
+            this.account_id = account;
     }
     get id()            { return this._id; }
     get amount()        { return this._amount; }
@@ -76,31 +77,24 @@ class Entry extends shared.BancaObject {
     get tag()           { return this._tag; }
     get where()         { return this._where; }
     get what()          { return this._what; }
+    get account()       { return this._account; }
+    get account_id()    { return this._account ? this._account.id : this._account_id; }
     set id(v)           { this._id = v ? Number.parseInt(v) : -1; }
     set amount(v)       { this._amount = isNaN(v) ? 0 : _.round(Number.parseFloat(v), 2); }
     set date(v)         { this._date = v ? new Date(v).getTime() : 0; }
-    set bank_note(v)    { this._bank_note = v ? v : ""; }
-    set note(v)         { this._note = v ? v : ""; }
-    set tag(v)          { this._tag = v ? v : ""; }
-    set where(v)        { this._where = v ? v : ""; }
-    set what(v)         { this._what = v ? v : ""; }
-
-    get account()       { return this._account; }
-    get account_id()    { return this._account ? this._account.id : this._account_id; }
-    set account(v)      {
-        if (check.object(v)) {
-            this._account    = v;
-            this._account_id = v.id;
-        }
-        else {
-            this._account    = null;
-            this._account_id = Number.parseInt(v);
-        }
+    set bank_note(v)    { this._bank_note = v ? v.toString() : ""; }
+    set note(v)         { this._note = v ? v.toString() : ""; }
+    set tag(v)          { this._tag = v ? v.toString() : ""; }
+    set where(v)        { this._where = v ? v.toString() : ""; }
+    set what(v)         { this._what = v ? v.toString() : ""; }
+    set account(v)    {
+        check.assert.instance(v, accountDAO.Account);
+        this._account    = v;
+        this._account_id = v.id;
     }
     set account_id(v) {
-        if (this._account)
-            this._account = null;
-        this._account_id = v;
+        this._account = null;
+        this._account_id = v ? Number.parseInt(v) : -1;
     }
 
     static fromObject(obj) {
@@ -139,7 +133,6 @@ exports.add = function(db, entry) {
     logger.trace(entry);
     check.assert.equal(db.constructor.name, "Database");
     check.assert.instance(entry, Entry);
-    entry.amount = _.round(entry.amount, 2);
     return new Promise((resolve, reject) => {
         db.run(
             "INSERT INTO entry (" +

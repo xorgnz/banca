@@ -5,7 +5,7 @@ const shared = require("./_shared.js");
 class Account extends shared.BancaObject {
     constructor(id, name, description) {
         super();
-        check.assert.equal(true, id === null || check.number(id));
+        check.assert.equal(true, check.not.assigned(id) || check.__numberlike(id));
         check.assert.string(name);
         check.assert.string(description);
         this.id          = id;
@@ -15,9 +15,9 @@ class Account extends shared.BancaObject {
     get id()            { return this._id; }
     get name()          { return this._name; }
     get description()   { return this._description; }
-    set id(v)           { this._id = v ? v : -1; }
-    set name(v)         { this._name = v ? v : ""; }
-    set description(v)  { this._description = v ? v : ""; }
+    set id(v)           { this._id = v ? Number.parseInt(v) : -1; }
+    set name(v)         { this._name = v ? v.toString() : ""; }
+    set description(v)  { this._description = v ? v.toString() : ""; }
 
     static fromObject(obj) {
         return new Account(

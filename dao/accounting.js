@@ -10,58 +10,54 @@ const accountDAO = require("../dao/account.js");
 class Accounting extends shared.BancaObject {
     constructor(id, period, account, amount_start, amount_end) {
         super();
-        check.assert.equal(true, id === null || check.number(id));
+        check.assert.equal(true, id === null || check.__numberlike(id));
         check.assert.equal(true, check.__numberlike(period) || check.instance(period, periodDAO.Period));
         check.assert.equal(true, check.__numberlike(account) || check.instance(account, accountDAO.Account));
-        check.assert.number(amount_start);
-        check.assert.number(amount_end);
+        check.assert(check.__numberlike(amount_start));
+        check.assert(check.__numberlike(amount_end));
 
         this.id           = id;
-        this.period       = period;
-        this.account      = account;
         this.amount_start = amount_start;
         this.amount_end   = amount_end;
+
+        if (check.instance(period, periodDAO.Period))
+            this.period = period;
+        else
+            this.period_id = period;
+
+        if (check.instance(account, accountDAO.Account))
+            this.account = account;
+        else
+            this.account_id = account;
     }
 
     get id()            { return this._id; }
-    set id(v)           { this._id = v ? v : -1; }
+    get account()       { return this._account; }
+    get account_id()    { return this._account ? this._account.id : this._account_id; }
+    get period()        { return this._period; }
+    get period_id()     { return this._period ? this._period.id : this._period_id; }
     get amount_start()  { return this._amount_start; }
-    set amount_start(v) { this._amount_start = isNaN(v) ? 0 : _.round(Number.parseFloat(v), 2); }
     get amount_end()    { return this._amount_end; }
+    set id(v)           { this._id = v ? Number.parseInt(v) : -1; }
+    set amount_start(v) { this._amount_start = isNaN(v) ? 0 : _.round(Number.parseFloat(v), 2); }
     set amount_end(v)   { this._amount_end = isNaN(v) ? 0 : _.round(Number.parseFloat(v), 2); }
-
-    get account()     { return this._account; }
-    get account_id()  { return this._account ? this._account.id : this._account_id; }
     set account(v)    {
-        if (check.object(v)) {
-            this._account    = v;
-            this._account_id = v.id;
-        }
-        else {
-            this._account    = null;
-            this._account_id = v;
-        }
+        check.assert.instance(v, accountDAO.Account);
+        this._account    = v;
+        this._account_id = v.id;
     }
     set account_id(v) {
-        if (this._account) this._account = null;
-        this._account_id = v;
+        this._account = null;
+        this._account_id = v ? Number.parseInt(v) : -1;
     }
-
-    get period()     { return this._period; }
-    get period_id()  { return this._period ? this._period.id : this._period_id; }
     set period(v)    {
-        if (check.object(v)) {
-            this._period    = v;
-            this._period_id = v.id;
-        }
-        else {
-            this._period    = null;
-            this._period_id = v;
-        }
+        check.assert.instance(v, periodDAO.Period);
+        this._period    = v;
+        this._period_id = v.id;
     }
     set period_id(v) {
-        if (this._period) this._period = null;
-        this._period_id = v;
+        this._period = null;
+        this._period_id = v ? Number.parseInt(v) : -1;
     }
 
     static fromObject(obj) {
@@ -122,6 +118,7 @@ exports.calc = function (db, id) {
     return Promise.resolve()
         .then(() => { return entryDAO.listByAccounting(db, id); })
         .then((entries) => {
+            console.log(entries);
             _.each(entries, (v) => { amount += v.amount; });
             return exports.get(db, id);
         })
