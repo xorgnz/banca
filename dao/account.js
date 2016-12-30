@@ -8,16 +8,16 @@ class Account extends shared.BancaObject {
         check.assert.equal(true, id === null || check.number(id));
         check.assert.string(name);
         check.assert.string(description);
-        this._id = id ? id : -1;
-        this._name = name ? name : "";
-        this._description = description ? description  : "";
+        this.id          = id;
+        this.name        = name;
+        this.description = description;
     }
     get id()            { return this._id; }
     get name()          { return this._name; }
     get description()   { return this._description; }
-    set id(v)           { this._id = v; }
-    set name(v)         { this._name = v; }
-    set description(v)  { this._description = v; }
+    set id(v)           { this._id = v ? v : -1; }
+    set name(v)         { this._name = v ? v : ""; }
+    set description(v)  { this._description = v ? v : ""; }
 
     static fromObject(obj) {
         return new Account(

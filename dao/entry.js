@@ -58,15 +58,15 @@ class Entry extends shared.BancaObject {
         check.assert.string(where);
         check.assert.string(what);
 
-        this.id = id;
-        this.account = account;
-        this.amount = amount;
-        this.date = date;
+        this.id        = id;
+        this.account   = account;
+        this.amount    = amount;
+        this.date      = date;
         this.bank_note = bank_note;
-        this.note = note;
-        this.tag = tag;
-        this.where = where;
-        this.what = what;
+        this.note      = note;
+        this.tag       = tag;
+        this.where     = where;
+        this.what      = what;
     }
     get id()            { return this._id; }
     get amount()        { return this._amount; }

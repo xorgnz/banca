@@ -28,20 +28,20 @@ class Period extends shared.BancaObject {
         check.assert.number(date_start);
         check.assert.number(date_end);
 
-        this._id         = id ? id : -1;
-        this._name       = name ? name : "";
-        this._date_start = isNaN(date_start) ? 0 : Number.parseInt(date_start);
-        this._date_end   = isNaN(date_end) ? 0 : Number.parseInt(date_end);
+        this._id        = id ? id : -1;
+        this.name       = name ? name : "";
+        this.date_start = date_start;
+        this.date_end   = date_end;
     };
 
     get id()            { return this._id; }
     get name()          { return this._name; }
     get date_start()    { return this._date_start; }
     get date_end()      { return this._date_end; }
-    set id(v)           { this._id = v; }
-    set name(v)         { this._name = v; }
-    set date_start(v)   { this._date_start = v; }
-    set date_end(v)     { this._date_end = v; }
+    set id(v)           { this._id = v ? v : -1; }
+    set name(v)         { this._name = v ? v : ""; }
+    set date_start(v)   { this._date_start = v ? new Date(v).getTime() : 0; }
+    set date_end(v)     { this._date_end = v ? new Date(v).getTime() : 0; }
 
     static fromObject(obj) {
         return new Period(

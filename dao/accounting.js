@@ -16,9 +16,9 @@ class Accounting extends shared.BancaObject {
         check.assert.number(amount_start);
         check.assert.number(amount_end);
 
-        this.id = id;
-        this.period = period;
-        this.account = account;
+        this.id           = id;
+        this.period       = period;
+        this.account      = account;
         this.amount_start = amount_start;
         this.amount_end   = amount_end;
     }

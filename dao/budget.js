@@ -19,19 +19,24 @@ class Budget extends shared.BancaObject {
         check.assert.number(type);
         check.assert.number(amount);
 
-        this._id     = id ? id : -1;
-        this._code   = code ? code : "";
-        this._type   = check.__numberlike(type) ? type  : -1;
-        this._amount = amount ? amount  : "";
+        this.id     = id;
+        this.code   = code;
+        this.type   = type;
+        this.amount = amount;
     }
     get id()            { return this._id; }
     get code()          { return this._code; }
     get type()          { return this._type; }
     get amount()        { return this._amount; }
-    set id(v)           { this._id = Number.parseInt(v); }
-    set code(v)         { this._code = v; }
-    set type(v)         { this._type = Number.parseInt(v); }
-    set amount(v)       { this._amount = v; }
+    set id(v)           { this._id = v ? Number.parseInt(v) : -1; }
+    set code(v)         { this._code = v ? v : ""; }
+    set type(v)         {
+        v = check.__numberlike(v) ? Number.parseInt(v) : 1;
+        if (v < 1 || v > 4)
+            v = 1;
+        this._type = v;
+    }
+    set amount(v)       { this._amount = v ? Number.parseFloat(v) : 0; }
 
     static fromObject(obj) {
         return new Budget(
