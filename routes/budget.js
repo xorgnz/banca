@@ -20,7 +20,7 @@ router.get('/types', function (req, res, next) {
 });
 
 
-/* GET - Retrieve particular budget */
+/* SPECIAL GET - Retrieve particular budget */
 router.get('/:id', function (req, res, next) {
     console.log("fish");
     Promise.resolve()

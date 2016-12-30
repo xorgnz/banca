@@ -42,7 +42,7 @@ router.patch("/:id", function (req, res, next) {
     var account = accountDAO.Account.fromObject(req.body);
     Promise.resolve()
         .then(() => { return accountDAO.update(req.db, account); })
-        .then((rows) => { res.status(HTTP.OK).json({success: true}); })
+        .then((rows) => { res.status(HTTP.OK).json({success: true, data: account}); })
         .catch(next);
 });
 

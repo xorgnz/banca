@@ -46,12 +46,12 @@ exports.isValidTagString = function (str) {
 class Entry extends shared.BancaObject {
     constructor(id, account, amount, date, bank_note, note, tag, where, what) {
         super();
-        check.assert.equal(true, id === null || check.number(id));
+        console.log(arguments);
+        check.assert.equal(true, id === null || check.__numberlike(id));
         check.assert(
             check.__numberlike(account) ||
             check.instance(account, accountDAO.Account));
         check.assert.number(amount);
-        check.assert.number(date);
         check.assert.string(bank_note);
         check.assert.string(note);
         check.assert.string(tag);
@@ -76,7 +76,7 @@ class Entry extends shared.BancaObject {
     get tag()           { return this._tag; }
     get where()         { return this._where; }
     get what()          { return this._what; }
-    set id(v)           { this._id = v ? v : -1; }
+    set id(v)           { this._id = v ? Number.parseInt(v) : -1; }
     set amount(v)       { this._amount = isNaN(v) ? 0 : _.round(Number.parseFloat(v), 2); }
     set date(v)         { this._date = v ? new Date(v).getTime() : 0; }
     set bank_note(v)    { this._bank_note = v ? v : ""; }
@@ -94,7 +94,7 @@ class Entry extends shared.BancaObject {
         }
         else {
             this._account    = null;
-            this._account_id = v;
+            this._account_id = Number.parseInt(v);
         }
     }
     set account_id(v) {
