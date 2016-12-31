@@ -1,10 +1,10 @@
-const _ = require('lodash');
+const _      = require('lodash');
 const check  = require('../lib/check-types-wrapper.js').check;
 const logger = require("../lib/debug.js").logger;
 const shared = require("./_shared.js");
 
-const entryDAO = require("../dao/entry.js");
-const periodDAO = require("../dao/period.js");
+const entryDAO   = require("../dao/entry.js");
+const periodDAO  = require("../dao/period.js");
 const accountDAO = require("../dao/account.js");
 
 class Accounting extends shared.BancaObject {
@@ -208,8 +208,9 @@ exports.getByPeriodAndAccount = function (db, period_id, account_id) {
 
 exports.getByDateAndAccount = function (db, date, account_id) {
     logger.trace("Accounting DAO - getByDateAndAccount: D: " + new Date(date) + ", A: " + account_id);
+    date = new Date(date).getTime();
     check.assert.equal(db.constructor.name, "Database");
-    check.assert(check.__numberlike(date));
+    check.assert.number(date);
     check.assert(check.__numberlike(account_id));
     return new Promise((resolve, reject) => {
         db.get(
@@ -296,9 +297,11 @@ exports.listOverDateRange = function (db, date_start, date_end, account_id) {
     logger.trace("Accounting DAO - listOverDateRange:");
     logger.trace("S: " + new Date(date_start));
     logger.trace("E: " + new Date(date_end));
+    date_start = new Date(date_start).getTime();
+    date_end = new Date(date_end).getTime();
     check.assert.equal(db.constructor.name, "Database");
-    check.assert(check.__numberlike(date_start));
-    check.assert(check.__numberlike(date_end));
+    check.assert.number(date_start);
+    check.assert.number(date_end);
     check.assert(check.__numberlike(account_id));
     return new Promise((resolve, reject) => {
         db.all(

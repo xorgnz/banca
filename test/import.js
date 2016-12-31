@@ -15,12 +15,8 @@ const it         = require("mocha").it;
 
 
 describe("Importer", function () {
-    const period0     = new periodDAO.Period(null, "January-2016",
-        new Date("2016-01-01").getTime(),
-        new Date("2016-01-31").getTime());
-    const period1     = new periodDAO.Period(null, "February-2016",
-        new Date("2016-02-01").getTime(),
-        new Date("2016-02-28").getTime());
+    const period0     = new periodDAO.Period(null, "January-2016", new Date("2016-01-01"), new Date("2016-01-31"));
+    const period1     = new periodDAO.Period(null, "February-2016", new Date("2016-02-01"), new Date("2016-02-28"));
     const account0    = testObjects.createTestAccount(0);
     const account1    = testObjects.createTestAccount(1);
     const accounting0 = testObjects.createTestAccounting(0, period0, account0);

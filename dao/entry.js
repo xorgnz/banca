@@ -49,6 +49,7 @@ class Entry extends shared.BancaObject {
         check.assert.equal(true, id === null || check.__numberlike(id));
         check.assert.equal(true, check.__numberlike(account) || check.instance(account, accountDAO.Account));
         check.assert.number(amount);
+        check.assert.number(new Date(date).getTime());
         check.assert.string(bank_note);
         check.assert.string(note);
         check.assert.string(tag);

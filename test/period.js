@@ -58,14 +58,14 @@ describe("Period DAO", function () {
         return Promise.resolve()
             .then(() => {
                 var period_sp_0 = new periodDAO.Period(null, "September-2015",
-                    new Date("2015-09-01T00:00:00.000Z").getTime(),
-                    new Date("2015-09-30T23:59:59.999Z").getTime());
+                    new Date("2015-09-01T00:00:00.000Z"),
+                    new Date("2015-09-30T23:59:59.999Z"));
                 return periodDAO.add(db, period_sp_0);
             })
             .then(() => {
                 return periodDAO.createOverDateRange(db,
-                    new Date("2015-08-01").getTime(),
-                    new Date("2016-02-01").getTime());
+                    new Date("2015-08-01"),
+                    new Date("2016-02-01"));
             })
             .then(() => { return periodDAO.listAll(db); })
             .then((rows) => {
@@ -100,13 +100,13 @@ describe("Period DAO", function () {
             .then(() => { return periodDAO.add(db, period0); })
             .then(() => { return periodDAO.add(db, period1); })
             .then(() => { return periodDAO.add(db, period2); })
-            .then(() => { return periodDAO.getByDate(db, new Date("2000-01-20").getTime()); })
+            .then(() => { return periodDAO.getByDate(db, new Date("2000-01-20")); })
             .then((obj) => { obj.assertEquivalence(period0); })
-            .then(() => { return periodDAO.getByDate(db, new Date("2001-01-31T23:59:59.999Z").getTime()); })
+            .then(() => { return periodDAO.getByDate(db, new Date("2001-01-31T23:59:59.999Z")); })
             .then((obj) => { obj.assertEquivalence(period1); })
-            .then(() => { return periodDAO.getByDate(db, new Date("2002-01-01T00:00:00.000Z").getTime()); })
+            .then(() => { return periodDAO.getByDate(db, new Date("2002-01-01T00:00:00.000Z")); })
             .then((obj) => { obj.assertEquivalence(period2); })
-            .then(() => { return periodDAO.getByDate(db, new Date("2003-01-01T00:00:00.000Z").getTime()); })
+            .then(() => { return periodDAO.getByDate(db, new Date("2003-01-01T00:00:00.000Z")); })
             .then((obj) => {
                 check.assert.equal(obj, null, "Expecting null - no period should match - bad date");
             });
@@ -117,13 +117,13 @@ describe("Period DAO", function () {
         return Promise.resolve()
             .then(() => {
                 return periodDAO.createOverDateRange(db,
-                    new Date("2015-06-01").getTime(),
-                    new Date("2015-12-01").getTime());
+                    new Date("2015-06-01"),
+                    new Date("2015-12-01"));
             })
             .then(() => {
                 return periodDAO.listOverDateRange(db,
-                    new Date("2015-07-05").getTime(),
-                    new Date("2015-09-05").getTime());
+                    new Date("2015-07-05"),
+                    new Date("2015-09-05"));
             })
             .then((rows) => {
                 check.assert.equal(rows[0].date_start, new Date("2015-07-01T00:00:00.000Z").getTime());
@@ -136,8 +136,8 @@ describe("Period DAO", function () {
             })
             .then(() => {
                 return periodDAO.listOverDateRange(db,
-                    new Date("2015-04-05").getTime(),
-                    new Date("2015-06-05").getTime());
+                    new Date("2015-04-05"),
+                    new Date("2015-06-05"));
             })
             .then((rows) => {
                 check.assert.equal(rows[0].date_start, new Date("2015-06-01T00:00:00.000Z").getTime());
@@ -146,8 +146,8 @@ describe("Period DAO", function () {
             })
             .then(() => {
                 return periodDAO.listOverDateRange(db,
-                    new Date("2015-11-05").getTime(),
-                    new Date("2016-02-05").getTime());
+                    new Date("2015-11-05"),
+                    new Date("2016-02-05"));
             })
             .then((rows) => {
                 check.assert.equal(rows[0].date_start, new Date("2015-11-01T00:00:00.000Z").getTime());

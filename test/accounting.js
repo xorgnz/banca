@@ -106,17 +106,17 @@ describe("Accounting DAO", function () {
     // ------------------------------------------------------------- TEST
     it(".cascade", function () {
         var period_sp0     = new periodDAO.Period(null, "January-2010",
-            new Date("2010-01-01").getTime(),
-            new Date("2010-01-31").getTime());
+            new Date("2010-01-01"),
+            new Date("2010-01-31"));
         var period_sp1     = new periodDAO.Period(null, "February-2010",
-            new Date("2010-02-01").getTime(),
-            new Date("2010-02-28").getTime());
+            new Date("2010-02-01"),
+            new Date("2010-02-28"));
         var period_sp2     = new periodDAO.Period(null, "March-2010",
-            new Date("2010-03-01").getTime(),
-            new Date("2010-03-31").getTime());
+            new Date("2010-03-01"),
+            new Date("2010-03-31"));
         var period_sp3     = new periodDAO.Period(null, "April-2010",
-            new Date("2010-04-01").getTime(),
-            new Date("2010-04-30").getTime());
+            new Date("2010-04-01"),
+            new Date("2010-04-30"));
         var accounting_sp0 = new accountingDAO.Accounting(null, period_sp0, account0, 10.50, 20.50);
         var accounting_sp1 = new accountingDAO.Accounting(null, period_sp1, account0, 3.24, 13.24);
         var accounting_sp2 = new accountingDAO.Accounting(null, period_sp2, account0, 892.33, 907.33);
@@ -206,23 +206,23 @@ describe("Accounting DAO", function () {
             .then(() => { return accountingDAO.add(db, accounting1); })
             .then(() => { return accountingDAO.add(db, accounting2); })
             .then(() => {
-                return accountingDAO.getByDateAndAccount(db, new Date("2000-01-20").getTime(), account0.id);
+                return accountingDAO.getByDateAndAccount(db, new Date("2000-01-20"), account0.id);
             })
             .then((obj) => { obj.assertEquivalence(accounting0); })
             .then(() => {
-                return accountingDAO.getByDateAndAccount(db, new Date("2001-01-31T23:59:59.999Z").getTime(), account1.id);
+                return accountingDAO.getByDateAndAccount(db, new Date("2001-01-31T23:59:59.999Z"), account1.id);
             })
             .then((obj) => { obj.assertEquivalence(accounting1); })
             .then(() => {
-                return accountingDAO.getByDateAndAccount(db, new Date("2002-01-01T00:00:00.000Z").getTime(), account2.id);
+                return accountingDAO.getByDateAndAccount(db, new Date("2002-01-01T00:00:00.000Z"), account2.id);
             })
             .then((obj) => { obj.assertEquivalence(accounting2); })
             .then(() => {
-                return accountingDAO.getByDateAndAccount(db, new Date("2000-04-20").getTime(), account0.id);
+                return accountingDAO.getByDateAndAccount(db, new Date("2000-04-20"), account0.id);
             })
             .then((obj) => { check.assert.equal(obj, null, "Expected null - bad date"); })
             .then(() => {
-                return accountingDAO.getByDateAndAccount(db, new Date("2000-01-20").getTime(), 999999999);
+                return accountingDAO.getByDateAndAccount(db, new Date("2000-01-20"), 999999999);
             })
             .then((obj) => { check.assert.equal(obj, null, "Expected null - bad account"); });
     });
@@ -284,8 +284,8 @@ describe("Accounting DAO", function () {
         return Promise.resolve()
             .then(() => {
                 return periodDAO.createOverDateRange(db,
-                    new Date("2015-06-01").getTime(),
-                    new Date("2015-12-01").getTime());
+                    new Date("2015-06-01"),
+                    new Date("2015-12-01"));
             })
             .then(() => { return periodDAO.listAll(db); })
             .then((rows) => {
@@ -296,24 +296,24 @@ describe("Accounting DAO", function () {
             })
             .then(() => {
                 return accountingDAO.listOverDateRange(db,
-                    new Date("2015-07-05").getTime(),
-                    new Date("2015-09-05").getTime(), account0.id);
+                    new Date("2015-07-05"),
+                    new Date("2015-09-05"), account0.id);
             })
             .then((rows) => {
                 check.assert.equal(rows.length, 3, "Incorrect number of accountings retrieved");
             })
             .then(() => {
                 return accountingDAO.listOverDateRange(db,
-                    new Date("2015-04-05").getTime(),
-                    new Date("2015-06-05").getTime(), account0.id);
+                    new Date("2015-04-05"),
+                    new Date("2015-06-05"), account0.id);
             })
             .then((rows) => {
                 check.assert.equal(rows.length, 1, "Incorrect number of accountings retrieved");
             })
             .then(() => {
                 return accountingDAO.listOverDateRange(db,
-                    new Date("2015-11-05").getTime(),
-                    new Date("2016-02-05").getTime(), account0.id);
+                    new Date("2015-11-05"),
+                    new Date("2016-02-05"), account0.id);
             })
             .then((rows) => {
                 check.assert.equal(rows.length, 2, "Incorrect number of accountings retrieved");
@@ -323,17 +323,17 @@ describe("Accounting DAO", function () {
     // ------------------------------------------------------------- TEST
     it(".listSelfAndFollowing", function () {
         var period_sp0     = new periodDAO.Period(null, "January-2010",
-            new Date("2010-01-01").getTime(),
-            new Date("2010-01-31").getTime());
+            new Date("2010-01-01"),
+            new Date("2010-01-31"));
         var period_sp1     = new periodDAO.Period(null, "February-2010",
-            new Date("2010-02-01").getTime(),
-            new Date("2010-02-28").getTime());
+            new Date("2010-02-01"),
+            new Date("2010-02-28"));
         var period_sp2     = new periodDAO.Period(null, "March-2010",
-            new Date("2010-03-01").getTime(),
-            new Date("2010-03-31").getTime());
+            new Date("2010-03-01"),
+            new Date("2010-03-31"));
         var period_sp3     = new periodDAO.Period(null, "April-2010",
-            new Date("2010-04-01").getTime(),
-            new Date("2010-04-30").getTime());
+            new Date("2010-04-01"),
+            new Date("2010-04-30"));
         var accounting_sp0 = testObjects.createTestAccounting(0, period_sp0, account0);
         var accounting_sp1 = testObjects.createTestAccounting(0, period_sp1, account0);
         var accounting_sp2 = testObjects.createTestAccounting(0, period_sp2, account0);

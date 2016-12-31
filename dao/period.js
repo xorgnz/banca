@@ -25,8 +25,8 @@ class Period extends shared.BancaObject {
         super();
         check.assert.equal(true, id === null || check.number(id));
         check.assert.string(name);
-        check.assert.number(date_start);
-        check.assert.number(date_end);
+        check.assert.number(new Date(date_start).getTime());
+        check.assert.number(new Date(date_end).getTime());
 
         this.id         = id;
         this.name       = name;
@@ -79,9 +79,11 @@ exports.createOverDateRange = function (db, date_start, date_end) {
     logger.trace("Period DAO - createOverDateRange: ");
     logger.trace("S: " + new Date(date_start));
     logger.trace("E: " + new Date(date_end));
+    date_start = new Date(date_start).getTime();
+    date_end = new Date(date_end).getTime();
     check.assert.equal(db.constructor.name, "Database");
-    check.assert(check.__numberlike(date_start));
-    check.assert(check.__numberlike(date_end));
+    check.assert.number(date_start);
+    check.assert.number(date_end);
 
     return Promise.resolve()
         .then(() => { return exports.listOverDateRange(db, date_start, date_end); })
@@ -131,8 +133,9 @@ exports.get = function (db, id) {
 
 exports.getByDate = function (db, date) {
     logger.trace("Period DAO - getByDate: " + date);
+    date = new Date(date).getTime();
     check.assert.equal(db.constructor.name, "Database");
-    check.assert(check.__numberlike(date));
+    check.assert.number(date);
     return new Promise((resolve, reject) => {
         db.get(
             "SELECT * FROM period " +
@@ -163,9 +166,11 @@ exports.listOverDateRange = function (db, date_start, date_end) {
     logger.trace("Period DAO - listOverDateRange:");
     logger.trace("S: " + new Date(date_start));
     logger.trace("E: " + new Date(date_end));
+    date_start = new Date(date_start).getTime();
+    date_end = new Date(date_end).getTime();
     check.assert.equal(db.constructor.name, "Database");
-    check.assert(check.__numberlike(date_start));
-    check.assert(check.__numberlike(date_end));
+    check.assert.number(date_start);
+    check.assert.number(date_end);
     return new Promise((resolve, reject) => {
         db.all(
             "SELECT * FROM period " +
