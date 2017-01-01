@@ -1,9 +1,9 @@
-const router     = require('express').Router();
-const validation = require("../lib/validation.js");
-const HTTP       = require("http-status");
+const router = require('express').Router();
+const shared = require("./_shared");
+const HTTP   = require("http-status");
 
 const accountingDAO = require("../dao/accounting.js");
-const entryDAO = require("../dao/entry.js");
+const entryDAO      = require("../dao/entry.js");
 
 
 /* GET list of all objects of this type */
@@ -16,7 +16,7 @@ router.get('/', function (req, res, next) {
 
 
 /* POST - Create new object */
-router.post('/', function (req, res, next) { validation.validateEntry(req, res, next); });
+router.post('/', function (req, res, next) { shared.validate(req, res, next, entryDAO.Entry); });
 router.post('/', function (req, res, next) {
     var entry = entryDAO.Entry.fromObject(req.body);
     Promise.resolve()
@@ -48,7 +48,7 @@ router.delete("/:id", function (req, res, next) {
 
 
 /* PATCH - Update specified object */
-router.patch('/:id', function (req, res, next) { validation.validateEntry(req, res, next) });
+router.post('/', function (req, res, next) { shared.validate(req, res, next, entryDAO.Entry); });
 router.patch("/:id", function (req, res, next) {
     req.body.id = req.params.id;
     var entry   = entryDAO.Entry.fromObject(req.body);

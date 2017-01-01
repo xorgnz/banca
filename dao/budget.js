@@ -33,6 +33,21 @@ class Budget extends shared.BancaObject {
     set type(v)         { this._type = (v > 1 && v < 4) ? Number.parseInt(v) : 1; }
     set amount(v)       { this._amount = v ? Number.parseFloat(v) : 0; }
 
+    validate(obj) {
+        var errors = [];
+        errors = _.concat(errors, shared.vs_stringNotEmpty(obj.code, "code"));
+        errors = _.concat(errors, shared.vs_number(obj.amount, "amount"));
+
+        if (! check.assigned(obj.type)) {
+            errors.push(new shared.ValidationError("type", exports.VET_MISSING));
+        }
+        else if (! _.find(exports.types, {id: obj.type})) {
+            errors.push(new shared.ValidationError("type", exports.VET_INVALID));
+        }
+
+        return errors;
+    }
+
     static fromObject(obj) {
         return new Budget(
             obj.id,

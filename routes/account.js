@@ -1,9 +1,9 @@
-const router     = require('express').Router();
-const validation = require("../lib/validation.js");
-const HTTP       = require("http-status");
+const router = require('express').Router();
+const shared = require("./_shared");
+const HTTP   = require("http-status");
 
 const accountDAO = require("../dao/account.js");
-const entryDAO = require("../dao/entry.js");
+const entryDAO   = require("../dao/entry.js");
 
 
 /* GET list of all accounts */
@@ -16,7 +16,7 @@ router.get('/', function (req, res, next) {
 
 
 /* POST - Create new account */
-router.post('/', function (req, res, next) { validation.validateAccount(req, res, next); });
+router.post('/', function (req, res, next) { shared.validate(req, res, next, accountDAO.Account); });
 router.post('/', function (req, res, next) {
     var account = accountDAO.Account.fromObject(req.body);
     Promise.resolve()
@@ -36,7 +36,7 @@ router.delete("/:id", function (req, res, next) {
 
 
 /* PATCH - Update specified account */
-router.patch('/:id', function (req, res, next) { validation.validateAccount(req, res, next) });
+router.post('/', function (req, res, next) { shared.validate(req, res, next, accountDAO.Account); });
 router.patch("/:id", function (req, res, next) {
     req.body.id = req.params.id;
     var account = accountDAO.Account.fromObject(req.body);

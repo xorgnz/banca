@@ -1,6 +1,6 @@
-const router     = require('express').Router();
-const validation = require('../lib/validation');
-const HTTP       = require('http-status');
+const router = require('express').Router();
+const HTTP   = require('http-status');
+const shared = require('./_shared');
 
 const budgetDAO = require("../dao/budget.js");
 
@@ -31,7 +31,7 @@ router.get('/:id', function (req, res, next) {
 
 
 /* POST - Create new budget */
-router.post('/', function (req, res, next) { validation.validateBudget(req, res, next); });
+router.post('/', function (req, res, next) { shared.validate(req, res, next, budgetDAO.Budget); });
 router.post('/', function (req, res, next) {
     var budget = budgetDAO.Budget.fromObject(req.body);
     Promise.resolve()
@@ -51,7 +51,7 @@ router.delete("/:id", function (req, res, next) {
 
 
 /* PATCH - Update specified budget */
-router.patch('/:id', function (req, res, next) { validation.validateBudget(req, res, next) });
+router.post('/', function (req, res, next) { shared.validate(req, res, next, budgetDAO.Budget); });
 router.patch("/:id", function (req, res, next) {
     req.body.id = req.params.id;
     var budget  = budgetDAO.Budget.fromObject(req.body);

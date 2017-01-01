@@ -67,7 +67,11 @@ exports.generateDBResponseFunctionInsert = function (resolve, reject, obj) {
             reject(err);
         }
         else {
-            if (obj) obj.id = this.lastID;
+            if (obj) {
+                //noinspection JSUnresolvedVariable
+                obj.id = this.lastID;
+            }
+            //noinspection JSUnresolvedVariable
             resolve(this.lastID);
         }
     }
@@ -83,6 +87,83 @@ exports.generateDBResponseFunctionUpdate = function (resolve, reject) {
     }
 };
 
+
+class ValidationError {
+    constructor(field, type, message) {
+        this._field = field;
+        this._type  = type;
+        if (message !== undefined) {
+            this.message = message;
+        }
+    }
+    get field() { return this._field; }
+    get type() { return this._type; }
+}
+exports.VET_MISSING     = "missing";
+exports.VET_INVALID     = "invalid";
+exports.ValidationError = ValidationError;
+
+// Validation sugar
+exports.vs_exists   = function (v, field) {
+    var errors = [];
+    if (! check.assigned(v)) {
+        errors.push(new ValidationError(field, exports.VET_MISSING));
+    }
+    return errors;
+};
+exports.vs_date = function (v, field) {
+    var errors = [];
+    if (! check.assigned(v)) {
+        errors.push(new ValidationError("date", exports.VET_MISSING));
+    }
+    else if (check.string(v) && check.emptyString(v)) {
+        errors.push(new ValidationError(field, exports.VET_MISSING));
+    }
+    else if (! check.number(new Date(v).getTime())) {
+        errors.push(new ValidationError(field, exports.VET_INVALID));
+    }
+};
+exports.vs_number   = function (v, field) {
+    var errors = [];
+
+    if (!check.assigned(v)) {
+        errors.push(new ValidationError(field, exports.VET_MISSING));
+    }
+    else if (! (check.string(v) || check.number(v))) {
+        errors.push(new ValidationError(field, exports.VET_INVALID));
+    }
+    else if (check.string(v) && check.emptyString(v)) {
+        errors.push(new ValidationError(field, exports.VET_MISSING));
+    }
+    else if (!check.number(Number.parseFloat(v))) {
+        errors.push(new ValidationError(field, exports.VET_INVALID));
+    }
+
+    return errors;
+};
+exports.vs_string = function (v, field) {
+    var errors = [];
+    if (! check.assigned(v)) {
+        errors.push(new ValidationError(field, exports.VET_MISSING));
+    }
+    else if (! check.string(v)) {
+        errors.push(new ValidationError(field, exports.VET_INVALID));
+    }
+    return errors;
+};
+exports.vs_stringNotEmpty = function (v, field) {
+    var errors = [];
+    if (! check.assigned(v)) {
+        errors.push(new ValidationError(field, exports.VET_MISSING));
+    }
+    else if (! check.string(v)) {
+        errors.push(new ValidationError(field, exports.VET_INVALID));
+    }
+    else if (!check.nonEmptyString(v)) {
+        errors.push(new ValidationError(field, exports.VET_MISSING));
+    }
+    return errors;
+};
 
 class BancaObject {
     toJSON() {
@@ -109,6 +190,10 @@ class BancaObject {
                 check.assert.equal(value, obj[key], "Objects not equivalent - property '" + key + "' does not match");
             }
         });
+    }
+
+    validate (obj) {
+        throw new Error("Attempt to validate BancaObject for which no validation is defined");
     }
 }
 exports.BancaObject = BancaObject;
