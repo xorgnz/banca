@@ -18,8 +18,22 @@ var validationDescriptors = {
             "invalid": "Budget type is invalid. Should be selected from list available"
         },
         "amount": {
-            "missing": "Budgets must have an allotted amount.",
+            "missing": "Budgets must have an allotted amount",
             "invalid": "Budget amount must be a non-negative number"
+        }
+    },
+    "entry": {
+        "date": {
+            "missing": "Entries must have a date. Can be specified in most formats",
+            "invalid": "Couldn't understand the date given. Try yyyy-mm-dd"
+        },
+        "tag": {
+            "missing": "Entries must have tags",
+            "invalid": "This is not a valid entry tag. The error should never be visible",
+        },
+        "amount": {
+            "missing": "Entries must have an amount",
+            "invalid": "Entry amount must be a number"
         }
     }
 };

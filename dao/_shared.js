@@ -126,7 +126,7 @@ exports.vs_date = function (v, field) {
     else if (check.string(v) && check.emptyString(v)) {
         errors.push(new ValidationError(field, exports.VET_MISSING));
     }
-    else if (! check.number(new Date(Number.parseInt(v)).getTime())) {
+    else if (! check.__datelike(v)) {
         errors.push(new ValidationError(field, exports.VET_INVALID));
     }
 
@@ -134,6 +134,9 @@ exports.vs_date = function (v, field) {
 };
 exports.vs_number   = function (v, field) {
     var errors = [];
+
+    console.log(v);
+    console.log(typeof(v));
 
     if (!check.assigned(v)) {
         errors.push(new ValidationError(field, exports.VET_MISSING));
@@ -144,7 +147,7 @@ exports.vs_number   = function (v, field) {
     else if (check.string(v) && check.emptyString(v)) {
         errors.push(new ValidationError(field, exports.VET_MISSING));
     }
-    else if (!check.number(Number.parseFloat(v))) {
+    else if (isNaN(v)) {
         errors.push(new ValidationError(field, exports.VET_INVALID));
     }
 

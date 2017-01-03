@@ -116,6 +116,9 @@ class Entry extends shared.BancaObject {
             errors.push(new shared.ValidationError("tag", exports.VET_INVALID));
         }
 
+        console.log(obj);
+        console.log(errors);
+
         return errors;
     }
 

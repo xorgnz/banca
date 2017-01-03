@@ -212,6 +212,55 @@ describe("Accounting DAO", function () {
     });
 
     // ------------------------------------------------------------- TEST
+    it(".createOverDateRange", function () {
+        var period_sp_0 = new periodDAO.Period(null, "September-2015",
+            new Date("2015-09-01T00:00:00.000Z"),
+            new Date("2015-09-30T23:59:59.999Z"));
+        var accounting_sp_0 = new accountingDAO.Accounting(null, period_sp_0, account0, 0, 0);
+
+        return Promise.resolve()
+            .then(() => { return periodDAO.removeAll(db); })
+            .then(() => { return periodDAO.add(db, period_sp_0); })
+            .then(() => { return accountingDAO.add(db, accounting_sp_0); })
+
+            .then(() => {
+                return accountingDAO.createOverDateRange(db,
+                    new Date("2015-08-01"),
+                    new Date("2016-02-01"), account0.id);
+            })
+            .then(() => { return periodDAO.listAll(db); })
+            .then((rows) => {
+                check.assert.equal(rows.length, 7, "Incorrect number of periods created");
+                check.assert.equal(rows[0].name, "August-2015");
+                check.assert.equal(rows[1].name, "September-2015");
+                check.assert.equal(rows[2].name, "October-2015");
+                check.assert.equal(rows[3].name, "November-2015");
+                check.assert.equal(rows[4].name, "December-2015");
+                check.assert.equal(rows[5].name, "January-2016");
+                check.assert.equal(rows[6].name, "February-2016");
+                check.assert.equal(rows[0].date_start, new Date("2015-08-01T00:00:00.000Z").getTime());
+                check.assert.equal(rows[1].date_start, new Date("2015-09-01T00:00:00.000Z").getTime());
+                check.assert.equal(rows[2].date_start, new Date("2015-10-01T00:00:00.000Z").getTime());
+                check.assert.equal(rows[3].date_start, new Date("2015-11-01T00:00:00.000Z").getTime());
+                check.assert.equal(rows[4].date_start, new Date("2015-12-01T00:00:00.000Z").getTime());
+                check.assert.equal(rows[5].date_start, new Date("2016-01-01T00:00:00.000Z").getTime());
+                check.assert.equal(rows[6].date_start, new Date("2016-02-01T00:00:00.000Z").getTime());
+                check.assert.equal(rows[0].date_end, new Date("2015-08-31T23:59:59.999Z").getTime());
+                check.assert.equal(rows[1].date_end, new Date("2015-09-30T23:59:59.999Z").getTime());
+                check.assert.equal(rows[2].date_end, new Date("2015-10-31T23:59:59.999Z").getTime());
+                check.assert.equal(rows[3].date_end, new Date("2015-11-30T23:59:59.999Z").getTime());
+                check.assert.equal(rows[4].date_end, new Date("2015-12-31T23:59:59.999Z").getTime());
+                check.assert.equal(rows[5].date_end, new Date("2016-01-31T23:59:59.999Z").getTime());
+                check.assert.equal(rows[6].date_end, new Date("2016-02-29T23:59:59.999Z").getTime());
+            })
+            .then(() => { return accountingDAO.listAll(db); })
+            .then((rows) => {
+                check.assert.equal(rows.length, 7, "Incorrect number of accountings created");
+                console.log(rows);
+            });
+    });
+
+    // ------------------------------------------------------------- TEST
     it(".getByDateAndAccount", function () {
         return Promise.resolve()
             .then(() => { return accountingDAO.add(db, accounting0); })

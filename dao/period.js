@@ -78,23 +78,21 @@ exports.add     = function (db, period) {
 
 exports.createOverDateRange = function (db, date_start, date_end) {
     logger.trace("Period DAO - createOverDateRange: ");
-    logger.trace("S: " + new Date(date_start));
-    logger.trace("E: " + new Date(date_end));
-    date_start = new Date(date_start).getTime();
-    date_end = new Date(date_end).getTime();
+    logger.trace("S: " + convert.toDate(date_start));
+    logger.trace("E: " + convert.toDate(date_end));
+    date_start = convert.toDate(date_start);
+    date_end = convert.toDate(date_end);
     check.assert.equal(db.constructor.name, "Database");
-    check.assert.number(date_start);
-    check.assert.number(date_end);
+    check.assert.date(date_start);
+    check.assert.date(date_end);
 
     return Promise.resolve()
         .then(() => { return exports.listOverDateRange(db, date_start, date_end); })
         .then((periods) => {
-            var sDate = new Date(date_start);
-            var sMonth = sDate.getUTCMonth();
-            var sYear  = sDate.getUTCFullYear();
-            var eDate = new Date(date_end);
-            var eMonth = eDate.getUTCMonth();
-            var eYear  = eDate.getUTCFullYear();
+            var sMonth = date_start.getUTCMonth();
+            var sYear  = date_start.getUTCFullYear();
+            var eMonth = date_end.getUTCMonth();
+            var eYear  = date_end.getUTCFullYear();
 
             var periodNames = _.map(periods, "name");
 
@@ -134,7 +132,7 @@ exports.get = function (db, id) {
 
 exports.getByDate = function (db, date) {
     logger.trace("Period DAO - getByDate: " + date);
-    date = new Date(date).getTime();
+    date = convert.toDate(date).getTime();
     check.assert.equal(db.constructor.name, "Database");
     check.assert.number(date);
     return new Promise((resolve, reject) => {
@@ -165,10 +163,10 @@ exports.listAll = function (db) {
 
 exports.listOverDateRange = function (db, date_start, date_end) {
     logger.trace("Period DAO - listOverDateRange:");
-    logger.trace("S: " + new Date(date_start));
-    logger.trace("E: " + new Date(date_end));
-    date_start = new Date(date_start).getTime();
-    date_end = new Date(date_end).getTime();
+    logger.trace("S: " + convert.toDate(date_start));
+    logger.trace("E: " + convert.toDate(date_end));
+    date_start = convert.toDate(date_start).getTime();
+    date_end = convert.toDate(date_end).getTime();
     check.assert.equal(db.constructor.name, "Database");
     check.assert.number(date_start);
     check.assert.number(date_end);

@@ -1,7 +1,8 @@
-const _      = require('lodash');
-const check  = require('../lib/types.js').check;
-const logger = require("../lib/debug.js").logger;
-const shared = require("./_shared.js");
+const _       = require('lodash');
+const check   = require('../lib/types.js').check;
+const convert = require('../lib/types.js').convert;
+const logger  = require("../lib/debug.js").logger;
+const shared  = require("./_shared.js");
 
 const entryDAO   = require("../dao/entry.js");
 const periodDAO  = require("../dao/period.js");
@@ -172,6 +173,24 @@ exports.createForPeriods = function (db, period_ids, account_id) {
 };
 
 
+exports.createOverDateRange = function (db, date_start, date_end, account_id) {
+    logger.trace("AccountingDAO - createOverDateRange:");
+    logger.trace("S: " + convert.toDate(date_start));
+    logger.trace("E: " + convert.toDate(date_end));
+    date_start = convert.toDate(date_start).getTime();
+    date_end = convert.toDate(date_end).getTime();
+    check.assert.equal(db.constructor.name, "Database");
+    check.assert.number(date_start);
+    check.assert.number(date_end);
+    check.assert(check.__numberlike(account_id));
+
+    return Promise.resolve()
+        .then(() => { return periodDAO.createOverDateRange(db, date_start, date_end); })
+        .then(() => { return periodDAO.listOverDateRange(db, date_start, date_end); })
+        .then((periods) => { return exports.createForPeriods(db, _.map(periods, "id"), account_id); });
+};
+
+
 exports.get = function (db, id) {
     logger.trace("Accounting DAO - get: " + id);
     check.assert.equal(db.constructor.name, "Database");
@@ -207,8 +226,8 @@ exports.getByPeriodAndAccount = function (db, period_id, account_id) {
 
 
 exports.getByDateAndAccount = function (db, date, account_id) {
-    logger.trace("Accounting DAO - getByDateAndAccount: D: " + new Date(date) + ", A: " + account_id);
-    date = new Date(date).getTime();
+    logger.trace("Accounting DAO - getByDateAndAccount: D: " + convert.toDate(date) + ", A: " + account_id);
+    date = convert.toDate(date).getTime();
     check.assert.equal(db.constructor.name, "Database");
     check.assert.number(date);
     check.assert(check.__numberlike(account_id));
@@ -295,10 +314,10 @@ exports.listByAccount = function (db, account_id) {
 
 exports.listOverDateRange = function (db, date_start, date_end, account_id) {
     logger.trace("Accounting DAO - listOverDateRange:");
-    logger.trace("S: " + new Date(date_start));
-    logger.trace("E: " + new Date(date_end));
-    date_start = new Date(date_start).getTime();
-    date_end = new Date(date_end).getTime();
+    logger.trace("S: " + convert.toDate(date_start));
+    logger.trace("E: " + convert.toDate(date_end));
+    date_start = convert.toDate(date_start).getTime();
+    date_end = convert.toDate(date_end).getTime();
     check.assert.equal(db.constructor.name, "Database");
     check.assert.number(date_start);
     check.assert.number(date_end);

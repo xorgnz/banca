@@ -56,6 +56,16 @@ router.patch("/:id", function (req, res, next) {
         .then(() => { return entryDAO.update(req.db, entry); })
         .then(() => { return accountingDAO.getByEntry(req.db, req.params.id); })
         .then((accounting) => {
+            if (! accounting) {
+                console.log(entry.account_id);
+                return Promise.resolve()
+                    .then(() => { return accountingDAO.createOverDateRange(req.db, entry.date, entry.date, entry.account_id); })
+                    .then(() => { return accountingDAO.getByEntry(req.db, req.params.id); })
+            }
+            else
+                return accounting;
+        })
+        .then ((accounting) => {
             return Promise.resolve()
                 .then(() => { return accountingDAO.calc(req.db, accounting.id); })
                 .then(() => { return accountingDAO.cascade(req.db, accounting.id); });
