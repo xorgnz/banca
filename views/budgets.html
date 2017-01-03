@@ -31,9 +31,9 @@
             <span data-bind="text: validation('type'), visible: validation('type')" class="error_message"></span>
         </td>
         <td class="width-2">
-            <span data-bind="visible: !editing(), style: { color: amountNice < 0 ? 'red' : 'black' }" style="font-weight: bold">
+            <span data-bind="visible: !editing(), style: { color: amount < 0 ? 'red' : 'black' }" style="font-weight: bold">
                 <span style="float:left ">$</span>
-                <span style="float:right" data-bind="text: amountNice"></span>
+                <span style="float:right" data-bind="text: amount"></span>
             </span>
             <input data-bind="value: amount, visible: editing, css: {error: validation('amount')}" title="Amount" class="width-2" style="text-align:right"/>
             <span data-bind="text: validation('amount'), visible: validation('amount')" class="error_message"></span>
@@ -74,9 +74,8 @@
 
 
 {% block scripts %}
+<script type='text/javascript' src='/js/objects/budget.js'></script>
 <script type="text/javascript">
-    var viewModel;
-
     const ViewModel = function () {
         var self = this;
 
@@ -94,81 +93,25 @@
         // Object under creation
         self.newBudget = ko.observable();
         this.blankNewBudget = function () {
-            self.newBudget(new Budget(null, "code", 1, 0));
+            self.newBudget(new Budget({
+                id: null,
+                code: "code",
+                type: 1,
+                amount: 0
+            }, self));
         };
         self.blankNewBudget();
     };
 
-    function Budget(id, code, type, amount)
-    {
-        // Create basic object
-        var budget = {
-            id: ko.observable(id),
-            code: ko.observable(code),
-            type: ko.observable(type),
-            amount: ko.observable("" + amount.toFixed(2)),
-            valuesOnly: function () {
-                return {
-                    id: this.id(),
-                    code: this.code(),
-                    type: this.type(),
-                    amount: this.amount()
-                }
-            }
-        };
-
-        // Nice field values
-        budget.typeNice = ko.computed(function() {
-            if (viewModel) {
-                var t = _.find(viewModel.budgetTypes, {id: budget.type()});
-                return (t && t.description) ? t.description : "Unknown";
-            }
-            return "Not loaded yet";
-        });
-        budget.amountNice = ko.computed(function() {
-            var amount = parseFloat(budget.amount());
-            return amount.toFixed(2);
-        });
-
-        // Decorate as rest managed object
-        decorateAjaxRest(budget, id, "budget", "/rest/budget/",
-            {
-                del: function (obj) {
-                    viewModel.budgets.remove(budget);
-                    console.log("Budget " + budget.code() + " removed.");
-                },
-                add: function (obj) {
-                    viewModel.budgets.push(budget);
-                    viewModel.blankNewBudget();
-                    console.log("Budget " + budget.code() + " added.");
-                },
-                update: function (obj, result) {
-                    var amount = parseFloat(result.data.amount);
-                    budget.sneakyUpdate(budget.amount, "" + amount.toFixed(2));
-                    console.log("Budget " + budget.code() + " updated.");
-                }
-            }
-        );
-
-        // Subscribe to exposed update fields
-        budget.code.subscribe(function (newValue) { budget.update(); });
-        budget.type.subscribe(function (newValue) { budget.update(); });
-        budget.amount.subscribe(function (newValue) { budget.update(); });
-
-        return budget;
-    }
-
     $(document).ready( function ()
     {
         // Configure view model
-        viewModel = new ViewModel();
+        var viewModel = new ViewModel();
         ko.applyBindings(viewModel);
 
         // Set up promise chain
-        var df = $.Deferred();
-        df.resolve();
+        Promise.resolve()
 
-        df.promise()
             // Load budget types
             .then(function () {
                 return $.ajax({
@@ -193,7 +136,7 @@
                     url: "/rest/budget",
                     success: function (data) {
                         for (var d of data.data) {
-                            viewModel.budgets.push(new Budget(d.id, d.code, d.type, d.amount));
+                            viewModel.budgets.push(new Budget(d, viewModel));
                         }
                         viewModel.loadedBudgets(true);
                     },

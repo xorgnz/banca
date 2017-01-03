@@ -53,13 +53,13 @@ class Entry {
         );
 
         // Subscribe to exposed update fields
-        self.amount.subscribe(function (newValue) { self.update(); });
-        self.bank_note.subscribe(function (newValue) { self.update(); });
-        self.date.subscribe(function (newValue) { self.update(); });
-        self.note.subscribe(function (newValue) { self.update(); });
-        self.tag.subscribe(function (newValue) { self.update(); });
-        self.what.subscribe(function (newValue) { self.update(); });
-        self.where.subscribe(function (newValue) { self.update(); });
+        this.amount.subscribe(function (newValue) { self.update(); });
+        this.bank_note.subscribe(function (newValue) { self.update(); });
+        this.date.subscribe(function (newValue) { self.update(); });
+        this.note.subscribe(function (newValue) { self.update(); });
+        this.tag.subscribe(function (newValue) { self.update(); });
+        this.what.subscribe(function (newValue) { self.update(); });
+        this.where.subscribe(function (newValue) { self.update(); });
     }
 
     updateFromObject(obj) {

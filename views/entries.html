@@ -101,7 +101,8 @@
             <span data-bind="text: validation('note'), visible: validation('note')" class="error_message"></span>
         </td>
         <td class="width-3" data-bind="style: {color: tagColor(), backgroundColor: tagBGColor()}">
-            <select data-bind="value: tag, foreach: $root.entryTags, css: {error: validation('tag')}" title="Tag" class="width-3">
+            <select data-bind="value: tag, foreach: $root.entryTags, css: {error: validation('tag')}" title="Tag"
+                    class="width-3">
                 <option data-bind="value: tag, text: tag"></option>
             </select>
             <span data-bind="text: validation('tag'), visible: validation('tag')" class="error_message"></span>
@@ -155,7 +156,6 @@
         // Object under creation
         self.newEntry      = ko.observable(null);
         this.blankNewEntry = function () {
-            console.log(self.entryTags);
             self.newEntry(new Entry({
                 id:         null,
                 account_id: account_id,
@@ -176,10 +176,8 @@
         ko.applyBindings(viewModel);
 
         // Set up promise chain
-        var df = $.Deferred();
-        df.resolve();
+        Promise.resolve()
 
-        df.promise()
             // Load entry tags
             .then(function () {
                 return $.ajax({
@@ -188,7 +186,7 @@
                         for (var d of data.data) {
                             viewModel.entryTags.push({tag: d});
                         }
-                        viewModel.loadedEntryTags(true);
+                        viewModel.loadedEntryTags(true);viewModel.blankNewEntry();
                     },
                     error:   function (err) {
                         alert("Cannot load entries. See console for details");
@@ -196,9 +194,7 @@
                     }
                 }).promise();
             })
-            .then(() => {
-                viewModel.blankNewEntry();
-            })
+
             // Load entries
             .then(function () {
                 return $.ajax({
