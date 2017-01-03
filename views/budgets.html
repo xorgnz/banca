@@ -3,7 +3,7 @@
 
 {% block content %}
 
-<span data-bind="visible: loaded() == false">Loading...</span>
+<div data-bind="visible: loaded() == false" class="loading_message">Loading...</div>
 
 <table data-bind="visible: loaded()" class="data_table" style="display:none">
 

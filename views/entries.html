@@ -11,7 +11,7 @@
 
 <link href="/stylesheets/entries.css" rel="stylesheet">
 
-<span data-bind="visible: loaded() == false">Loading...</span>
+<div data-bind="visible: loaded() == false" class="loading_message">Loading...</div>
 
 <table data-bind="visible: loaded()" class="data_table" style="display:none">
 
@@ -201,6 +201,22 @@
                 }).promise();
             })
 
+            // Load account
+            .then(function () {
+                return $.ajax({
+                    url:     "/rest/account/{{account_id}}",
+                    success: function (response) {
+                        console.log(new Account(response.data, viewModel));
+                        viewModel.account(new Account(response.data, viewModel));
+                        viewModel.loadedAccount(true);
+                    },
+                    error:   function (err) {
+                        alert("Cannot load accounts. See console for details");
+                        console.log("Received HTTP 500. Server said: " + err.responseText)
+                    }
+                }).promise();
+            })
+
             // Load entries
             .then(function () {
                 return $.ajax({
@@ -210,22 +226,6 @@
                             viewModel.entries.push(new Entry(d, [], viewModel));
                         }
                         viewModel.loadedEntries(true);
-                    },
-                    error:   function (err) {
-                        alert("Cannot load accounts. See console for details");
-                        console.log("Received HTTP 500. Server said: " + err.responseText)
-                    }
-                }).promise();
-            })
-
-            // Load account
-            .then(function () {
-                return $.ajax({
-                    url:     "/rest/account/{{account_id}}",
-                    success: function (response) {
-                        console.log(new Account(response.data, viewModel));
-                        viewModel.account(new Account(response.data, viewModel));
-                        viewModel.loadedAccount(true);
                     },
                     error:   function (err) {
                         alert("Cannot load accounts. See console for details");
