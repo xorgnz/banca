@@ -1,5 +1,4 @@
-function decorateAjaxRest(obj, id, type, ajax_endpoint, callbacks) {
-
+function decorateAjaxRest(obj, type, ajax_endpoint, callbacks) {
     // Ensure parameters meet contract
     if (!obj)
         throw "Cannot decorate " + obj;
@@ -11,7 +10,7 @@ function decorateAjaxRest(obj, id, type, ajax_endpoint, callbacks) {
     obj.del = function () { this.deleting(true); };
     obj.delReally = function (obj) {
         $.ajax({
-            url: ajax_endpoint + id,
+            url: ajax_endpoint + obj.id(),
             method: "delete",
             success: function (result) {
                 if (typeof(callbacks.del) === "function") {
@@ -58,7 +57,7 @@ function decorateAjaxRest(obj, id, type, ajax_endpoint, callbacks) {
     obj.update = function () {
         if (obj.id() !== null && ! obj.disableUpdates()) {
             $.ajax({
-                url: ajax_endpoint + id,
+                url: ajax_endpoint + obj.id(),
                 method: "patch",
                 contentType: "application/json",
                 data: ko.toJSON(typeof(obj.valuesOnly) === "function" ? obj.valuesOnly() : obj),
@@ -67,6 +66,7 @@ function decorateAjaxRest(obj, id, type, ajax_endpoint, callbacks) {
                         obj.validationResults({});
                         obj.deleting(false);
                         obj.editing(false);
+                        obj.fullsneakyUpdate(result.data);
                         if (typeof(callbacks.update) === "function") {
                             callbacks.update(obj, result);
                         }
@@ -95,4 +95,11 @@ function decorateAjaxRest(obj, id, type, ajax_endpoint, callbacks) {
         observable(value);
         obj.disableUpdates(u);
     };
+
+    obj.fullsneakyUpdate = function (newObj) {
+        var u = obj.disableUpdates();
+        obj.disableUpdates(true);
+        obj.updateFromObject(newObj);
+        obj.disableUpdates(u);
+    }
 }

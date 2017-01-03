@@ -110,14 +110,11 @@ class Entry extends shared.BancaObject {
         errors = _.concat(errors, shared.vs_date(obj.date, "date"));
 
         if (! check.assigned(obj.tag)) {
-            errors.push(new shared.ValidationError("tag", exports.VET_MISSING));
+            errors.push(new shared.ValidationError("tag", shared.VET_MISSING));
         }
         else if (_.indexOf(tags, obj.tag) == -1) {
-            errors.push(new shared.ValidationError("tag", exports.VET_INVALID));
+            errors.push(new shared.ValidationError("tag", shared.VET_INVALID));
         }
-
-        console.log(obj);
-        console.log(errors);
 
         return errors;
     }

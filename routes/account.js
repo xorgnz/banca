@@ -36,6 +36,7 @@ router.post('/', function (req, res, next) {
 
 /* DELETE - Delete specified account */
 router.delete("/:id", function (req, res, next) {
+    console.log(req.params.id);
     Promise.resolve()
         .then(() => { accountDAO.remove(req.db, req.params.id); })
         .then(() => { res.status(HTTP.OK).json({success: true}); })

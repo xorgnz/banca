@@ -7,26 +7,31 @@
 
 <table data-bind="visible: loaded()" class="data_table" style="display:none">
 
-    <thead><tr>
+    <thead>
+    <tr>
         <th>ID</th>
         <th>Name</th>
         <th>Description</th>
         <th>&nbsp;</th>
         <th>&nbsp;</th>
-    </tr></thead>
+    </tr>
+    </thead>
 
     <tbody data-bind="foreach: accounts">
     <tr data-bind="groupFocus: editing">
         <td class="width-1"><span data-bind="text: id"></span></td>
         <td class="width-3">
             <b data-bind="text: name, visible: !editing()"></b>
-            <input data-bind="value: name, visible: editing, css: {error: validation('name')}" title="Name" class="width-3"/>
+            <input data-bind="value: name, visible: editing, css: {error: validation('name')}" title="Name"
+                   class="width-3"/>
             <span data-bind="text: validation('name'), visible: validation('name')" class="error_message"></span>
         </td>
         <td class="width-6">
             <b data-bind="text: description, visible: !editing()"></b>
-            <input data-bind="value: description, visible: editing, css: {error: validation('description')}" title="Description" class="width-6"/>
-            <span data-bind="text: validation('description'), visible: validation('description')" class="error_message"></span>
+            <input data-bind="value: description, visible: editing, css: {error: validation('description')}"
+                   title="Description" class="width-6"/>
+            <span data-bind="text: validation('description'), visible: validation('description')"
+                  class="error_message"></span>
         </td>
         <td class="width-3">
             <a data-bind="click: del, visible: deleting() == false">Delete</a>
@@ -43,12 +48,14 @@
     <tr data-bind="with: newAccount">
         <td>&nbsp;</td>
         <td class="width-3">
-            <input data-bind="value: name, css: {error: validation('name')}" title="Name" class="width-3" ><br/>
+            <input data-bind="value: name, css: {error: validation('name')}" title="Name" class="width-3"><br/>
             <span data-bind="text: validation('name'), visible: validation('name')" class="error_message"></span>
         </td>
         <td class="width-6">
-            <input data-bind="value: description, css: {error: validation('description')}" title="Description" class="width-6"/><br/>
-            <span data-bind="text: validation('description'), visible: validation('description')" class="error_message"></span>
+            <input data-bind="value: description, css: {error: validation('description')}" title="Description"
+                   class="width-6"/><br/>
+            <span data-bind="text: validation('description'), visible: validation('description')"
+                  class="error_message"></span>
         </td>
         <td class="width-3">
             <button data-bind="click: add">Add Account</button>
@@ -62,87 +69,47 @@
 
 
 {% block scripts %}
+<script type='text/javascript' src='/js/objects/account.js'></script>
 <script type="text/javascript">
-    var viewModel;
+    class ViewModel {
+        constructor() {
+            this.loaded   = ko.observable(false);
+            this.accounts = ko.observableArray([]);
 
-    const ViewModel = function () {
-        this.loaded = ko.observable(false);
-        this.accounts = ko.observableArray([]);
-
-        // Setup blank account for new account form
-        var self = this;
-        self.newAccount = ko.observable();
-        this.blankNewAccount = function () {
-            self.newAccount(new Account(null, "Name", "Description"));
-        };
-        self.blankNewAccount();
-    };
-
-    function Account(id, name, description)
-    {
-        // Create basic object
-        var acct = {
-            id: ko.observable(id),
-            name: ko.observable(name),
-            description: ko.observable(description),
-            valuesOnly: function () {
-                return {
-                    id: acct.id,
-                    name: acct.name,
-                    description: acct.description,
-                }
-            }
-        };
-
-        // Decorate as rest managed object
-        decorateAjaxRest(
-            acct, id, "account", "/rest/account/",
-            {
-                del: function () {
-                    viewModel.accounts.remove(acct);
-                    console.log("Account " + acct.name() + " removed.");
-                },
-                add: function () {
-                    viewModel.accounts.push(acct);
-                    viewModel.blankNewAccount();
-                    console.log("Account " + acct.name() + " added.");
-                },
-                update: function () {
-                    console.log("Account " + acct.name() + " updated.");
-                }
-            }
-        );
-
-        // Subscribe to exposed update fields
-        acct.name.subscribe(function (newValue) { acct.update(); });
-        acct.description.subscribe(function (newValue) { acct.update(); });
-
-        return acct;
+            // Setup blank account for new account form
+            var self             = this;
+            this.newAccount      = ko.observable();
+            this.blankNewAccount = function () {
+                self.newAccount(new Account({
+                    id: null,
+                    name: "Name",
+                    description: "Description"
+                }, this));
+            };
+            this.blankNewAccount();
+        }
     }
 
-    $(document).ready( function ()
-    {
+    $(document).ready(function () {
         // Configure view model
-        viewModel = new ViewModel();
+        var viewModel = new ViewModel();
         ko.applyBindings(viewModel);
 
         // Load initial accounts
         $.ajax({
-            url: "/rest/account",
+            url:     "/rest/account",
             success: function (data) {
                 for (var d of data.data) {
-                    viewModel.accounts.push(new Account(d.id, d.name, d.description));
+                    viewModel.accounts.push(new Account(d, viewModel));
                 }
                 viewModel.loaded(true);
             },
-            error: function (err) {
+            error:   function (err) {
                 alert("Cannot load accounts. See console for details");
                 console.log("Received HTTP 500. Server said: " + err.responseText)
             }
         });
     });
-
-
 
 </script>
 {% endblock %}

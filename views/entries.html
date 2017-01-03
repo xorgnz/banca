@@ -9,7 +9,8 @@
 
 <table data-bind="visible: loaded()" class="data_table" style="display:none">
 
-    <thead><tr>
+    <thead>
+    <tr>
         <th>ID</th>
         <th>Date</th>
         <th>Bank Note</th>
@@ -19,49 +20,59 @@
         <th>What</th>
         <th>Amount</th>
         <th>&nbsp;</th>
-    </tr></thead>
+    </tr>
+    </thead>
 
     <tbody data-bind="foreach: entries">
     <tr data-bind="groupFocus: editing">
         <td class="width-1"><span data-bind="text: id"></span></td>
         <td class="width-3">
-            <b data-bind="text: dateNice, visible: !editing()"></b>
-            <input data-bind="value: dateNice, visible: editing, css: {error: validation('date')}" title="Date" class="width-3"/>
+            <b data-bind="text: date, visible: !editing()"></b>
+            <input data-bind="value: date, visible: editing, css: {error: validation('date')}" title="Date"
+                   class="width-3"/>
             <span data-bind="text: validation('date'), visible: validation('date')" class="error_message"></span>
         </td>
         <td class="width-6">
             <b data-bind="text: bank_note, visible: !editing()"></b>
-            <input data-bind="value: bank_note, visible: editing, css: {error: validation('bank_note')}" title="Bank Note" class="width-6"/>
-            <span data-bind="text: validation('bank_note'), visible: validation('bank_note')" class="error_message"></span>
+            <input data-bind="value: bank_note, visible: editing, css: {error: validation('bank_note')}"
+                   title="Bank Note" class="width-6"/>
+            <span data-bind="text: validation('bank_note'), visible: validation('bank_note')"
+                  class="error_message"></span>
         </td>
         <td class="width-6">
             <b data-bind="text: note, visible: !editing()"></b>
-            <input data-bind="value: note, visible: editing, css: {error: validation('note')}" title="Note" class="width-6"/>
+            <input data-bind="value: note, visible: editing, css: {error: validation('note')}" title="Note"
+                   class="width-6"/>
             <span data-bind="text: validation('note'), visible: validation('note')" class="error_message"></span>
         </td>
         <td class="tag width-3" data-bind="style: {color: tagColor(), backgroundColor: tagBGColor()}">
             <b data-bind="text: tag, visible: !editing()"></b>
-            <select data-bind="value: tag, foreach: $root.entryTags, visible: editing, css: {error: validation('tag')}" title="Tag" class="width-3">
+            <select data-bind="value: tag, foreach: $root.entryTags, visible: editing, css: {error: validation('tag')}"
+                    title="Tag" class="width-3">
                 <option data-bind="value: tag, text: tag"></option>
             </select>
             <span data-bind="text: validation('tag'), visible: validation('tag')" class="error_message"></span>
         </td>
         <td class="width-6">
             <b data-bind="text: where, visible: !editing()"></b>
-            <input data-bind="value: where, visible: editing, css: {error: validation('where')}" title="Where" class="width-6"/>
+            <input data-bind="value: where, visible: editing, css: {error: validation('where')}" title="Where"
+                   class="width-6"/>
             <span data-bind="text: validation('where'), visible: validation('where')" class="error_message"></span>
         </td>
         <td class="width-6">
             <b data-bind="text: what, visible: !editing()"></b>
-            <input data-bind="value: what, visible: editing, css: {error: validation('what')}" title="What" class="width-6"/>
+            <input data-bind="value: what, visible: editing, css: {error: validation('what')}" title="What"
+                   class="width-6"/>
             <span data-bind="text: validation('what'), visible: validation('what')" class="error_message"></span>
         </td>
         <td class="width-2">
-            <span data-bind="visible: !editing(), style: { color: amountNice() > 0 ? 'black' : 'red' }" style="font-weight: bold">
+            <span data-bind="visible: !editing(), style: { color: amount() > 0 ? 'black' : 'red' }"
+                  style="font-weight: bold">
                 <span style="float:left ">$</span>
-                <span style="float:right" data-bind="text: amountNice"></span>
+                <span style="float:right" data-bind="text: amount"></span>
             </span>
-            <input data-bind="value: amount, visible: editing, css: {error: validation('amount')}" title="Amount" class="width-2"/>
+            <input data-bind="value: amount, visible: editing, css: {error: validation('amount')}" title="Amount"
+                   class="width-2"/>
             <span data-bind="text: validation('amount'), visible: validation('amount')" class="error_message"></span>
         </td>
         <td class="width-3">
@@ -76,19 +87,23 @@
     <tr data-bind="with: newEntry">
         <td>&nbsp;</td>
         <td class="width-3">
-            <input data-bind="value: dateNice, css: {error: validation('date')}" title="Date" class="width-3"/>
+            <input data-bind="value: date, css: {error: validation('date')}" title="Date" class="width-3"/>
             <span data-bind="text: validation('date'), visible: validation('date')" class="error_message"></span>
         </td>
         <td class="width-6">
-            <input data-bind="value: bank_note, css: {error: validation('bank_note')}" title="Bank Note" class="width-6"/>
-            <span data-bind="text: validation('bank_note'), visible: validation('bank_note')" class="error_message"></span>
+            <input data-bind="value: bank_note, css: {error: validation('bank_note')}" title="Bank Note"
+                   class="width-6"/>
+            <span data-bind="text: validation('bank_note'), visible: validation('bank_note')"
+                  class="error_message"></span>
         </td>
         <td class="width-6">
             <input data-bind="value: note, css: {error: validation('note')}" title="Note" class="width-6"/>
             <span data-bind="text: validation('note'), visible: validation('note')" class="error_message"></span>
         </td>
-        <td class="width-3">
-            <input data-bind="value: tag, css: {error: validation('tag')}" title="Tag" class="width-3"/>
+        <td class="width-3" data-bind="style: {color: tagColor(), backgroundColor: tagBGColor()}">
+            <select data-bind="value: tag, foreach: $root.entryTags, css: {error: validation('tag')}" title="Tag" class="width-3">
+                <option data-bind="value: tag, text: tag"></option>
+            </select>
             <span data-bind="text: validation('tag'), visible: validation('tag')" class="error_message"></span>
         </td>
         <td class="width-3">
@@ -115,8 +130,9 @@
 
 
 {% block scripts %}
+<script type='text/javascript' src='/js/objects/account.js'></script>
+<script type='text/javascript' src='/js/objects/entry.js'></script>
 <script type="text/javascript">
-    var viewModel;
 
     var account_id = {{account_id}};
 
@@ -124,168 +140,37 @@
         var self = this;
 
         // Flags
-        this.loadedEntries = ko.observable(false);
+        this.loadedEntries   = ko.observable(false);
         this.loadedEntryTags = ko.observable(false);
-        this.loadedAccount = ko.observable(false);
-        this.loaded = ko.computed(function () {
+        this.loadedAccount   = ko.observable(false);
+        this.loaded          = ko.computed(function () {
             return self.loadedEntries() && self.loadedEntryTags() && self.loadedAccount();
         });
 
         // Storage
-        this.entries = ko.observableArray([]);
+        this.entries   = ko.observableArray([]);
         this.entryTags = [];
-        this.account = ko.observable(null);
+        this.account   = ko.observable(null);
 
         // Object under creation
-        self.newEntry = ko.observable(null);
+        self.newEntry      = ko.observable(null);
         this.blankNewEntry = function () {
+            console.log(self.entryTags);
             self.newEntry(new Entry({
-                id: null,
+                id:         null,
                 account_id: account_id,
-                amount: 0,
-                date: "1970-01-01",
-                bank_note: "Created via UI",
-                note: "",
-                tag: "",
-                what: "",
-                where: ""
-            }, []));
+                amount:     0,
+                date:       "1970-01-01",
+                bank_note:  "Created via UI",
+                note:       "",
+                tag:        "",
+                what:       "",
+                where:      ""
+            }, [], this));
         };
-        self.blankNewEntry();
     };
 
-    function Entry(obj, budget_allocations)
-    {
-        // Create basic object
-        var entry = {
-            id: ko.observable(obj.id),
-            account_id: ko.observable(obj.account_id),
-            amount: ko.observable("" + obj.amount.toFixed(2)),
-            date: ko.observable(obj.date),
-            bank_note: ko.observable(obj.bank_note),
-            note: ko.observable(obj.note),
-            tag: ko.observable(obj.tag),
-            budget_allocations: ko.observableArray(budget_allocations),
-            what: ko.observable(obj.what),
-            where: ko.observable(obj.where),
-
-            valuesOnly: function () {
-                return {
-                    id: entry.id(),
-                    account_id: entry.account_id(),
-                    amount: entry.amount(),
-                    date: entry.date(),
-                    bank_note: entry.bank_note(),
-                    note: entry.note(),
-                    tag: entry.tag(),
-                    what: entry.what(),
-                    where: entry.where(),
-                }
-            }
-        };
-
-        // Nice field values
-        entry.amountNice = ko.computed(function() {
-            var amount = parseFloat(entry.amount());
-            return amount.toFixed(2);
-        });
-        entry.dateNice = ko.computed(function() {
-            return formatDateIso8601(entry.date());
-        });
-
-        entry.tagColor = ko.computed(function() {
-            var tc = tag_colors[entry.tag()];
-            if (tc && tc.color) {
-                return tc.color;
-            } else {
-                return "black";
-            }
-        });
-
-        entry.tagBGColor = ko.computed(function() {
-            var tc = tag_colors[entry.tag()];
-            if (tc && tc.bgcolor) {
-                return tc.bgcolor;
-            } else {
-                return "white";
-            }
-        });
-
-        // Decorate as rest managed object
-        decorateAjaxRest(
-            entry, obj.id, "entry", "/rest/entry/",
-            {
-                del: function (obj, result) {
-                    viewModel.entries.remove(entry);
-                    console.log("Entry " + entry.date() + " - " + entry.amount() + " removed.");
-                },
-                add: function (obj, result) {
-                    viewModel.entries.push(entry);
-                    viewModel.blankNewEntry();
-                    console.log("Entry " + entry.date() + " - " + entry.amount() + " added.");
-                },
-                update: function (obj, result) {
-                    console.log("Entry " + entry.date() + " - " + entry.amount() + " updated.");
-                }
-            }
-        );
-
-        // Subscribe to exposed update fields
-        entry.amount.subscribe(function (newValue) { entry.update(); });
-        entry.bank_note.subscribe(function (newValue) { entry.update(); });
-        entry.date.subscribe(function (newValue) { entry.update(); });
-        entry.note.subscribe(function (newValue) { entry.update(); });
-        entry.tag.subscribe(function (newValue) { entry.update(); });
-        entry.what.subscribe(function (newValue) { entry.update(); });
-        entry.where.subscribe(function (newValue) { entry.update(); });
-
-        return entry;
-    }
-
-    function Account(id, name, description)
-    {
-        // Create basic object
-        var acct = {
-            id: ko.observable(id),
-            name: ko.observable(name),
-            description: ko.observable(description),
-            valuesOnly: function () {
-                return {
-                    id: acct.id,
-                    name: acct.name,
-                    description: acct.description,
-                }
-            }
-        };
-
-        // Decorate as rest managed object
-        decorateAjaxRest(
-            acct, id, "account", "/rest/account/",
-            {
-                del: function () {
-                    viewModel.accounts.remove(acct);
-                    console.log("Account " + acct.name() + " removed.");
-                },
-                add: function () {
-                    viewModel.accounts.push(acct);
-                    viewModel.blankNewAccount();
-                    console.log("Account " + acct.name() + " added.");
-                },
-                update: function () {
-                    console.log("Account " + acct.name() + " updated.");
-                }
-            }
-        );
-
-        // Subscribe to exposed update fields
-        acct.name.subscribe(function (newValue) { acct.update(); });
-        acct.description.subscribe(function (newValue) { acct.update(); });
-
-        return acct;
-    }
-
-    $(document).ready( function ()
-    {
+    $(document).ready(function () {
         // Configure view model
         viewModel = new ViewModel();
         ko.applyBindings(viewModel);
@@ -298,33 +183,33 @@
             // Load entry tags
             .then(function () {
                 return $.ajax({
-                    url: "/rest/entry/tags",
+                    url:     "/rest/entry/tags",
                     success: function (data) {
                         for (var d of data.data) {
                             viewModel.entryTags.push({tag: d});
                         }
-
                         viewModel.loadedEntryTags(true);
-                        viewModel.blankNewEntry();
                     },
-                    error: function (err) {
+                    error:   function (err) {
                         alert("Cannot load entries. See console for details");
                         console.log("Received HTTP 500. Server said: " + err.responseText)
                     }
                 }).promise();
             })
-
+            .then(() => {
+                viewModel.blankNewEntry();
+            })
             // Load entries
             .then(function () {
                 return $.ajax({
-                    url: "/rest/account/{{account_id}}/entries",
+                    url:     "/rest/account/{{account_id}}/entries",
                     success: function (data) {
                         for (var d of data.data) {
-                            viewModel.entries.push(new Entry(d, []));
+                            viewModel.entries.push(new Entry(d, [], viewModel));
                         }
                         viewModel.loadedEntries(true);
                     },
-                    error: function (err) {
+                    error:   function (err) {
                         alert("Cannot load accounts. See console for details");
                         console.log("Received HTTP 500. Server said: " + err.responseText)
                     }
@@ -334,19 +219,18 @@
             // Load entries
             .then(function () {
                 return $.ajax({
-                    url: "/rest/account/{{account_id}}",
+                    url:     "/rest/account/{{account_id}}",
                     success: function (data) {
-                        viewModel.account(new Account(data.id, data.name, data.description));
+                        viewModel.account(new Account(data, viewModel));
                         viewModel.loadedAccount(true);
                     },
-                    error: function (err) {
+                    error:   function (err) {
                         alert("Cannot load accounts. See console for details");
                         console.log("Received HTTP 500. Server said: " + err.responseText)
                     }
                 }).promise();
             });
     });
-
 
 
 </script>

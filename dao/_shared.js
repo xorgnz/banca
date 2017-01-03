@@ -135,9 +135,6 @@ exports.vs_date = function (v, field) {
 exports.vs_number   = function (v, field) {
     var errors = [];
 
-    console.log(v);
-    console.log(typeof(v));
-
     if (!check.assigned(v)) {
         errors.push(new ValidationError(field, exports.VET_MISSING));
     }
