@@ -7,7 +7,7 @@ class Budget {
         this.id     = ko.observable(obj.id);
         this.code   = ko.observable(obj.code);
         this.type   = ko.observable(obj.type);
-        this.amount = ko.observable(obj.amount.toFixed(2));
+        this.amount = ko.observable("" + obj.amount.toFixed(2));
 
         // Nice field values
         this.typeNice = ko.computed(function () {
@@ -27,6 +27,8 @@ class Budget {
             add:    function (obj) {
                 viewModel.budgets.push(self);
                 viewModel.blankNewBudget();
+                console.log(obj);
+                obj.sneakyUpdate(obj.amount, "" + Number.parseFloat(obj.amount()).toFixed(2));
                 console.log("Budget " + self.code() + " added.");
             },
             update: function (obj, result) {
@@ -41,10 +43,11 @@ class Budget {
     }
 
     updateFromObject(obj) {
+        console.log(obj);
         this.id(obj.id);
         this.code(obj.code);
         this.type(obj.type);
-        this.amount(obj.amount.toFixed(2));
+        this.amount("" + obj.amount.toFixed(2));
     }
 
     valuesOnly() {

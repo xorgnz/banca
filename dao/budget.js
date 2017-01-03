@@ -32,7 +32,7 @@ class Budget extends shared.BancaObject {
     set id(v)           { this._id = v ? Number.parseInt(v) : -1; }
     set code(v)         { this._code = v ? v.toString() : ""; }
     set type(v)         { this._type = (v > 1 && v <= 4) ? Number.parseInt(v) : 1; }
-    set amount(v)       { this._amount = v ? Number.parseFloat(v) : 0; }
+    set amount(v)       { this._amount = check.__numberlike(v) ? _.round(Number.parseFloat(v), 2) : 0; }
 
     validate(obj) {
         var errors = [];

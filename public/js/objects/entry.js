@@ -44,6 +44,7 @@ class Entry {
                 add:    function (obj, result) {
                     viewModel.entries.push(self);
                     viewModel.blankNewEntry();
+                    obj.sneakyUpdate(obj.amount, "" + Number.parseFloat(obj.amount()).toFixed(2));
                     console.log("Entry " + self.date() + " - " + self.amount() + " added.");
                 },
                 update: function (obj, result) {
