@@ -1,12 +1,12 @@
 const _      = require('lodash');
-const check  = require('../lib/check-types-wrapper.js').check;
+const check  = require('../lib/types.js').check;
 const logger = require("../lib/debug.js").logger;
 const shared = require("./_shared.js");
 
 class Account extends shared.BancaObject {
     constructor(id, name, description) {
         super();
-        check.assert.equal(true, check.not.assigned(id) || check.__numberlike(id));
+        check.assert(check.null(id) || check.__numberlike(id));
         check.assert.string(name);
         check.assert.string(description);
         this.id          = id;

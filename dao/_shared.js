@@ -1,6 +1,6 @@
 const _      = require('lodash');
 const logger = require("../lib/debug.js").logger;
-const check  = require('../lib/check-types-wrapper.js').check;
+const check  = require('../lib/types.js').check;
 
 var stripDatabasePrefix = function (obj) {
     if (obj === undefined) {
@@ -98,6 +98,12 @@ class ValidationError {
     }
     get field() { return this._field; }
     get type() { return this._type; }
+    toJSON() {
+        return {
+            field: this._field,
+            type: this._type
+        };
+    }
 }
 exports.VET_MISSING     = "missing";
 exports.VET_INVALID     = "invalid";
@@ -113,15 +119,18 @@ exports.vs_exists   = function (v, field) {
 };
 exports.vs_date = function (v, field) {
     var errors = [];
+
     if (! check.assigned(v)) {
-        errors.push(new ValidationError("date", exports.VET_MISSING));
+        errors.push(new ValidationError(field, exports.VET_MISSING));
     }
     else if (check.string(v) && check.emptyString(v)) {
         errors.push(new ValidationError(field, exports.VET_MISSING));
     }
-    else if (! check.number(new Date(v).getTime())) {
+    else if (! check.number(new Date(Number.parseInt(v)).getTime())) {
         errors.push(new ValidationError(field, exports.VET_INVALID));
     }
+
+    return errors;
 };
 exports.vs_number   = function (v, field) {
     var errors = [];

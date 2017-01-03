@@ -1,4 +1,5 @@
-const check  = require('../lib/check-types-wrapper.js').check;
+const _      = require('lodash');
+const check  = require('../lib/types.js').check;
 const logger = require("../lib/debug.js").logger;
 const shared = require("./_shared.js");
 
@@ -14,10 +15,10 @@ exports.types = [
 class Budget extends shared.BancaObject {
     constructor(id, code, type, amount) {
         super();
-        check.assert.equal(true, id === null || check.__numberlike(id));
+        check.assert(check.null(id) || check.__numberlike(id));
         check.assert.string(code);
-        check.assert.number(type);
-        check.assert.number(amount);
+        check.assert(check.__numberlike(type));
+        check.assert(check.__numberlike(amount));
 
         this.id     = id;
         this.code   = code;
@@ -30,7 +31,7 @@ class Budget extends shared.BancaObject {
     get amount()        { return this._amount; }
     set id(v)           { this._id = v ? Number.parseInt(v) : -1; }
     set code(v)         { this._code = v ? v.toString() : ""; }
-    set type(v)         { this._type = (v > 1 && v < 4) ? Number.parseInt(v) : 1; }
+    set type(v)         { this._type = (v > 1 && v <= 4) ? Number.parseInt(v) : 1; }
     set amount(v)       { this._amount = v ? Number.parseFloat(v) : 0; }
 
     validate(obj) {

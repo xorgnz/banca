@@ -48,7 +48,7 @@ router.delete("/:id", function (req, res, next) {
 
 
 /* PATCH - Update specified object */
-router.post('/', function (req, res, next) { shared.validate(req, res, next, entryDAO.Entry); });
+router.patch('/:id', function (req, res, next) { shared.validate(req, res, next, entryDAO.Entry); });
 router.patch("/:id", function (req, res, next) {
     req.body.id = req.params.id;
     var entry   = entryDAO.Entry.fromObject(req.body);

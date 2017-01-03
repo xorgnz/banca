@@ -36,7 +36,7 @@ router.delete("/:id", function (req, res, next) {
 
 
 /* PATCH - Update specified account */
-router.post('/', function (req, res, next) { shared.validate(req, res, next, accountDAO.Account); });
+router.patch('/:id', function (req, res, next) { shared.validate(req, res, next, accountDAO.Account); });
 router.patch("/:id", function (req, res, next) {
     req.body.id = req.params.id;
     var account = accountDAO.Account.fromObject(req.body);

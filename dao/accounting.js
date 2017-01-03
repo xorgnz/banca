@@ -1,5 +1,5 @@
 const _      = require('lodash');
-const check  = require('../lib/check-types-wrapper.js').check;
+const check  = require('../lib/types.js').check;
 const logger = require("../lib/debug.js").logger;
 const shared = require("./_shared.js");
 
@@ -10,9 +10,9 @@ const accountDAO = require("../dao/account.js");
 class Accounting extends shared.BancaObject {
     constructor(id, period, account, amount_start, amount_end) {
         super();
-        check.assert.equal(true, id === null || check.__numberlike(id));
-        check.assert.equal(true, check.__numberlike(period) || check.instance(period, periodDAO.Period));
-        check.assert.equal(true, check.__numberlike(account) || check.instance(account, accountDAO.Account));
+        check.assert(check.null(id) || check.__numberlike(id));
+        check.assert(check.__numberlike(period) || check.instance(period, periodDAO.Period));
+        check.assert(check.__numberlike(account) || check.instance(account, accountDAO.Account));
         check.assert(check.__numberlike(amount_start));
         check.assert(check.__numberlike(amount_end));
 
@@ -39,8 +39,8 @@ class Accounting extends shared.BancaObject {
     get amount_start()  { return this._amount_start; }
     get amount_end()    { return this._amount_end; }
     set id(v)           { this._id = v ? Number.parseInt(v) : -1; }
-    set amount_start(v) { this._amount_start = isNaN(v) ? 0 : _.round(Number.parseFloat(v), 2); }
-    set amount_end(v)   { this._amount_end = isNaN(v) ? 0 : _.round(Number.parseFloat(v), 2); }
+    set amount_start(v) { this._amount_start = check.number(v) ? _.round(Number.parseFloat(v), 2) : 0; }
+    set amount_end(v)   { this._amount_end = check.number(v) ? _.round(Number.parseFloat(v), 2) : 0; }
     set account(v)    {
         check.assert.instance(v, accountDAO.Account);
         this._account    = v;

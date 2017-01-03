@@ -1,4 +1,4 @@
-const check = require('../lib/check-types-wrapper.js').check;
+const check = require('../lib/types.js').check;
 const _     = require('lodash');
 
 const importer      = require("../tools/importer.js");

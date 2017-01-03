@@ -51,7 +51,7 @@ router.delete("/:id", function (req, res, next) {
 
 
 /* PATCH - Update specified budget */
-router.post('/', function (req, res, next) { shared.validate(req, res, next, budgetDAO.Budget); });
+router.patch('/:id', function (req, res, next) { shared.validate(req, res, next, budgetDAO.Budget); });
 router.patch("/:id", function (req, res, next) {
     req.body.id = req.params.id;
     var budget  = budgetDAO.Budget.fromObject(req.body);

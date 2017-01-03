@@ -1,4 +1,4 @@
-const check   = require('../../lib/check-types-wrapper.js').check;
+const check   = require('../../lib/types.js').check;
 
 var fn_response = function (resolve, reject) {
     return function (error, response, body) {

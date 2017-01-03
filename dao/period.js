@@ -1,8 +1,9 @@
-const _      = require('lodash');
-const check  = require('../lib/check-types-wrapper.js').check;
-const logger = require("../lib/debug.js").logger;
-const pad    = require("pad-number");
-const shared = require("./_shared.js");
+const _       = require('lodash');
+const check   = require('../lib/types.js').check;
+const convert = require('../lib/types.js').convert;
+const logger  = require("../lib/debug.js").logger;
+const pad     = require("pad-number");
+const shared  = require("./_shared.js");
 
 const months = [
     "January",
@@ -23,10 +24,10 @@ const months = [
 class Period extends shared.BancaObject {
     constructor(id, name, date_start, date_end) {
         super();
-        check.assert.equal(true, id === null || check.number(id));
+        check.assert.equal(true, check.null(id) || check.__numberlike(id));
         check.assert.string(name);
-        check.assert.number(new Date(date_start).getTime());
-        check.assert.number(new Date(date_end).getTime());
+        check.assert(check.__datelike(date_start));
+        check.assert(check.__datelike(date_end));
 
         this.id         = id;
         this.name       = name;
@@ -40,8 +41,8 @@ class Period extends shared.BancaObject {
     get date_end()      { return this._date_end; }
     set id(v)           { this._id = v ? Number.parseInt(v) : -1; }
     set name(v)         { this._name = v ? v.toString() : ""; }
-    set date_start(v)   { this._date_start = v ? new Date(v).getTime() : 0; }
-    set date_end(v)     { this._date_end = v ? new Date(v).getTime() : 0; }
+    set date_start(v)   { this._date_start = v ? convert.toDate(v).getTime() : 0; }
+    set date_end(v)     { this._date_end = v ? convert.toDate(v).getTime() : 0; }
 
     static fromObject(obj) {
         return new Period(

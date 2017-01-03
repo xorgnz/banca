@@ -1,5 +1,6 @@
 const _      = require('lodash');
-const check  = require('../lib/check-types-wrapper.js').check;
+const check  = require('../lib/types.js').check;
+const convert  = require('../lib/types.js').convert;
 const logger = require("../lib/debug.js").logger;
 const shared = require("./_shared.js");
 
@@ -46,10 +47,10 @@ exports.isValidTagString = function (str) {
 class Entry extends shared.BancaObject {
     constructor(id, account, amount, date, bank_note, note, tag, where, what) {
         super();
-        check.assert.equal(true, id === null || check.__numberlike(id));
-        check.assert.equal(true, check.__numberlike(account) || check.instance(account, accountDAO.Account));
-        check.assert.number(amount);
-        check.assert.number(new Date(date).getTime());
+        check.assert(check.null(id) || check.__numberlike(id));
+        check.assert(check.__numberlike(account) || check.instance(account, accountDAO.Account));
+        check.assert(check.__numberlike(amount));
+        check.assert(check.__datelike(date));
         check.assert.string(bank_note);
         check.assert.string(note);
         check.assert.string(tag);
@@ -58,6 +59,8 @@ class Entry extends shared.BancaObject {
 
         this.id        = id;
         this.amount    = amount;
+        console.log(date);
+        console.log(convert.toDate(date));
         this.date      = date;
         this.bank_note = bank_note;
         this.note      = note;
@@ -81,8 +84,8 @@ class Entry extends shared.BancaObject {
     get account()       { return this._account; }
     get account_id()    { return this._account ? this._account.id : this._account_id; }
     set id(v)           { this._id = v ? Number.parseInt(v) : -1; }
-    set amount(v)       { this._amount = isNaN(v) ? 0 : _.round(Number.parseFloat(v), 2); }
-    set date(v)         { this._date = v ? new Date(v).getTime() : 0; }
+    set amount(v)       { this._amount = check.number(v) ? _.round(Number.parseFloat(v), 2) : 0; }
+    set date(v)         { this._date = v ? convert.toDate(v).getTime() : 0; }
     set bank_note(v)    { this._bank_note = v ? v.toString() : ""; }
     set note(v)         { this._note = v ? v.toString() : ""; }
     set tag(v)          { this._tag = v ? v.toString() : ""; }
@@ -99,6 +102,7 @@ class Entry extends shared.BancaObject {
     }
 
     validate(obj) {
+        console.log(obj);
         var errors = [];
         errors = _.concat(errors, shared.vs_number(obj.account_id, "account_id"));
         errors = _.concat(errors, shared.vs_string(obj.bank_note, "bank_note"));
@@ -114,6 +118,8 @@ class Entry extends shared.BancaObject {
         else if (_.indexOf(tags, obj.tag) == -1) {
             errors.push(new shared.ValidationError("tag", exports.VET_INVALID));
         }
+
+        console.log(errors);
 
         return errors;
     }

@@ -1,4 +1,4 @@
-const check   = require('../lib/check-types-wrapper.js').check;
+const check   = require('../lib/types.js').check;
 
 const db          = require("./_shared.js").db;
 const testObjects = require("./_shared.js").testObjects;

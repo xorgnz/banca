@@ -1,4 +1,4 @@
-const check = require('../lib/check-types-wrapper.js').check;
+const check = require('../lib/types.js').check;
 const _     = require('lodash');
 
 const db            = require("./_shared.js").db;
@@ -60,6 +60,13 @@ describe("Entry DAO", function () {
             .then((rows) => {
                 check.assert.equal(rows.length, 0, "Record remains after remove");
             });
+    });
+
+    // ------------------------------------------------------------- TEST
+    it("Object construction", function () {
+        describe("All fields passed in as strings", function () {
+            var e = new entryDAO.Entry("0", "1", "-100.0", "2016-07-01", "bank_note", "note", "tag", "where", "what");
+        });
     });
 
     // ------------------------------------------------------------- TEST
