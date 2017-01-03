@@ -25,7 +25,7 @@
         </td>
         <td class="width-3">
             <b data-bind="text: typeNice, visible: !editing()"></b>
-            <select data-bind="value: type, foreach: $root.budgetTypes, visible: editing, css: {error: $root.newBudget().validation('type')}" title="Type" class="width-3">
+            <select data-bind="value: type, foreach: $root.budgetTypes, visible: editing, css: {error: validation('type')}" title="Type" class="width-3">
                 <option data-bind="value: id, text: description"></option>
             </select>
             <span data-bind="text: validation('type'), visible: validation('type')" class="error_message"></span>
@@ -80,15 +80,18 @@
     const ViewModel = function () {
         var self = this;
 
+        // Flags
         this.loadedBudgets = ko.observable(false);
         this.loadedBudgetTypes = ko.observable(false);
         this.loaded = ko.computed(function () {
             return self.loadedBudgets() && self.loadedBudgetTypes();
         });
+
+        // Storage
         this.budgets = ko.observableArray([]);
         this.budgetTypes = [];
 
-        // Setup blank budget for new budget form
+        // Object under creation
         self.newBudget = ko.observable();
         this.blankNewBudget = function () {
             self.newBudget(new Budget(null, "code", 1, 0));
@@ -165,40 +168,41 @@
         var df = $.Deferred();
         df.resolve();
 
-        // Load budget types
-        df.promise().then(function () {
-            return $.ajax({
-                url: "/rest/budget/types",
-                success: function (data) {
-                    for (var d of data.data) {
-                        viewModel.budgetTypes.push({id: d.id, description: d.description});
+        df.promise()
+            // Load budget types
+            .then(function () {
+                return $.ajax({
+                    url: "/rest/budget/types",
+                    success: function (data) {
+                        for (var d of data.data) {
+                            viewModel.budgetTypes.push({id: d.id, description: d.description});
+                        }
+                        viewModel.loadedBudgetTypes(true);
+                        viewModel.blankNewBudget();
+                    },
+                    error: function (err) {
+                        alert("Cannot load budgets. See console for details");
+                        console.log("Received HTTP 500. Server said: " + err.responseText)
                     }
-                    viewModel.loadedBudgetTypes(true);
-                    viewModel.blankNewBudget();
-                },
-                error: function (err) {
-                    alert("Cannot load budgets. See console for details");
-                    console.log("Received HTTP 500. Server said: " + err.responseText)
-                }
-            }).promise();
-        })
+                }).promise();
+            })
 
-        // Load budgets
-        .then(function () {
-            return $.ajax({
-                url: "/rest/budget",
-                success: function (data) {
-                    for (var d of data.data) {
-                        viewModel.budgets.push(new Budget(d.id, d.code, d.type, d.amount));
+            // Load budgets
+            .then(function () {
+                return $.ajax({
+                    url: "/rest/budget",
+                    success: function (data) {
+                        for (var d of data.data) {
+                            viewModel.budgets.push(new Budget(d.id, d.code, d.type, d.amount));
+                        }
+                        viewModel.loadedBudgets(true);
+                    },
+                    error: function (err) {
+                        alert("Cannot load budgets. See console for details");
+                        console.log("Received HTTP 500. Server said: " + err.responseText)
                     }
-                    viewModel.loadedBudgets(true);
-                },
-                error: function (err) {
-                    alert("Cannot load budgets. See console for details");
-                    console.log("Received HTTP 500. Server said: " + err.responseText)
-                }
-            }).promise();
-        })
+                }).promise();
+            })
 
     });
 

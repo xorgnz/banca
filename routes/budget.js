@@ -22,7 +22,6 @@ router.get('/types', function (req, res, next) {
 
 /* SPECIAL GET - Retrieve particular budget */
 router.get('/:id', function (req, res, next) {
-    console.log("fish");
     Promise.resolve()
         .then(() => { return budgetDAO.get(req.db, req.params.id); })
         .then((row) => { res.status(HTTP.OK).json({success: true, data: row}); })

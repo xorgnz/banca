@@ -15,6 +15,12 @@ router.get('/', function (req, res, next) {
 });
 
 
+/* SPECIAL GET - List allowed budget types */
+router.get('/tags', function (req, res, next) {
+    res.status(HTTP.OK).json({success: true, data: entryDAO.tags});
+});
+
+
 /* POST - Create new object */
 router.post('/', function (req, res, next) { shared.validate(req, res, next, entryDAO.Entry); });
 router.post('/', function (req, res, next) {

@@ -14,6 +14,14 @@ router.get('/', function (req, res, next) {
         .catch(next);
 });
 
+/* SPECIAL GET - Retrieve particular budget */
+router.get('/:id', function (req, res, next) {
+    Promise.resolve()
+        .then(() => { return accountDAO.get(req.db, req.params.id); })
+        .then((row) => { res.status(HTTP.OK).json({success: true, data: row}); })
+        .catch(next);
+});
+
 
 /* POST - Create new account */
 router.post('/', function (req, res, next) { shared.validate(req, res, next, accountDAO.Account); });
