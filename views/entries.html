@@ -3,6 +3,12 @@
 
 {% block content %}
 
+<div data-bind="with: account, visible: loadedAccount()" class="width-12 data_panel" style="display:none">
+    <h1>Account Information</h1>
+    <span><b data-bind="text: name"></b></span><br/>
+    <span data-bind="text: description"></span>
+</div>
+
 <link href="/stylesheets/entries.css" rel="stylesheet">
 
 <span data-bind="visible: loaded() == false">Loading...</span>
@@ -151,10 +157,10 @@
         // Storage
         this.entries   = ko.observableArray([]);
         this.entryTags = [];
-        this.account   = ko.observable(null);
+        this.account   = ko.observable({ name: ko.observable(""), description: "" });
 
         // Object under creation
-        self.newEntry      = ko.observable(null);
+        this.newEntry      = ko.observable(null);
         this.blankNewEntry = function () {
             self.newEntry(new Entry({
                 id:         null,
@@ -172,7 +178,7 @@
 
     $(document).ready(function () {
         // Configure view model
-        viewModel = new ViewModel();
+        var viewModel = new ViewModel();
         ko.applyBindings(viewModel);
 
         // Set up promise chain
@@ -182,8 +188,8 @@
             .then(function () {
                 return $.ajax({
                     url:     "/rest/entry/tags",
-                    success: function (data) {
-                        for (var d of data.data) {
+                    success: function (response) {
+                        for (var d of response.data) {
                             viewModel.entryTags.push({tag: d});
                         }
                         viewModel.loadedEntryTags(true);viewModel.blankNewEntry();
@@ -212,12 +218,13 @@
                 }).promise();
             })
 
-            // Load entries
+            // Load account
             .then(function () {
                 return $.ajax({
                     url:     "/rest/account/{{account_id}}",
-                    success: function (data) {
-                        viewModel.account(new Account(data, viewModel));
+                    success: function (response) {
+                        console.log(new Account(response.data, viewModel));
+                        viewModel.account(new Account(response.data, viewModel));
                         viewModel.loadedAccount(true);
                     },
                     error:   function (err) {

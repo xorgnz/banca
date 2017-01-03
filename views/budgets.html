@@ -91,7 +91,7 @@
         this.budgetTypes = [];
 
         // Object under creation
-        self.newBudget = ko.observable();
+        this.newBudget = ko.observable();
         this.blankNewBudget = function () {
             self.newBudget(new Budget({
                 id: null,
