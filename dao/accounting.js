@@ -39,8 +39,8 @@ class Accounting extends shared.BancaObject {
     get amount_start()  { return this._amount_start; }
     get amount_end()    { return this._amount_end; }
     set id(v)           { this._id = v ? Number.parseInt(v) : -1; }
-    set amount_start(v) { this._amount_start = check.number(v) ? _.round(Number.parseFloat(v), 2) : 0; }
-    set amount_end(v)   { this._amount_end = check.number(v) ? _.round(Number.parseFloat(v), 2) : 0; }
+    set amount_start(v) { this._amount_start = check.__numberlike(v) ? _.round(Number.parseFloat(v), 2) : 0; }
+    set amount_end(v)   { this._amount_end = check.__numberlike(v) ? _.round(Number.parseFloat(v), 2) : 0; }
     set account(v)    {
         check.assert.instance(v, accountDAO.Account);
         this._account    = v;

@@ -17,9 +17,9 @@ describe("Account DAO", function () {
             .then(() => { return accountDAO.removeAll(db); })
     });
 
+    // ------------------------------------------------------------- TEST
     it("CRUD", function () {
         return Promise.resolve()
-
             // Test Add
             .then(() => { return accountDAO.add(db, account0); })
             .then((id) => { return accountDAO.get(db, id); })
@@ -47,7 +47,17 @@ describe("Account DAO", function () {
             });
     });
 
-    // Test removeAll
+    // ------------------------------------------------------------- TEST
+    it("Object construction", function () {
+        describe("All fields passed in as strings", function () {
+            var obj = new accountDAO.Account("0", "name", "description");
+            check.assert.equal(obj.id, 0);
+            check.assert.equal(obj.name, "name");
+            check.assert.equal(obj.description, "description");
+        });
+    });
+
+    // ------------------------------------------------------------- TEST
     it(".removeAll", function () {
         return Promise.resolve()
             .then(() => { return accountDAO.add(db, account0); })

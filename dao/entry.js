@@ -59,8 +59,6 @@ class Entry extends shared.BancaObject {
 
         this.id        = id;
         this.amount    = amount;
-        console.log(date);
-        console.log(convert.toDate(date));
         this.date      = date;
         this.bank_note = bank_note;
         this.note      = note;
@@ -84,7 +82,7 @@ class Entry extends shared.BancaObject {
     get account()       { return this._account; }
     get account_id()    { return this._account ? this._account.id : this._account_id; }
     set id(v)           { this._id = v ? Number.parseInt(v) : -1; }
-    set amount(v)       { this._amount = check.number(v) ? _.round(Number.parseFloat(v), 2) : 0; }
+    set amount(v)       { this._amount = check.__numberlike(v) ? _.round(Number.parseFloat(v), 2) : 0; }
     set date(v)         { this._date = v ? convert.toDate(v).getTime() : 0; }
     set bank_note(v)    { this._bank_note = v ? v.toString() : ""; }
     set note(v)         { this._note = v ? v.toString() : ""; }
@@ -102,7 +100,6 @@ class Entry extends shared.BancaObject {
     }
 
     validate(obj) {
-        console.log(obj);
         var errors = [];
         errors = _.concat(errors, shared.vs_number(obj.account_id, "account_id"));
         errors = _.concat(errors, shared.vs_string(obj.bank_note, "bank_note"));
@@ -118,8 +115,6 @@ class Entry extends shared.BancaObject {
         else if (_.indexOf(tags, obj.tag) == -1) {
             errors.push(new shared.ValidationError("tag", exports.VET_INVALID));
         }
-
-        console.log(errors);
 
         return errors;
     }

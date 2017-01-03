@@ -49,7 +49,18 @@ describe("Budget DAO", function () {
             });
     });
 
-    // Test removeAll
+    // ------------------------------------------------------------- TEST
+    it("Object construction", function () {
+        describe("All fields passed in as strings", function () {
+            var obj = new budgetDAO.Budget("0", "code", "1", "-100.0");
+            check.assert.equal(obj.id, 0);
+            check.assert.equal(obj.code, "code");
+            check.assert.equal(obj.type, 1);
+            check.assert.equal(obj.amount, -100);
+        });
+    });
+
+    // ------------------------------------------------------------- TEST
     it(".removeAll", function () {
         return Promise.resolve()
             .then(() => { return budgetDAO.add(db, budget0); })
@@ -72,6 +83,7 @@ describe("Budget AJAX", function () {
             .then(() => { return budgetDAO.removeAll(db); })
     });
 
+    // ------------------------------------------------------------- TEST
     it("CRUD", function () {
         return Promise.resolve()
             // Test Add

@@ -54,6 +54,17 @@ describe("Period DAO", function () {
     });
 
     // ------------------------------------------------------------- TEST
+    it("Object construction", function () {
+        describe("All fields passed in as strings", function () {
+            var obj = new periodDAO.Period("0", "name", "2016-01-02", "2016-01-03");
+            check.assert.equal(obj.id, 0);
+            check.assert.equal(obj.name, "name");
+            check.assert.equal(obj.date_start, 1451692800000);
+            check.assert.equal(obj.date_end, 1451779200000);
+        });
+    });
+
+    // ------------------------------------------------------------- TEST
     it(".createOverDateRange", function () {
         return Promise.resolve()
             .then(() => {

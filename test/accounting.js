@@ -70,6 +70,18 @@ describe("Accounting DAO", function () {
     });
 
     // ------------------------------------------------------------- TEST
+    it("Object construction", function () {
+        describe("All fields passed in as strings", function () {
+            var obj = new accountingDAO.Accounting("0", "1", "2", "-100.1", "-200.2");
+            check.assert.equal(obj.id, 0);
+            check.assert.equal(obj.period_id, 1);
+            check.assert.equal(obj.account_id, 2);
+            check.assert.equal(obj.amount_start, -100.1);
+            check.assert.equal(obj.amount_end, -200.2);
+        });
+    });
+
+    // ------------------------------------------------------------- TEST
     it(".calc", function () {
         return Promise.resolve()
             .then(() => { return entryDAO.removeAll(db); })

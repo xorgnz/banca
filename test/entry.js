@@ -65,7 +65,26 @@ describe("Entry DAO", function () {
     // ------------------------------------------------------------- TEST
     it("Object construction", function () {
         describe("All fields passed in as strings", function () {
-            var e = new entryDAO.Entry("0", "1", "-100.0", "2016-07-01", "bank_note", "note", "tag", "where", "what");
+            var obj = new entryDAO.Entry("0", "1", "-100.0", "2016-07-01", "bank_note", "note", "tag", "where", "what");
+            check.assert.equal(obj.id, 0);
+            check.assert.equal(obj.account_id, 1);
+            check.assert.equal(obj.amount, -100);
+            check.assert.equal(obj.date, 1467331200000);
+            check.assert.equal(obj.bank_note, "bank_note");
+            check.assert.equal(obj.note, "note");
+            check.assert.equal(obj.tag, "tag");
+            check.assert.equal(obj.where, "where");
+            check.assert.equal(obj.what, "what");
+        });
+    });
+
+    // ------------------------------------------------------------- TEST
+    it("Object construction", function () {
+        describe("All fields passed in as strings", function () {
+            var obj = new accountDAO.Account("0", "name", "description");
+            check.assert.equal(obj.id, 0);
+            check.assert.equal(obj.name, "name");
+            check.assert.equal(obj.description, "description");
         });
     });
 
