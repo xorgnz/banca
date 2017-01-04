@@ -3,134 +3,30 @@
 
 {% block content %}
 
-<div data-bind="with: account, visible: loadedAccount()" class="width-12 data_panel" style="display:none">
-    <h1>Account Information</h1>
-    <span><b data-bind="text: name"></b></span><br/>
-    <span data-bind="text: description"></span>
-</div>
+<div id="div_acct_info" style="display:none"></div>
 
 <link href="/stylesheets/entries.css" rel="stylesheet">
 
-<div data-bind="visible: loaded() == false" class="loading_message">Loading...</div>
+<div id="div_loading" class="loading_message">Loading...</div>
 
-<table data-bind="visible: loaded()" class="data_table" style="display:none">
+<table class="data_table">
 
     <thead>
     <tr>
-        <th>ID</th>
-        <th>Date</th>
-        <th>Bank Note</th>
-        <th>Note</th>
-        <th>Tag</th>
-        <th>Where</th>
-        <th>What</th>
-        <th>Amount</th>
-        <th>&nbsp;</th>
+        <th class="width-1">ID</th>
+        <th class="width-3">Date</th>
+        <th class="width-3">Bank Note</th>
+        <th class="width-3">Note</th>
+        <th class="width-3">Tag</th>
+        <th class="width-3">Where</th>
+        <th class="width-3">What</th>
+        <th class="width-3">Amount</th>
+        <th class="width-3">&nbsp;</th>
     </tr>
     </thead>
 
-    <tbody data-bind="foreach: entries">
-    <tr data-bind="groupFocus: editing">
-        <td class="width-1"><span data-bind="text: id"></span></td>
-        <td class="width-3">
-            <b data-bind="text: date, visible: !editing()"></b>
-            <input data-bind="value: date, visible: editing, css: {error: validation('date')}" title="Date"
-                   class="width-3"/>
-            <span data-bind="text: validation('date'), visible: validation('date')" class="error_message"></span>
-        </td>
-        <td class="width-6">
-            <b data-bind="text: bank_note, visible: !editing()"></b>
-            <input data-bind="value: bank_note, visible: editing, css: {error: validation('bank_note')}"
-                   title="Bank Note" class="width-6"/>
-            <span data-bind="text: validation('bank_note'), visible: validation('bank_note')"
-                  class="error_message"></span>
-        </td>
-        <td class="width-6">
-            <b data-bind="text: note, visible: !editing()"></b>
-            <input data-bind="value: note, visible: editing, css: {error: validation('note')}" title="Note"
-                   class="width-6"/>
-            <span data-bind="text: validation('note'), visible: validation('note')" class="error_message"></span>
-        </td>
-        <td class="tag width-3" data-bind="style: {color: tagColor(), backgroundColor: tagBGColor()}">
-            <b data-bind="text: tag, visible: !editing()"></b>
-            <select data-bind="value: tag, foreach: $root.entryTags, visible: editing, css: {error: validation('tag')}"
-                    title="Tag" class="width-3">
-                <option data-bind="value: tag, text: tag"></option>
-            </select>
-            <span data-bind="text: validation('tag'), visible: validation('tag')" class="error_message"></span>
-        </td>
-        <td class="width-6">
-            <b data-bind="text: where, visible: !editing()"></b>
-            <input data-bind="value: where, visible: editing, css: {error: validation('where')}" title="Where"
-                   class="width-6"/>
-            <span data-bind="text: validation('where'), visible: validation('where')" class="error_message"></span>
-        </td>
-        <td class="width-6">
-            <b data-bind="text: what, visible: !editing()"></b>
-            <input data-bind="value: what, visible: editing, css: {error: validation('what')}" title="What"
-                   class="width-6"/>
-            <span data-bind="text: validation('what'), visible: validation('what')" class="error_message"></span>
-        </td>
-        <td class="width-2">
-            <span data-bind="visible: !editing(), style: { color: amount() > 0 ? 'black' : 'red' }"
-                  style="font-weight: bold">
-                <span style="float:left ">$</span>
-                <span style="float:right" data-bind="text: amount"></span>
-            </span>
-            <input data-bind="value: amount, visible: editing, css: {error: validation('amount')}" title="Amount"
-                   class="width-2"/>
-            <span data-bind="text: validation('amount'), visible: validation('amount')" class="error_message"></span>
-        </td>
-        <td class="width-3">
-            <a data-bind="click: del, visible: deleting() == false">Delete</a>
-            <a data-bind="click: delReally, visible: deleting() == true">Confirm</a>
-            <a data-bind="click: cancelDel, visible: deleting() == true">Cancel</a>
-        </td>
-    </tr>
-    </tbody>
+    <tbody id="tbody_entries" style="display:none"></tbody>
 
-    <tfoot>
-    <tr data-bind="with: newEntry">
-        <td>&nbsp;</td>
-        <td class="width-3">
-            <input data-bind="value: date, css: {error: validation('date')}" title="Date" class="width-3"/>
-            <span data-bind="text: validation('date'), visible: validation('date')" class="error_message"></span>
-        </td>
-        <td class="width-6">
-            <input data-bind="value: bank_note, css: {error: validation('bank_note')}" title="Bank Note"
-                   class="width-6"/>
-            <span data-bind="text: validation('bank_note'), visible: validation('bank_note')"
-                  class="error_message"></span>
-        </td>
-        <td class="width-6">
-            <input data-bind="value: note, css: {error: validation('note')}" title="Note" class="width-6"/>
-            <span data-bind="text: validation('note'), visible: validation('note')" class="error_message"></span>
-        </td>
-        <td class="width-3" data-bind="style: {color: tagColor(), backgroundColor: tagBGColor()}">
-            <select data-bind="value: tag, foreach: $root.entryTags, css: {error: validation('tag')}" title="Tag"
-                    class="width-3">
-                <option data-bind="value: tag, text: tag"></option>
-            </select>
-            <span data-bind="text: validation('tag'), visible: validation('tag')" class="error_message"></span>
-        </td>
-        <td class="width-3">
-            <input data-bind="value: where, css: {error: validation('where')}" title="Where" class="width-6"/>
-            <span data-bind="text: validation('where'), visible: validation('where')" class="error_message"></span>
-        </td>
-        <td class="width-3">
-            <input data-bind="value: what, css: {error: validation('what')}" title="What" class="width-6"/>
-            <span data-bind="text: validation('what'), visible: validation('what')" class="error_message"></span>
-        </td>
-        <td class="width-2">
-            <input data-bind="value: amount, css: {error: validation('amount')}" title="Amount" class="width-2"/>
-            <span data-bind="text: validation('amount'), visible: validation('amount')" class="error_message"></span>
-        </td>
-        <td class="width-3">
-            <button data-bind="click: add">Add Entry</button>
-        </td>
-        <td>&nbsp;</td>
-    </tr>
-    </tfoot>
 </table>
 
 {% endblock %}
@@ -143,26 +39,26 @@
 
     var account_id = {{account_id}};
 
-    const ViewModel = function () {
-        var self = this;
+    class ViewModel {
+        constructor() {
+            var self = this;
 
-        // Flags
-        this.loadedEntries   = ko.observable(false);
-        this.loadedEntryTags = ko.observable(false);
-        this.loadedAccount   = ko.observable(false);
-        this.loaded          = ko.computed(function () {
-            return self.loadedEntries() && self.loadedEntryTags() && self.loadedAccount();
-        });
+            // Flags
+            this.loadedEntries   = false;
+            this.loadedEntryTags = false;
+            this.loadedAccount   = false;
 
-        // Storage
-        this.entries   = ko.observableArray([]);
-        this.entryTags = [];
-        this.account   = ko.observable({ name: ko.observable(""), description: "" });
+            // Storage
+            this.entries   = [];
+            this.entryTags = [];
+            this.account   = null;
+            this.newEntry      = null;
+        };
 
-        // Object under creation
-        this.newEntry      = ko.observable(null);
-        this.blankNewEntry = function () {
-            self.newEntry(new Entry({
+        loaded() { return this.loadedEntries && this.loadedEntryTags && this.loadedAccount; };
+
+        blankNewEntry () {
+            this.newEntry = new Entry({
                 id:         null,
                 account_id: account_id,
                 amount:     0,
@@ -172,27 +68,62 @@
                 tag:        "",
                 what:       "",
                 where:      ""
-            }, [], this));
+            }, [], this);
         };
-    };
+
+        expressAccount () {
+            var div = $("#div_acct_info");
+            div.empty();
+            div.append(this.account.expressAsPanel());
+            div.show();
+        }
+
+        expressEntries () {
+            var tbody = $("#tbody_entries");
+            tbody.empty();
+            for (var entry of this.entries)
+                tbody.append(entry.expressAsEditableTableRow());
+            tbody.show();
+        }
+
+        hideLoadingDialog() {
+            $("#div_loading").hide();
+        }
+    }
 
     $(document).ready(function () {
         // Configure view model
         var viewModel = new ViewModel();
-        ko.applyBindings(viewModel);
 
         // Set up promise chain
         Promise.resolve()
 
+            // Load account
+            .then(() => {
+                return $.ajax({
+                    url:     "/rest/account/{{account_id}}",
+                    success: function (response) {
+                        viewModel.account = new Account(response.data, viewModel);
+                        viewModel.loadedAccount = true;
+                        viewModel.expressAccount();
+                    },
+                    error:   function (err) {
+                        alert("Cannot load accounts. See console for details");
+                        console.log("Received HTTP 500. Server said: " + err.responseText)
+                    }
+                }).promise();
+            })
+
             // Load entry tags
-            .then(function () {
+            .then(() => {
                 return $.ajax({
                     url:     "/rest/entry/tags",
                     success: function (response) {
                         for (var d of response.data) {
-                            viewModel.entryTags.push({tag: d});
+                            viewModel.entryTags.push(d);
                         }
-                        viewModel.loadedEntryTags(true);viewModel.blankNewEntry();
+                        viewModel.loadedEntryTags = true;
+                        viewModel.blankNewEntry();
                     },
                     error:   function (err) {
                         alert("Cannot load entries. See console for details");
@@ -201,14 +132,15 @@
                 }).promise();
             })
 
-            // Load account
-            .then(function () {
+            // Load entries
+            .then(() => {
                 return $.ajax({
-                    url:     "/rest/account/{{account_id}}",
-                    success: function (response) {
-                        console.log(new Account(response.data, viewModel));
-                        viewModel.account(new Account(response.data, viewModel));
-                        viewModel.loadedAccount(true);
+                    url:     "/rest/account/{{account_id}}/entries",
+                    success: function (data) {
+                        for (var d of data.data) {
+                            viewModel.entries.push(new Entry(d, [], viewModel));
+                        }
+                        viewModel.loadedEntries = true;
                     },
                     error:   function (err) {
                         alert("Cannot load accounts. See console for details");
@@ -217,21 +149,10 @@
                 }).promise();
             })
 
-            // Load entries
-            .then(function () {
-                return $.ajax({
-                    url:     "/rest/account/{{account_id}}/entries",
-                    success: function (data) {
-                        for (var d of data.data) {
-                            viewModel.entries.push(new Entry(d, [], viewModel));
-                        }
-                        viewModel.loadedEntries(true);
-                    },
-                    error:   function (err) {
-                        alert("Cannot load accounts. See console for details");
-                        console.log("Received HTTP 500. Server said: " + err.responseText)
-                    }
-                }).promise();
+            // Load accountings
+            .then (() => {
+                viewModel.expressEntries();
+                viewModel.hideLoadingDialog();
             });
     });
 

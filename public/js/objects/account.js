@@ -4,9 +4,9 @@ class Account {
         var self = this;
 
         // Storage
-        this.id          = ko.observable(obj.id);
-        this.name        = ko.observable(obj.name);
-        this.description = ko.observable(obj.description);
+        this.id          = obj.id;
+        this.name        = obj.name;
+        this.description = obj.description;
 
         // Register for AJAX calls
         decorateAjaxRest(
@@ -27,23 +27,29 @@ class Account {
                 }
             }
         );
+    }
 
-        // Subscribe to exposed update fields
-        this.name.subscribe(function (newValue) { self.update(); });
-        this.description.subscribe(function (newValue) { self.update(); });
+    expressAsPanel() {
+        var div = document.createElement("div");
+        div.className = "width-12 data_panel";
+        div.append(domsugar_h(1, "Account Information"));
+        div.append(domsugar_text(this.name, true));
+        div.append(domsugar_br());
+        div.append(domsugar_text(this.description));
+        return div;
     }
 
     updateFromObject(obj) {
-        this.id(obj.id);
-        this.name(obj.name);
-        this.description(obj.description);
+        this.id = obj.id;
+        this.name = obj.name;
+        this.description = obj.description;
     }
 
     valuesOnly () {
         return {
-            id:          this.id(),
-            name:        this.name(),
-            description: this.description(),
+            id:          this.id,
+            name:        this.name,
+            description: this.description,
         };
     }
 }

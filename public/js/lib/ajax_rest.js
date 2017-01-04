@@ -1,16 +1,16 @@
 function decorateAjaxRest(obj, type, ajax_endpoint, callbacks) {
-    // Ensure parameters meet contract
-    if (!obj)
-        throw "Cannot decorate " + obj;
+
+    // Test contract
+    console.assert(typeof(obj) === "object", "Cannot decorate " + obj + " - is not an object");
+    console.assert(typeof(obj.valuesOnly) === "function", "Cannot decorate " + obj + " - has no valuesOnly fn");
+
+    // Process callbacks
     callbacks = (typeof(callbacks) === "object" && callbacks) ? callbacks : {};
 
     // Deleting
-    obj.deleting = ko.observable(false);
-    obj.cancelDel = function ()  { this.deleting(false); };
-    obj.del = function () { this.deleting(true); };
-    obj.delReally = function (obj) {
+    obj.del = function () {
         $.ajax({
-            url: ajax_endpoint + obj.id(),
+            url: ajax_endpoint + obj.id,
             method: "delete",
             success: function (result) {
                 if (typeof(callbacks.del) === "function") {
@@ -21,27 +21,26 @@ function decorateAjaxRest(obj, type, ajax_endpoint, callbacks) {
     };
 
     obj.add = function () {
+        // Test contract
         $.ajax({
             url: ajax_endpoint,
             method: "post",
             contentType: "application/json",
-            data: ko.toJSON(typeof(obj.valuesOnly) === "function" ? obj.valuesOnly() : obj),
+            data: obj.valuesOnly(),
             success: function (result) {
                 if (result.success)
                 {
-                    obj.id(result.data.id);
-                    obj.validationResults({});
+                    obj.id = result.data.id;
+                    obj.validationResults = {};
                     if (typeof(callbacks.add) === "function") {
                         callbacks.add(obj, result);
                     }
                 }
                 else
                 {
-                    var results = {};
                     for (var error of result.errors) {
-                        results[error.field] = errorToString(error, type);
+                        obj.validationResults[error.field] = errorToString(error, type);
                     }
-                    obj.validationResults(results);
                 }
             },
             error: function (result) {
@@ -52,31 +51,29 @@ function decorateAjaxRest(obj, type, ajax_endpoint, callbacks) {
     };
 
     // Updating
-    obj.editing = ko.observable(false);
-    obj.disableUpdates = ko.observable(false);
+    obj.editing = false;
+    obj.disableUpdates = false;
     obj.update = function () {
-        if (obj.id() !== null && ! obj.disableUpdates()) {
+        if (obj.id !== null && ! obj.disableUpdates) {
             $.ajax({
-                url: ajax_endpoint + obj.id(),
+                url: ajax_endpoint + obj.id,
                 method: "patch",
                 contentType: "application/json",
-                data: ko.toJSON(typeof(obj.valuesOnly) === "function" ? obj.valuesOnly() : obj),
+                data: obj.valuesOnly(),
                 success: function (result) {
                     if (result.success) {
-                        obj.validationResults({});
-                        obj.deleting(false);
-                        obj.editing(false);
-                        obj.fullsneakyUpdate(result.data);
+                        obj.validationResults = {};
+                        obj.deleting = false;
+                        obj.editing = false;
+                        obj.updateFromObject(result.data);
                         if (typeof(callbacks.update) === "function") {
                             callbacks.update(obj, result);
                         }
                     } else {
-                        var results = {};
                         for (var error of result.errors) {
-                            results[error.field] = errorToString(error, type);
+                            obj.validationResults[error.field] = errorToString(error, type);
                         }
-                        obj.validationResults(results);
-                        obj.editing(true);
+                        obj.editing = true;
                     }
                 }
             });
@@ -84,22 +81,8 @@ function decorateAjaxRest(obj, type, ajax_endpoint, callbacks) {
     };
 
     // Validation
-    obj.validationResults = ko.observable({});
+    obj.validationResults = {};
     obj.validation = function (fieldName) {
-        return ko.computed(function() { return obj.validationResults()[fieldName]; });
+        return obj.validationResults[fieldName];
     };
-
-    obj.sneakyUpdate = function(observable, value) {
-        var u = obj.disableUpdates();
-        obj.disableUpdates(true);
-        observable(value);
-        obj.disableUpdates(u);
-    };
-
-    obj.fullsneakyUpdate = function (newObj) {
-        var u = obj.disableUpdates();
-        obj.disableUpdates(true);
-        obj.updateFromObject(newObj);
-        obj.disableUpdates(u);
-    }
 }
