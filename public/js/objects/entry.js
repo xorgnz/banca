@@ -1,5 +1,7 @@
-class Entry {
+class Entry extends AjaxRestObject {
     constructor(obj, budget_allocations, viewModel) {
+        super("/rest/entry/", "entry");
+
         this._viewModel = viewModel;
         var self        = this;
 
@@ -16,52 +18,81 @@ class Entry {
         this.budget_allocations = budget_allocations;
 
         // UI
-        var ui_tr = null;
+        this.ui_tr = null;
 
-        // Decorate as rest managed object
-        decorateAjaxRest(
-            self, "entry", "/rest/entry/",
-            {
-                del:    function (obj, result) {
-                    _.remove(viewModel.entries, self);
-                    console.log("Entry " + self.date + " - " + self.amount + " removed.");
-                },
-                add:    function (obj, result) {
-                    viewModel.entries.push(self);
-                    viewModel.blankNewEntry();
-                    this.amount = "" + Number.parseFloat(obj.amount).toFixed(2);
-                    console.log("Entry " + self.date + " - " + self.amount + " added.");
-                },
-                update: function (obj, result) {
-                    console.log("Entry " + self.date + " - " + self.amount + " updated.");
-                }
+        // AJAX callbacks
+        this.callbacks.del = function (result) {
+            _.pull(viewModel.entries, self);
+            self.ui_tr.parentNode.removeChild(self.ui_tr);
+            console.log("Entry " + self.date + " - " + self.amount + " removed.");
+        };
+
+        this.callbacks.add = function (result) {
+            viewModel.entries.push(self);
+            viewModel.blankNewEntry();
+            this.amount = "" + Number.parseFloat(this.amount).toFixed(2);
+            console.log("Entry " + self.date + " - " + self.amount + " added.");
+        };
+
+        this.callbacks.update = function (result) {
+            self.refreshFields();
+            if (result.success) {
+                console.log("Entry " + self.date + " - " + self.amount + " updated.");
+                self.releaseFields();
             }
-        );
+            else {
+                console.log("Entry " + self.date + " - " + self.amount + " update failed.");
+            }
+        }
     }
 
     expressAsEditableTableRow() {
-        var tds = [];
         var self = this;
 
-        tds.push(domsugar_td(this.id, {class: "center"}));
-        tds.push(domsugar_td(this.date, {class: "bold"}));
-        tds.push(domsugar_td(this.bank_note, {class: "bold"}));
-        tds.push(domsugar_td(this.note, {class: "bold"}));
-        tds.push(domsugar_td(this.tag, {class: "bold tag_" + this.tag.replace(" ", "_")}));
-        tds.push(domsugar_td(this.where, {class: "bold"}));
-        tds.push(domsugar_td(this.what, {class: "bold"}));
-        tds.push(domsugar_td(this.amount, {class: "bold amt_" + (this.amount >= 0 ? "positive": "negative")}));
+        this.field_date      = new EditableTextField(this, "date", "td", "width-3");
+        this.field_bank_note = new EditableTextField(this, "bank_note", "td", "width-6");
+        this.field_note      = new EditableTextField(this, "note", "td", "width-6");
+        // this.field_tag       = new EditableTagField(this, "tag", "td", "width-3");
+        this.field_where     = new EditableTextField(this, "where", "td", "width-6");
+        this.field_what      = new EditableTextField(this, "what", "td", "width-6");
+        this.field_amount    = new EditableAmountTextField(this, "amount", "td", "width-3");
+        
+        this.deleteButtons = new DeleteButtonPanel(this, "td", "width-3");
 
-        tds.push(domsugar_td(buildsugar_deleteButtons(() => {
-            this.del();
-            self.ui_tr.parentNode.removeChild(self.ui_tr);
-        })));
-
+        // Make static TDs
         this.ui_tr = document.createElement("tr");
-        for (var td of tds)
-            this.ui_tr.appendChild(td);
+
+        this.ui_tr.appendChild(domsugar_td(this.id, {class: "id"}));
+        this.ui_tr.appendChild(this.field_date.container);
+        this.ui_tr.appendChild(this.field_bank_note.container);
+        this.ui_tr.appendChild(this.field_note.container);
+        this.ui_tr.appendChild(domsugar_td(this.tag, {class: "tag_" + this.tag.replace(" ", "_")}));
+        this.ui_tr.appendChild(this.field_where.container);
+        this.ui_tr.appendChild(this.field_what.container);
+        this.ui_tr.appendChild(this.field_amount.container);
+        this.ui_tr.appendChild(this.deleteButtons.container);
 
         return this.ui_tr;
+    }
+
+    refreshFields() {
+        this.field_date.refresh();
+        this.field_bank_note.refresh();
+        this.field_note.refresh();
+        // this.field_tag.refresh();
+        this.field_where.refresh();
+        this.field_what.refresh();
+        this.field_amount.refresh();
+    }
+
+    releaseFields() {
+        this.field_date.input.disabled = true;
+        this.field_bank_note.input.disabled = true;
+        this.field_note.input.disabled = true;
+        // this.field_tag.input.disabled = true;
+        this.field_where.input.disabled = true;
+        this.field_what.input.disabled = true;
+        this.field_amount.input.disabled = true;
     }
 
     updateFromObject(obj) {

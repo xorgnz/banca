@@ -1,4 +1,4 @@
-function formatDateIso8601 (date) {
+function formatDateIso8601(date) {
     // Is a numeric date in string or number form
     if (!isNaN(date)) {
         return new Date(Number.parseInt(date)).toISOString().substr(0, 10);
@@ -16,34 +16,134 @@ function formatDateIso8601 (date) {
 }
 
 
-function buildsugar_deleteButtons (fn) {
-    var button_del = domsugar_button("Delete");
-    var button_delConfirm = domsugar_button("Confirm");
-    var button_delCancel = domsugar_button("Cancel");
-    var div = document.createElement("div");
-    div.appendChild(button_del);
-    div.appendChild(button_delConfirm);
-    div.appendChild(button_delCancel);
-    stylesugar_hide(button_delConfirm);
-    stylesugar_hide(button_delCancel);
+class EditableTextField {
+    constructor(object, field, container, className) {
+        var self    = this;
+        this.object = object;
+        this.field  = field;
 
-    button_del.onclick = () => {
-        stylesugar_hide(button_del);
-        stylesugar_show(button_delConfirm);
-        stylesugar_show(button_delCancel);
-    };
-    button_delCancel.onclick = () => {
-        stylesugar_show(button_del);
-        stylesugar_hide(button_delConfirm);
-        stylesugar_hide(button_delCancel);
-    };
-    button_delConfirm.onclick = () => {
-        fn();
-    };
+        // Set up container
+        console.assert(
+            (typeof(container) === "string" && (container == "td" || container == "div")) ||
+            (typeof(container) === "object" && container instanceof HTMLElement), "Invalid container");
+        if (typeof(container) === "string")
+            this.container = document.createElement(container);
+        else
+            this.container = container;
 
-    return div;
+        // Set CSS class
+        if (className)
+            this.container.className = className;
+
+        // Set up elements
+        this.input                = document.createElement("input");
+        this.input.disabled       = true;
+        this.span_error           = document.createElement("span");
+        this.span_error.className = "error";
+        this.container.appendChild(this.input);
+        this.container.appendChild(this.span_error);
+        this.refresh();
+
+        // Events
+        this.container.onclick = () => { self.startEditing(); };
+        this.input.onblur      = () => { self.stopEditing(); };
+        this.input.onchange    = () => {
+            this.dirty    = true;
+            object[field] = this.input.value;
+            object.update();
+        };
+    }
+
+    refresh() {
+        this.input.value = this.object[this.field];
+
+        domsugar_clear(this.span_error);
+        if (! this.object.valid(this.field)) {
+            this.span_error.appendChild(document.createTextNode(this.object.validationString(this.field)));
+            this.container.className += " error";
+            this.span_error.style.display = "block";
+        }
+        else {
+            this.container.className = this.container.className.replace(" error", "");
+            this.span_error.style.display = "none";
+        }
+    }
+
+    startEditing() {
+        this.input.disabled = false;
+        this.input.focus();
+    }
+
+    stopEditing() {
+        if (!this.dirty) {
+            this.input.disabled = true;
+        }
+    }
 }
 
+class DeleteButtonPanel {
+    constructor(object, container, className) {
+        var self    = this;
+        this.object = object;
+
+        // Set up container
+        console.assert(
+            (typeof(container) === "string" && (container == "td" || container == "div")) ||
+            (typeof(container) === "object" && container instanceof HTMLElement), "Invalid container");
+        if (typeof(container) === "string")
+            this.container = document.createElement(container);
+        else
+            this.container = container;
+
+        // Set CSS class
+        if (className)
+            this.container.className = className;
+
+        // Set up elements
+        var button_del        = domsugar_button("Delete");
+        var button_delConfirm = domsugar_button("Confirm");
+        var button_delCancel  = domsugar_button("Cancel");
+        stylesugar_hide(button_delConfirm);
+        stylesugar_hide(button_delCancel);
+        this.container.appendChild(button_del);
+        this.container.appendChild(button_delConfirm);
+        this.container.appendChild(button_delCancel);
+
+        // Events
+        button_del.onclick        = () => {
+            stylesugar_hide(button_del);
+            stylesugar_show(button_delConfirm);
+            stylesugar_show(button_delCancel);
+        };
+        button_delCancel.onclick  = () => {
+            stylesugar_show(button_del);
+            stylesugar_hide(button_delConfirm);
+            stylesugar_hide(button_delCancel);
+        };
+        button_delConfirm.onclick = () => {
+            object.del();
+        };
+    }
+}
+
+class EditableAmountTextField extends EditableTextField {
+    constructor(object, field, container, className) {
+        super(object, field, container, className);
+        this.refresh();
+    }
+
+    refresh() {
+        super.refresh();
+
+        this.container.className = this.container.className.replace(" amt_positive", "");
+        this.container.className = this.container.className.replace(" amt_negative", "");
+
+        if (this.object[this.field] >= 0)
+            this.container.className += " amt_positive";
+        else
+            this.container.className += " amt_negative";
+    }
+}
 
 function domsugar_br(clear) {
     var br = document.createElement("br");
@@ -71,6 +171,12 @@ function domsugar_button(text, onclick, className, id) {
     return button;
 };
 
+function domsugar_clear(element) {
+    while (element.firstChild) {
+        element.removeChild(element.firstChild);
+    }
+}
+
 function domsugar_h(level, text, content) {
     var elem = document.createElement("h" + level);
     elem.appendChild(document.createTextNode(text));
@@ -88,7 +194,7 @@ function domsugar_td(content, attributes) {
         td.setAttribute(k, attributes[k]);
     }
 
-    if (typeof(content) === "string")
+    if (typeof(content) === "string" || typeof(content) === "number")
         td.appendChild(document.createTextNode(content));
     else if (typeof(content) === "object")
         td.appendChild(content);
@@ -114,14 +220,14 @@ function domsugar_text(text, bold, italic, style) {
 
 function stylesugar_hide(element) {
     element.style.oldDisplay = element.style.display;
-    element.style.display = "none";
+    element.style.display    = "none";
 }
 
 function stylesugar_show(element) {
     if (element.style.oldDisplay)
-        element.style.display = element.style.oldDisplay
+        element.style.display = element.style.oldDisplay;
     else
-        element.style.display = "block";
+        element.style.display = "inline";
 }
 
 
@@ -147,26 +253,26 @@ function stylesugar_show(element) {
 //
 //
 //
-// DOMUtils.div = function(className, id, text, style, content)
+// DOMUtils.container = function(className, id, text, style, content)
 // {
-//     var div = document.createElement("div");
+//     var container = document.createElement("container");
 //
 //     if (className)
-//         div.className = className;
+//         container.className = className;
 //
 //     if (id)
-//         div.id = id;
+//         container.id = id;
 //
 //     if (text)
-//         div.innerHTML = text;
+//         container.innerHTML = text;
 //
 //     if (style)
-//         div.setAttribute("style", style);
+//         container.setAttribute("style", style);
 //
 //     if (content)
-//         div.appendChild(content);
+//         container.appendChild(content);
 //
-//     return div;
+//     return container;
 // };
 //
 //

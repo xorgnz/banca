@@ -9,24 +9,24 @@ class Account {
         this.description = obj.description;
 
         // Register for AJAX calls
-        decorateAjaxRest(
-            self, "account", "/rest/account/",
-            {
-                del:    function () {
-                    self._viewModel.accounts.remove(self);
-                    console.log("Account " + self.name() + " removed.");
-                },
-                add:    function () {
-                    self._viewModel.accounts.push(self);
-                    self._viewModel.blankNewAccount();
-                    console.log(self);
-                    console.log("Account " + self.name() + " added.");
-                },
-                update: function () {
-                    console.log("Account " + self.name() + " updated.");
-                }
-            }
-        );
+        // decorateAjaxRest(
+        //     self, "account", "/rest/account/",
+        //     {
+        //         del:    function () {
+        //             self._viewModel.accounts.remove(self);
+        //             console.log("Account " + self.name() + " removed.");
+        //         },
+        //         add:    function () {
+        //             self._viewModel.accounts.push(self);
+        //             self._viewModel.blankNewAccount();
+        //             console.log(self);
+        //             console.log("Account " + self.name() + " added.");
+        //         },
+        //         update: function () {
+        //             console.log("Account " + self.name() + " updated.");
+        //         }
+        //     }
+        // );
     }
 
     expressAsPanel() {

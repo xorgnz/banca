@@ -1,8 +1,8 @@
-const _      = require('lodash');
-const check  = require('../lib/types.js').check;
-const convert  = require('../lib/types.js').convert;
-const logger = require("../lib/debug.js").logger;
-const shared = require("./_shared.js");
+const _       = require('lodash');
+const check   = require('../lib/types.js').check;
+const convert = require('../lib/types.js').convert;
+const logger  = require("../lib/debug.js").logger;
+const shared  = require("./_shared.js");
 
 const accountDAO    = require("../dao/account.js");
 const accountingDAO = require("../dao/accounting.js");

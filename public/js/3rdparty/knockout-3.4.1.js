@@ -266,7 +266,7 @@
                         var nodesArray = ko.utils.makeArray(nodes);
                         var templateDocument = (nodesArray[0] && nodesArray[0].ownerDocument) || document;
 
-                        var container = templateDocument.createElement('div');
+                        var container = templateDocument.createElement('container');
                         for (var i = 0, j = nodesArray.length; i < j; i++) {
                             container.appendChild(ko.cleanNode(nodesArray[i]));
                         }
@@ -866,7 +866,7 @@
                     // If you have referenced jQuery, this won't be used anyway - KO will use jQuery's "clean" function directly
 
                     // Note that there's still an issue in IE < 9 whereby it will discard comment nodes that are the first child of
-                    // a descendant node. For example: "<div><!-- mycomment -->abc</div>" will get parsed as "<div>abc</div>"
+                    // a descendant node. For example: "<container><!-- mycomment -->abc</container>" will get parsed as "<container>abc</container>"
                     // This won't affect anyone who has referenced jQuery, and there's always the workaround of inserting a dummy node
                     // (possibly a text node) in front of the comment. So, KO does not attempt to workaround this IE issue automatically at present.
 
@@ -877,7 +877,7 @@
 
                     // Go to html and back, then peel off extra wrappers
                     // Note that we always prefix with some dummy text, because otherwise, IE<9 will strip out leading comment nodes in descendants. Total madness.
-                    var markup = "ignored<div>" + wrap[1] + html + wrap[2] + "</div>";
+                    var markup = "ignored<container>" + wrap[1] + html + wrap[2] + "</container>";
                     if (typeof windowContext['innerShiv'] == "function") {
                         // Note that innerShiv is deprecated in favour of html5shiv. We should consider adding
                         // support for html5shiv (except if no explicit support is needed, e.g., if html5shiv
@@ -2744,8 +2744,8 @@
                 }
 
                 function getUnbalancedChildTags(node) {
-                    // e.g., from <div>OK</div><!-- ko blah --><span>Another</span>, returns: <!-- ko blah --><span>Another</span>
-                    //       from <div>OK</div><!-- /ko --><!-- /ko -->,             returns: <!-- /ko --><!-- /ko -->
+                    // e.g., from <container>OK</container><!-- ko blah --><span>Another</span>, returns: <!-- ko blah --><span>Another</span>
+                    //       from <container>OK</container><!-- /ko --><!-- /ko -->,             returns: <!-- /ko --><!-- /ko -->
                     var childNode = node.firstChild, captureRemaining = null;
                     if (childNode) {
                         do {
@@ -3744,7 +3744,7 @@
                             }
                     }
 
-                    // Regular elements such as <div>, and <template> elements on old browsers that don't really
+                    // Regular elements such as <container>, and <template> elements on old browsers that don't really
                     // understand <template> and just treat it as a regular container
                     return ko.utils.cloneNodes(elemInstance.childNodes);
                 }
@@ -5854,7 +5854,7 @@
                         var jQueryTemplateOptions = jQueryInstance['extend']({ 'koBindingContext': bindingContext }, options['templateOptions']);
 
                         var resultNodes = executeTemplate(precompiled, data, jQueryTemplateOptions);
-                        resultNodes['appendTo'](templateDocument.createElement("div")); // Using "appendTo" forces jQuery/jQuery.tmpl to perform necessary cleanup work
+                        resultNodes['appendTo'](templateDocument.createElement("container")); // Using "appendTo" forces jQuery/jQuery.tmpl to perform necessary cleanup work
 
                         jQueryInstance['fragments'] = {}; // Clear jQuery's fragment cache to avoid a memory leak after a large number of template renders
                         return resultNodes;
