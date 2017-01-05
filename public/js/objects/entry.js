@@ -55,7 +55,7 @@ class Entry extends AjaxRestObject {
         this.field_date      = new EditableTextField(this, "date", "td", "width-3");
         this.field_bank_note = new EditableTextField(this, "bank_note", "td", "width-6");
         this.field_note      = new EditableTextField(this, "note", "td", "width-6");
-        // this.field_tag       = new EditableTagField(this, "tag", "td", "width-3");
+        this.field_tag       = new TagSelectionField(this, "tag", "td", "width-3");
         this.field_where     = new EditableTextField(this, "where", "td", "width-6");
         this.field_what      = new EditableTextField(this, "what", "td", "width-6");
         this.field_amount    = new EditableAmountTextField(this, "amount", "td", "width-3");
@@ -69,7 +69,7 @@ class Entry extends AjaxRestObject {
         this.container.appendChild(this.field_date.container);
         this.container.appendChild(this.field_bank_note.container);
         this.container.appendChild(this.field_note.container);
-        this.container.appendChild(domsugar_td(this.tag, {class: "tag_" + this.tag.replace(" ", "_")}));
+        this.container.appendChild(this.field_tag.container);
         this.container.appendChild(this.field_where.container);
         this.container.appendChild(this.field_what.container);
         this.container.appendChild(this.field_amount.container);
@@ -82,7 +82,7 @@ class Entry extends AjaxRestObject {
         this.field_date.refresh();
         this.field_bank_note.refresh();
         this.field_note.refresh();
-        // this.field_tag.refresh();
+        this.field_tag.refresh();
         this.field_where.refresh();
         this.field_what.refresh();
         this.field_amount.refresh();
@@ -92,7 +92,7 @@ class Entry extends AjaxRestObject {
         this.field_date.stopEditing();
         this.field_bank_note.stopEditing();
         this.field_note.stopEditing();
-        // this.field_tag.stopEditing();
+        this.field_tag.stopEditing();
         this.field_where.stopEditing();
         this.field_what.stopEditing();
         this.field_amount.stopEditing();

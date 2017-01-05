@@ -91,7 +91,6 @@ table.data_table td.width-3 input { width: 116px; }
 table.data_table td.width-4 input { width: 156px; }
 table.data_table td.width-6 input { width: 236px; }
 table.data_table td input {
-    border: 1px solid #a0a0a0;
     font-size: 12px;
     font-weight: bold;
     padding: 2px;
@@ -141,32 +140,44 @@ div.loading_message {
 
 
 
+.tag_selector {
+    display: none;
+    background-color: red;
+    width: 300px;
+    height: 300px;
+    position: absolute;
+    top: 400px;
+    left: 400px;
+}
+.tag_selector .option {
+    border: 1px yellow solid;
+}
 
-.tag_Bank          {color: white; background-color: #0000ff }
-.tag_Books         {color: white; background-color: #a000ff }
-.tag_Cash_out      {color: red; background-color: tan }
-.tag_Clothes       {color: red; background-color: tan }
-.tag_Donation      {color: red; background-color: tan }
-.tag_Education     {color: red; background-color: tan }
-.tag_Entertainment {color: white; background-color: #ff00ff }
-.tag_Food_out      {color: white; background-color: #ff4f00 }
-.tag_Games         {color: white; background-color: #ff8e65 }
-.tag_Groceries     {color: red; background-color: tan }
-.tag_Health        {color: red; background-color:   #ffffff }
-.tag_Insurance     {color: red; background-color: tan }
-.tag_Joint         {color: #0000ff; background-color: #c0aa83 }
-.tag_Liquor        {color: red; background-color: tan }
-.tag_Misc          {color: white; background-color: #00b0b0 }
-.tag_Music         {color: white; background-color: #ff4f78 }
-.tag_Pay           {color: #000000; background-color: #70ff00 }
-.tag_Phone         {color: red; background-color: tan }
-.tag_Project       {color: red; background-color: tan }
-.tag_Purchase      {color: red; background-color: tan }
-.tag_Sport         {color: red; background-color: tan }
-.tag_Tech          {color: white; background-color: #003080 }
-.tag_Transfer      {color: #c0c0c0; background-color: #0000b0 }
-.tag_Travel        {color: #000000; background-color: #c0c0c0 }
-.tag_Unknown       {color: #ffff00; background-color: #800080 }
+.tag_Bank          {color: #ffffff; background-color: #0000ff !important }
+.tag_Books         {color: #ffffff; background-color: #a000ff !important }
+.tag_Cash_out      {color: #ff0000; background-color: #ffe070 !important }
+.tag_Clothes       {color: #ff0000; background-color: #ffe070 !important }
+.tag_Donation      {color: #ff0000; background-color: #ffe070 !important }
+.tag_Education     {color: #ff0000; background-color: #ffe070 !important }
+.tag_Entertainment {color: #ffffff; background-color: #ff00ff !important }
+.tag_Food_out      {color: #ffffff; background-color: #ff4f00 !important }
+.tag_Games         {color: #ffffff; background-color: #ff8e65 !important }
+.tag_Groceries     {color: #ff0000; background-color: #ffe070 !important }
+.tag_Health        {color: #ff0000; background-color: #ffffff !important }
+.tag_Insurance     {color: #ff0000; background-color: #ffe070 !important }
+.tag_Joint         {color: #0000ff; background-color: #c0aa83 !important }
+.tag_Liquor        {color: #ff0000; background-color: #ffe070 !important }
+.tag_Misc          {color: #ffffff; background-color: #00b0b0 !important }
+.tag_Music         {color: #ffffff; background-color: #ff4f78 !important }
+.tag_Pay           {color: #000000; background-color: #70ff00 !important }
+.tag_Phone         {color: #ff0000; background-color: #ffe070 !important }
+.tag_Project       {color: #ff0000; background-color: #ffe070 !important }
+.tag_Purchase      {color: #ff0000; background-color: #ffe070 !important }
+.tag_Sport         {color: #ff0000; background-color: #ffe070 !important }
+.tag_Tech          {color: #ffffff; background-color: #003080 !important }
+.tag_Transfer      {color: #c0c0c0; background-color: #0000b0 !important }
+.tag_Travel        {color: #000000; background-color: #c0c0c0 !important }
+.tag_Unknown       {color: #ffff00; background-color: #800080 !important }
 
 .amt_positive input { font-weight: bold; color: black; }
 .amt_negative input { font-weight: bold; color: red; }

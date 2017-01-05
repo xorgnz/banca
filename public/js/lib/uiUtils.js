@@ -16,7 +16,7 @@ function formatDateIso8601(date) {
 }
 
 class UIComponent {
-    constructor (container, className) {
+    constructor(container, className) {
         // Test contract
         console.assert(
             (typeof(container) === "string" && (container == "td" || container == "div")) ||
@@ -151,8 +151,136 @@ class EditableAmountTextField extends EditableTextField {
 class TagSelectionField extends UIComponent {
     constructor(object, field, container, className) {
         super(container, className);
+
+        // Initialize
+        var self    = this;
+        this.object = object;
+        this.field  = field;
+
+        // Set up elements
+        this.input          = document.createElement("input");
+        this.input.disabled = true;
+        stylesugar_addClass(this.container, "tag_" + object[field]);
+        stylesugar_addClass(this.input, "tag_" + object[field]);
+        this.container.appendChild(this.input);
+
+        // Initialize Tag Selection Widget
+        TagSelectionField.initializeTagSelectionDiv();
+
+        // Events
+        this.container.onclick = () => {
+            self.startEditing();
+            var onclick = (e) => {
+                if (e.path[0] != self.input && _.indexOf(e.path, TagSelectionField.tag_selector.container) == -1) {
+                    document.getElementsByTagName("body")[0].removeEventListener("click", onclick);
+                    self.stopEditing();
+                }
+            };
+            document.getElementsByTagName("body")[0].addEventListener("click", onclick);
+        };
+        this.input.onchange    = () => {
+            object[field] = this.input.value;
+            object.update();
+        };
+
+        // Configure
+        this.refresh(); // Set up correct field value
+        self.stopEditing(); // Configure field to start in non-editing state
+    }
+
+    static initializeTagSelectionDiv() {
+        if (!TagSelectionField.tag_selector) {
+            TagSelectionField.tag_selector = new TagSelectionField_TagSelector();
+        }
+    }
+
+    refresh() {
+        this.input.value = this.object[this.field];
+        // for (var str of this.container.className.split(" "))
+        //     console.log(str);
+    }
+
+    startEditing() {
+        console.log("Start editing " + this.object.id + " - " + this.object[this.field]);
+        TagSelectionField.tag_selector.setMaster(this, this.object[this.field]);
+        TagSelectionField.tag_selector.show(this);
+    }
+
+    stopEditing() {
+        TagSelectionField.tag_selector.hide(this);
+        TagSelectionField.tag_selector.clearMaster();
     }
 }
+
+class TagSelectionField_TagSelector {
+    constructor() {
+        this.master = null;
+
+        this.container           = document.createElement("div");
+        this.container.className = "tag_selector";
+        document.getElementsByTagName("body")[0].appendChild(this.container);
+
+        this.options              = {};
+        this.options["Bank"]      = new TagSelectionField_TagSelector_Option("Bank");
+        this.options["Music"]     = new TagSelectionField_TagSelector_Option("Music");
+        this.options["Games"]     = new TagSelectionField_TagSelector_Option("Games");
+        this.options["Groceries"] = new TagSelectionField_TagSelector_Option("Groceries");
+
+        _.forIn(this.options, (value, key) => {
+            this.container.appendChild(value.container);
+        });
+    }
+
+    clearMaster() {
+        this.master = null;
+    }
+
+    setMaster(field, value) {
+        this.master = field;
+
+        // Position
+        var rect                     = field.input.getBoundingClientRect();
+        this.container.style.left    = rect.left + "px";
+        this.container.style.top     = rect.bottom + "px";
+        this.container.style.display = "block";
+
+        // Set value
+        // this.options[value].select();
+    }
+
+    hide(authority) {
+        if (this.master == authority)
+            stylesugar_hide(this.container);
+    }
+
+    show(authority) {
+        if (this.master == authority)
+            stylesugar_show(this.container);
+    }
+}
+
+class TagSelectionField_TagSelector_Option {
+    constructor(value) {
+        this.container = document.createElement("div");
+        this.container.appendChild(document.createTextNode(value));
+
+        stylesugar_addClass(this.container, "option");
+        stylesugar_addClass(this.container, "tag_" + value);
+    }
+
+    deselect() {
+        stylesugar_removeClass(this.container, "selected");
+    }
+
+    select() {
+        stylesugar_addClass(this.container, "selected");
+    }
+}
+
+
+/*  ---------------------------------------------------------------------------
+ DOM Sugar methods
+ */
 
 function domsugar_br(clear) {
     var br = document.createElement("br");
@@ -227,18 +355,48 @@ function domsugar_text(text, bold, italic, style) {
 };
 
 
+/*  ---------------------------------------------------------------------------
+ Style Sugar methods
+ */
+
 function stylesugar_hide(element) {
-    element.style.oldDisplay = element.style.display;
-    element.style.display    = "none";
+    element.oldDisplay    = element.style.display;
+    element.style.display = "none";
 }
 
 function stylesugar_show(element) {
-    if (element.style.oldDisplay)
-        element.style.display = element.style.oldDisplay;
+    if (element.oldDisplay)
+        element.style.display = element.oldDisplay;
     else
-        element.style.display = "inline";
+        element.style.display = "block";
 }
 
+function stylesugar_addClass(element, className) {
+    if (!element instanceof HTMLElement)
+        throw new Error("Can't add class to non-element");
+
+    element.className = " " + element.className + " ";
+    if (!element.className.includes(" " + className + " ")) {
+        element.className += className;
+        element.className = element.className.trim();
+    }
+}
+
+function stylesugar_clearClasses(element) {
+    if (!element instanceof HTMLElement)
+        throw new Error("Can't clear classes from non-element");
+
+    element.className = "";
+}
+
+function stylesugar_removeClass(element, className) {
+    if (!element instanceof HTMLElement)
+        throw new Error("Can't remove class from non-element");
+
+    element.className = " " + element.className + " ";
+    element.className = element.className.replace(" " + className, "");
+    element.className = element.className.trim();
+}
 
 // DOMUtils.button = function(className, id, text, onclick)
 // {
