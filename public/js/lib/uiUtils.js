@@ -160,7 +160,6 @@ class TagSelectionField extends UIComponent {
         // Set up elements
         this.input          = document.createElement("input");
         this.input.disabled = true;
-        stylesugar_addClass(this.container, "tag_" + object[field]);
         stylesugar_addClass(this.input, "tag_" + object[field]);
         this.container.appendChild(this.input);
 
@@ -171,7 +170,10 @@ class TagSelectionField extends UIComponent {
         this.container.onclick = () => {
             self.startEditing();
             var onclick = (e) => {
+                console.log("Considering click for listener on " + this.object.id);
+                console.log(e.path);
                 if (e.path[0] != self.input && _.indexOf(e.path, TagSelectionField.tag_selector.container) == -1) {
+                    console.log("Click to cancel accepted for " + this.object.id);
                     document.getElementsByTagName("body")[0].removeEventListener("click", onclick);
                     self.stopEditing();
                 }
@@ -201,14 +203,15 @@ class TagSelectionField extends UIComponent {
     }
 
     startEditing() {
-        console.log("Start editing " + this.object.id + " - " + this.object[this.field]);
         TagSelectionField.tag_selector.setMaster(this, this.object[this.field]);
         TagSelectionField.tag_selector.show(this);
+        stylesugar_addClass(this.input, "editing");
     }
 
     stopEditing() {
         TagSelectionField.tag_selector.hide(this);
-        TagSelectionField.tag_selector.clearMaster();
+        TagSelectionField.tag_selector.clearMaster(this);
+        stylesugar_removeClass(this.input, "editing");
     }
 }
 
@@ -231,8 +234,9 @@ class TagSelectionField_TagSelector {
         });
     }
 
-    clearMaster() {
-        this.master = null;
+    clearMaster(authority) {
+        if (this.master == authority)
+            this.master = null;
     }
 
     setMaster(field, value) {

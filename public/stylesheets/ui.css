@@ -83,14 +83,13 @@ table.data_table td.error {
 }
 table.data_table tr:nth-child(odd) td input:disabled { background-color: #f0f0f0; }
 table.data_table tr:nth-child(even) td input:disabled { background-color: #d0d0d0; }
-table.data_table tr:nth-child(odd) td input { border: 1px solid #c0c0c0; }
-table.data_table tr:nth-child(even) td input { border: 1px solid #a0a0a0; }
 table.data_table td.width-1 input { width: 36px; }
 table.data_table td.width-2 input { width: 76px; }
 table.data_table td.width-3 input { width: 116px; }
 table.data_table td.width-4 input { width: 156px; }
 table.data_table td.width-6 input { width: 236px; }
 table.data_table td input {
+    border: 1px solid #c0c0c0;
     font-size: 12px;
     font-weight: bold;
     padding: 2px;
@@ -152,7 +151,7 @@ div.loading_message {
 .tag_selector .option {
     border: 1px yellow solid;
 }
-
+input.editing { border: 1px cyan solid !important; }
 .tag_Bank          {color: #ffffff; background-color: #0000ff !important }
 .tag_Books         {color: #ffffff; background-color: #a000ff !important }
 .tag_Cash_out      {color: #ff0000; background-color: #ffe070 !important }
