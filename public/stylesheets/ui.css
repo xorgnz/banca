@@ -96,6 +96,7 @@ table.data_table td input {
     font-weight: bold;
     padding: 2px;
 }
+table.data_table td input:enabled{ color: yellow; }
 table.data_table td input:focus { color: blue; }
 table.data_table input.error {
     background-color: #ffb0b0;

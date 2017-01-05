@@ -86,13 +86,13 @@ class Entry extends AjaxRestObject {
     }
 
     releaseFields() {
-        this.field_date.input.disabled = true;
-        this.field_bank_note.input.disabled = true;
-        this.field_note.input.disabled = true;
-        // this.field_tag.input.disabled = true;
-        this.field_where.input.disabled = true;
-        this.field_what.input.disabled = true;
-        this.field_amount.input.disabled = true;
+        this.field_date.stopEditing();
+        this.field_bank_note.stopEditing();
+        this.field_note.stopEditing();
+        // this.field_tag.stopEditing();
+        this.field_where.stopEditing();
+        this.field_what.stopEditing();
+        this.field_amount.stopEditing();
     }
 
     updateFromObject(obj) {

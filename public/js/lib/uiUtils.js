@@ -45,9 +45,13 @@ class EditableTextField {
         this.refresh();
 
         // Events
-        this.container.onclick = () => { self.startEditing(); };
-        this.input.onblur      = () => { self.stopEditing(); };
+        this.container.onclick = () => {
+            console.log(field + " onclick");
+            self.startEditing();
+        };
+        this.input.onblur      = () => { if (!this.dirty) { self.stopEditing(); } };
         this.input.onchange    = () => {
+            console.log(field + " onchange (triggering update)");
             this.dirty    = true;
             object[field] = this.input.value;
             object.update();
@@ -75,9 +79,8 @@ class EditableTextField {
     }
 
     stopEditing() {
-        if (!this.dirty) {
-            this.input.disabled = true;
-        }
+        this.dirty = false;
+        this.input.disabled = true;
     }
 }
 
