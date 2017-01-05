@@ -18,13 +18,15 @@ class Entry extends AjaxRestObject {
         this.budget_allocations = budget_allocations;
 
         // UI
-        this.ui_tr = null;
+        this.container = null;
 
         // AJAX callbacks
         this.callbacks.del = function (result) {
-            _.pull(viewModel.entries, self);
-            self.ui_tr.parentNode.removeChild(self.ui_tr);
-            console.log("Entry " + self.date + " - " + self.amount + " removed.");
+            if (result.success) {
+                _.pull(viewModel.entries, self);
+                self.container.parentNode.removeChild(self.container);
+                console.log("Entry " + self.date + " - " + self.amount + " removed.");
+            }
         };
 
         this.callbacks.add = function (result) {
@@ -35,9 +37,9 @@ class Entry extends AjaxRestObject {
         };
 
         this.callbacks.update = function (result) {
-            self.refreshFields();
             if (result.success) {
                 console.log("Entry " + self.date + " - " + self.amount + " updated.");
+                self.refreshFields();
                 self.releaseFields();
             }
             else {
@@ -49,6 +51,7 @@ class Entry extends AjaxRestObject {
     expressAsEditableTableRow() {
         var self = this;
 
+        // Create components
         this.field_date      = new EditableTextField(this, "date", "td", "width-3");
         this.field_bank_note = new EditableTextField(this, "bank_note", "td", "width-6");
         this.field_note      = new EditableTextField(this, "note", "td", "width-6");
@@ -56,23 +59,23 @@ class Entry extends AjaxRestObject {
         this.field_where     = new EditableTextField(this, "where", "td", "width-6");
         this.field_what      = new EditableTextField(this, "what", "td", "width-6");
         this.field_amount    = new EditableAmountTextField(this, "amount", "td", "width-3");
-        
-        this.deleteButtons = new DeleteButtonPanel(this, "td", "width-3");
+        this.deleteButtons   = new DeleteButtonPanel(this, "td", "width-3");
 
-        // Make static TDs
-        this.ui_tr = document.createElement("tr");
+        // Create container
+        this.container = document.createElement("tr");
 
-        this.ui_tr.appendChild(domsugar_td(this.id, {class: "id"}));
-        this.ui_tr.appendChild(this.field_date.container);
-        this.ui_tr.appendChild(this.field_bank_note.container);
-        this.ui_tr.appendChild(this.field_note.container);
-        this.ui_tr.appendChild(domsugar_td(this.tag, {class: "tag_" + this.tag.replace(" ", "_")}));
-        this.ui_tr.appendChild(this.field_where.container);
-        this.ui_tr.appendChild(this.field_what.container);
-        this.ui_tr.appendChild(this.field_amount.container);
-        this.ui_tr.appendChild(this.deleteButtons.container);
+        // Assemble
+        this.container.appendChild(domsugar_td(this.id, {class: "id"}));
+        this.container.appendChild(this.field_date.container);
+        this.container.appendChild(this.field_bank_note.container);
+        this.container.appendChild(this.field_note.container);
+        this.container.appendChild(domsugar_td(this.tag, {class: "tag_" + this.tag.replace(" ", "_")}));
+        this.container.appendChild(this.field_where.container);
+        this.container.appendChild(this.field_what.container);
+        this.container.appendChild(this.field_amount.container);
+        this.container.appendChild(this.deleteButtons.container);
 
-        return this.ui_tr;
+        return this.container;
     }
 
     refreshFields() {

@@ -15,60 +15,66 @@ function formatDateIso8601(date) {
     }
 }
 
-
-class EditableTextField {
-    constructor(object, field, container, className) {
-        var self    = this;
-        this.object = object;
-        this.field  = field;
-
-        // Set up container
+class UIComponent {
+    constructor (container, className) {
+        // Test contract
         console.assert(
             (typeof(container) === "string" && (container == "td" || container == "div")) ||
             (typeof(container) === "object" && container instanceof HTMLElement), "Invalid container");
+
+        // Set up container
         if (typeof(container) === "string")
             this.container = document.createElement(container);
         else
             this.container = container;
 
-        // Set CSS class
+        // Set up container CSS
         if (className)
             this.container.className = className;
+    }
+}
+
+class EditableTextField extends UIComponent {
+    constructor(object, field, container, className) {
+        super(container, className);
+
+        // Initialize
+        var self    = this;
+        this.object = object;
+        this.field  = field;
 
         // Set up elements
         this.input                = document.createElement("input");
-        this.input.disabled       = true;
         this.span_error           = document.createElement("span");
         this.span_error.className = "error";
         this.container.appendChild(this.input);
         this.container.appendChild(this.span_error);
-        this.refresh();
 
         // Events
-        this.container.onclick = () => {
-            console.log(field + " onclick");
-            self.startEditing();
-        };
+        this.container.onclick = () => { self.startEditing(); };
         this.input.onblur      = () => { if (!this.dirty) { self.stopEditing(); } };
         this.input.onchange    = () => {
-            console.log(field + " onchange (triggering update)");
             this.dirty    = true;
             object[field] = this.input.value;
             object.update();
         };
+
+        // Configure
+        this.refresh(); // Set up correct field value
+        self.stopEditing(); // Configure field to start in non-editing state
     }
 
     refresh() {
         this.input.value = this.object[this.field];
 
         domsugar_clear(this.span_error);
-        if (! this.object.valid(this.field)) {
+        if (!this.object.valid(this.field)) {
             this.span_error.appendChild(document.createTextNode(this.object.validationString(this.field)));
             this.container.className += " error";
             this.span_error.style.display = "block";
         }
         else {
-            this.container.className = this.container.className.replace(" error", "");
+            this.container.className      = this.container.className.replace(" error", "");
             this.span_error.style.display = "none";
         }
     }
@@ -79,54 +85,48 @@ class EditableTextField {
     }
 
     stopEditing() {
-        this.dirty = false;
+        this.dirty          = false;
         this.input.disabled = true;
     }
 }
 
-class DeleteButtonPanel {
+class DeleteButtonPanel extends UIComponent {
     constructor(object, container, className) {
+        super(container, className);
+
+        // Initialize
         var self    = this;
         this.object = object;
 
-        // Set up container
-        console.assert(
-            (typeof(container) === "string" && (container == "td" || container == "div")) ||
-            (typeof(container) === "object" && container instanceof HTMLElement), "Invalid container");
-        if (typeof(container) === "string")
-            this.container = document.createElement(container);
-        else
-            this.container = container;
-
-        // Set CSS class
-        if (className)
-            this.container.className = className;
-
         // Set up elements
-        var button_del        = domsugar_button("Delete");
-        var button_delConfirm = domsugar_button("Confirm");
-        var button_delCancel  = domsugar_button("Cancel");
-        stylesugar_hide(button_delConfirm);
-        stylesugar_hide(button_delCancel);
-        this.container.appendChild(button_del);
-        this.container.appendChild(button_delConfirm);
-        this.container.appendChild(button_delCancel);
+        this.button_del        = domsugar_button("Delete");
+        this.button_delConfirm = domsugar_button("Confirm");
+        this.button_delCancel  = domsugar_button("Cancel");
+        this.container.appendChild(this.button_del);
+        this.container.appendChild(this.button_delConfirm);
+        this.container.appendChild(this.button_delCancel);
 
         // Events
-        button_del.onclick        = () => {
-            stylesugar_hide(button_del);
-            stylesugar_show(button_delConfirm);
-            stylesugar_show(button_delCancel);
-        };
-        button_delCancel.onclick  = () => {
-            stylesugar_show(button_del);
-            stylesugar_hide(button_delConfirm);
-            stylesugar_hide(button_delCancel);
-        };
-        button_delConfirm.onclick = () => {
-            object.del();
-        };
+        this.button_del.onclick        = () => { this.setState_confirming(); };
+        this.button_delCancel.onclick  = () => { this.setState_rest(); };
+        this.button_delConfirm.onclick = () => { object.del(); };
+
+        // Configure
+        this.setState_rest(); // Start in rest state
     }
+
+    setState_confirming() {
+        stylesugar_hide(this.button_del);
+        stylesugar_show(this.button_delConfirm);
+        stylesugar_show(this.button_delCancel);
+    }
+
+    setState_rest() {
+        stylesugar_show(this.button_del);
+        stylesugar_hide(this.button_delConfirm);
+        stylesugar_hide(this.button_delCancel);
+    }
+
 }
 
 class EditableAmountTextField extends EditableTextField {
@@ -145,6 +145,12 @@ class EditableAmountTextField extends EditableTextField {
             this.container.className += " amt_positive";
         else
             this.container.className += " amt_negative";
+    }
+}
+
+class TagSelectionField extends UIComponent {
+    constructor(object, field, container, className) {
+        super(container, className);
     }
 }
 
