@@ -160,7 +160,7 @@ class TagSelectionField extends UIComponent {
         // Set up elements
         this.input          = document.createElement("input");
         this.input.disabled = true;
-        stylesugar_addClass(this.input, "tag_" + object[field]);
+        this.setTagStyle(object[field]);
         this.container.appendChild(this.input);
 
         // Initialize Tag Selection Widget
@@ -170,19 +170,12 @@ class TagSelectionField extends UIComponent {
         this.container.onclick = () => {
             self.startEditing();
             var onclick = (e) => {
-                console.log("Considering click for listener on " + this.object.id);
-                console.log(e.path);
                 if (e.path[0] != self.input && _.indexOf(e.path, TagSelectionField.tag_selector.container) == -1) {
-                    console.log("Click to cancel accepted for " + this.object.id);
                     document.getElementsByTagName("body")[0].removeEventListener("click", onclick);
                     self.stopEditing();
                 }
             };
             document.getElementsByTagName("body")[0].addEventListener("click", onclick);
-        };
-        this.input.onchange    = () => {
-            object[field] = this.input.value;
-            object.update();
         };
 
         // Configure
@@ -198,12 +191,25 @@ class TagSelectionField extends UIComponent {
 
     refresh() {
         this.input.value = this.object[this.field];
-        // for (var str of this.container.className.split(" "))
-        //     console.log(str);
     }
+
+    setSelectedValue(selected) {
+        console.log("User selected " + selected);
+        this.setTagStyle(selected);
+        this.input.value = selected;
+        this.object[this.field] = selected;
+        this.object.update();
+    }
+
+    setTagStyle(selected) {
+        stylesugar_clearClasses(this.input);
+        stylesugar_addClass(this.input, "tag_" + selected.replace(" ", "_"));
+    }
+
 
     startEditing() {
         TagSelectionField.tag_selector.setMaster(this, this.object[this.field]);
+        TagSelectionField.tag_selector.setSelectedOption(this, this.object[this.field]);
         TagSelectionField.tag_selector.show(this);
         stylesugar_addClass(this.input, "editing");
     }
@@ -217,18 +223,20 @@ class TagSelectionField extends UIComponent {
 
 class TagSelectionField_TagSelector {
     constructor() {
+        // Initialize
         this.master = null;
 
+        // Create container
         this.container           = document.createElement("div");
         this.container.className = "tag_selector";
         document.getElementsByTagName("body")[0].appendChild(this.container);
 
+        // Create options
         this.options              = {};
-        this.options["Bank"]      = new TagSelectionField_TagSelector_Option("Bank");
-        this.options["Music"]     = new TagSelectionField_TagSelector_Option("Music");
-        this.options["Games"]     = new TagSelectionField_TagSelector_Option("Games");
-        this.options["Groceries"] = new TagSelectionField_TagSelector_Option("Groceries");
-
+        this.options["Bank"]      = new TagSelectionField_TagSelector_Option("Bank", this);
+        this.options["Music"]     = new TagSelectionField_TagSelector_Option("Music", this);
+        this.options["Games"]     = new TagSelectionField_TagSelector_Option("Games", this);
+        this.options["Groceries"] = new TagSelectionField_TagSelector_Option("Groceries", this);
         _.forIn(this.options, (value, key) => {
             this.container.appendChild(value.container);
         });
@@ -244,12 +252,24 @@ class TagSelectionField_TagSelector {
 
         // Position
         var rect                     = field.input.getBoundingClientRect();
-        this.container.style.left    = rect.left + "px";
+        this.container.style.left    = (rect.left - 21) + "px";
         this.container.style.top     = rect.bottom + "px";
         this.container.style.display = "block";
+    }
 
-        // Set value
-        // this.options[value].select();
+    setSelectedOption(authority, selected) {
+        if (this.master == authority) {
+            _.each(this.options, function (v) { v.deselect(); });
+            if (this.options[selected])
+                this.options[selected].select();
+            else
+                console.log("Cannot set selected to " + selected + " - does not exist");
+        }
+    }
+
+    setSelectedValue(selected) {
+        if (this.master)
+            this.master.setSelectedValue(selected);
     }
 
     hide(authority) {
@@ -264,12 +284,22 @@ class TagSelectionField_TagSelector {
 }
 
 class TagSelectionField_TagSelector_Option {
-    constructor(value) {
+    constructor(value, selector) {
+        // Initialize
+        var self = this;
+        this.selector = selector;
+        this.value = value;
+
+        // Create container
         this.container = document.createElement("div");
         this.container.appendChild(document.createTextNode(value));
-
         stylesugar_addClass(this.container, "option");
-        stylesugar_addClass(this.container, "tag_" + value);
+        stylesugar_addClass(this.container, "tag_" + value.replace(" ", "_"));
+
+        // Events
+        this.container.onclick = () => {
+            self.selector.setSelectedValue(self.value);
+        };
     }
 
     deselect() {
@@ -363,8 +393,11 @@ function domsugar_text(text, bold, italic, style) {
  Style Sugar methods
  */
 
-function stylesugar_hide(element) {
-    element.oldDisplay    = element.style.display;
+function stylesugar_hide(element)
+{
+    if (element.style.display)
+        element.oldDisplay    = element.style.display;
+
     element.style.display = "none";
 }
 
@@ -372,7 +405,7 @@ function stylesugar_show(element) {
     if (element.oldDisplay)
         element.style.display = element.oldDisplay;
     else
-        element.style.display = "block";
+        element.style.display = "";
 }
 
 function stylesugar_addClass(element, className) {

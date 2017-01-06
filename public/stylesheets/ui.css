@@ -96,17 +96,17 @@ table.data_table td input {
 }
 table.data_table td input:enabled{ color: yellow; }
 table.data_table td input:focus { color: blue; }
-table.data_table input.error {
+table.data_table td input.error {
     background-color: #ffb0b0;
     border: 1px solid #ff0000;
 }
-table.data_table span.error {
+table.data_table td span.error {
     color: #c00000;
     font-size: 10px;
     padding: 4px;
 }
 table.data_table td button {
-    height: 18px;
+    height: 20px;
     font-size: 12px;
 }
 
@@ -141,17 +141,23 @@ div.loading_message {
 
 .tag_selector {
     display: none;
-    background-color: red;
-    width: 300px;
-    height: 300px;
+    background-color: #c0c0c0;
+    border: 1px solid #000000;
+    width: 160px;
     position: absolute;
     top: 400px;
     left: 400px;
 }
 .tag_selector .option {
-    border: 1px yellow solid;
+    padding: 4px;
+    border: 2px #909090 solid;
+    margin: 2px;
 }
-input.editing { border: 1px cyan solid !important; }
+.tag_selector .option.selected {
+    border: 4px yellow solid;
+    padding: 6px;
+}
+input.editing { border: 1px cyan solid !important; } /* Testing */
 .tag_Bank          {color: #ffffff; background-color: #0000ff !important }
 .tag_Books         {color: #ffffff; background-color: #a000ff !important }
 .tag_Cash_out      {color: #ff0000; background-color: #ffe070 !important }
