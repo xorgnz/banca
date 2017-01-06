@@ -2,7 +2,7 @@ class Entry extends AjaxRestObject {
     constructor(obj, budget_allocations, viewModel) {
         super("/rest/entry/", "entry");
 
-        this._viewModel = viewModel;
+        this.viewModel = viewModel;
         var self        = this;
 
         // Storage
@@ -53,9 +53,9 @@ class Entry extends AjaxRestObject {
 
         // Create components
         this.field_date      = new EditableTextField(this, "date", "td", "width-3");
+        this.field_tag       = new TagSelectionField(this, "tag", this.viewModel.entryTags, "td", "width-3");
         this.field_bank_note = new EditableTextField(this, "bank_note", "td", "width-6");
         this.field_note      = new EditableTextField(this, "note", "td", "width-6");
-        this.field_tag       = new TagSelectionField(this, "tag", "td", "width-3");
         this.field_where     = new EditableTextField(this, "where", "td", "width-6");
         this.field_what      = new EditableTextField(this, "what", "td", "width-6");
         this.field_amount    = new EditableAmountTextField(this, "amount", "td", "width-3");
@@ -67,9 +67,9 @@ class Entry extends AjaxRestObject {
         // Assemble
         this.container.appendChild(domsugar_td(this.id, {class: "id"}));
         this.container.appendChild(this.field_date.container);
+        this.container.appendChild(this.field_tag.container);
         this.container.appendChild(this.field_bank_note.container);
         this.container.appendChild(this.field_note.container);
-        this.container.appendChild(this.field_tag.container);
         this.container.appendChild(this.field_where.container);
         this.container.appendChild(this.field_what.container);
         this.container.appendChild(this.field_amount.container);

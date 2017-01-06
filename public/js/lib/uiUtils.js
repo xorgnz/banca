@@ -149,7 +149,7 @@ class EditableAmountTextField extends EditableTextField {
 }
 
 class TagSelectionField extends UIComponent {
-    constructor(object, field, container, className) {
+    constructor(object, field, tags, container, className) {
         super(container, className);
 
         // Initialize
@@ -164,7 +164,7 @@ class TagSelectionField extends UIComponent {
         this.container.appendChild(this.input);
 
         // Initialize Tag Selection Widget
-        TagSelectionField.initializeTagSelectionDiv();
+        TagSelectionField.initializeTagSelectionDiv(tags);
 
         // Events
         this.container.onclick = () => {
@@ -183,9 +183,9 @@ class TagSelectionField extends UIComponent {
         self.stopEditing(); // Configure field to start in non-editing state
     }
 
-    static initializeTagSelectionDiv() {
+    static initializeTagSelectionDiv(tags) {
         if (!TagSelectionField.tag_selector) {
-            TagSelectionField.tag_selector = new TagSelectionField_TagSelector();
+            TagSelectionField.tag_selector = new TagSelectionField_TagSelector(tags);
         }
     }
 
@@ -194,9 +194,16 @@ class TagSelectionField extends UIComponent {
     }
 
     setSelectedValue(selected) {
-        console.log("User selected " + selected);
+        // Change cell values
         this.setTagStyle(selected);
         this.input.value = selected;
+
+        // Animate green flash
+        var self                             = this;
+        this.container.style.backgroundColor = "#38ff65";
+        setTimeout(() => { self.container.style.backgroundColor = ""; }, 600);
+
+        // Update
         this.object[this.field] = selected;
         this.object.update();
     }
@@ -222,23 +229,22 @@ class TagSelectionField extends UIComponent {
 }
 
 class TagSelectionField_TagSelector {
-    constructor() {
+    constructor(tags) {
         // Initialize
+        var self    = this;
         this.master = null;
 
         // Create container
         this.container           = document.createElement("div");
         this.container.className = "tag_selector";
+        stylesugar_hide(this.container);
         document.getElementsByTagName("body")[0].appendChild(this.container);
 
         // Create options
-        this.options              = {};
-        this.options["Bank"]      = new TagSelectionField_TagSelector_Option("Bank", this);
-        this.options["Music"]     = new TagSelectionField_TagSelector_Option("Music", this);
-        this.options["Games"]     = new TagSelectionField_TagSelector_Option("Games", this);
-        this.options["Groceries"] = new TagSelectionField_TagSelector_Option("Groceries", this);
-        _.forIn(this.options, (value, key) => {
-            this.container.appendChild(value.container);
+        this.options = {};
+        _.each(tags, (tag) => {
+            this.options[tag] = new TagSelectionField_TagSelector_Option(tag, self);
+            self.container.appendChild(this.options[tag].container);
         });
     }
 
@@ -286,9 +292,9 @@ class TagSelectionField_TagSelector {
 class TagSelectionField_TagSelector_Option {
     constructor(value, selector) {
         // Initialize
-        var self = this;
+        var self      = this;
         this.selector = selector;
-        this.value = value;
+        this.value    = value;
 
         // Create container
         this.container = document.createElement("div");
@@ -393,10 +399,9 @@ function domsugar_text(text, bold, italic, style) {
  Style Sugar methods
  */
 
-function stylesugar_hide(element)
-{
+function stylesugar_hide(element) {
     if (element.style.display)
-        element.oldDisplay    = element.style.display;
+        element.oldDisplay = element.style.display;
 
     element.style.display = "none";
 }
