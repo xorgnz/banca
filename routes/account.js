@@ -10,11 +10,12 @@ const entryDAO   = require("../dao/entry.js");
 router.get('/', function (req, res, next) {
     Promise.resolve()
         .then(() => { return accountDAO.listAll(req.db); })
-        .then((rows) => { res.status(HTTP.OK).json({success: true, data: rows}); })
+        .then((rows) => {
+            res.status(HTTP.OK).json({success: true, data: rows}); })
         .catch(next);
 });
 
-/* SPECIAL GET - Retrieve particular budget */
+/* SPECIAL GET - Retrieve particular account */
 router.get('/:id', function (req, res, next) {
     Promise.resolve()
         .then(() => { return accountDAO.get(req.db, req.params.id); })

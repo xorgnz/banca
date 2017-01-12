@@ -1,5 +1,7 @@
-class Budget {
+class Budget extends AjaxRestObject {
     constructor(obj, viewModel) {
+        super("/rest/budget/", "budget");
+
         this._viewModel = viewModel;
         var self        = this;
 
@@ -19,22 +21,22 @@ class Budget {
         });
 
         // Decorate as rest managed object
-        decorateAjaxRest(self, "budget", "/rest/budget/", {
-            del:    function (obj) {
-                viewModel.budgets.remove(self);
-                console.log("Budget " + self.code() + " removed.");
-            },
-            add:    function (obj) {
-                viewModel.budgets.push(self);
-                viewModel.blankNewBudget();
-                console.log(obj);
-                obj.sneakyUpdate(obj.amount, "" + Number.parseFloat(obj.amount()).toFixed(2));
-                console.log("Budget " + self.code() + " added.");
-            },
-            update: function (obj, result) {
-                console.log("Budget " + self.code() + " updated.");
-            }
-        });
+        // decorateAjaxRest(self, "budget", "/rest/budget/", {
+        //     del:    function (obj) {
+        //         viewModel.budgets.remove(self);
+        //         console.log("Budget " + self.code() + " removed.");
+        //     },
+        //     add:    function (obj) {
+        //         viewModel.budgets.push(self);
+        //         viewModel.blankNewBudget();
+        //         console.log(obj);
+        //         obj.sneakyUpdate(obj.amount, "" + Number.parseFloat(obj.amount()).toFixed(2));
+        //         console.log("Budget " + self.code() + " added.");
+        //     },
+        //     update: function (obj, result) {
+        //         console.log("Budget " + self.code() + " updated.");
+        //     }
+        // });
 
         // Subscribe to exposed update fields
         this.code.subscribe(function (newValue) { self.update(); });

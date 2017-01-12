@@ -157,30 +157,30 @@ div.loading_message {
     padding: 6px;
 }
 .tag_Bank          {color: #ffffff; background-color: #0000ff !important }
-.tag_Books         {color: #ffffff; background-color: #a000ff !important }
-.tag_Cash_out      {color: #ff0000; background-color: #ffe070 !important }
-.tag_Clothes       {color: #ff0000; background-color: #ffe070 !important }
-.tag_Donation      {color: #ff0000; background-color: #ffe070 !important }
-.tag_Education     {color: #ff0000; background-color: #ffe070 !important }
+.tag_Books         {color: #ffffff; background-color: #ff7669 !important }
+.tag_Cash_out      {color: #74ffcb; background-color: #0000ff !important }
+.tag_Clothes       {color: #1b2f47; background-color: #5dfff8 !important }
+.tag_Donation      {color: #ebff00; background-color: #000000 !important }
+.tag_Education     {color: #8eff84; background-color: #514527 !important }
 .tag_Entertainment {color: #ffffff; background-color: #ff00ff !important }
 .tag_Food_out      {color: #ffffff; background-color: #ff4f00 !important }
-.tag_Games         {color: #ffffff; background-color: #ff8e65 !important }
-.tag_Groceries     {color: #ff0000; background-color: #ffe070 !important }
+.tag_Games         {color: #ffffff; background-color: #ffa949 !important }
+.tag_Groceries     {color: #000000; background-color: #88be35 !important }
 .tag_Health        {color: #ff0000; background-color: #ffffff !important }
-.tag_Insurance     {color: #ff0000; background-color: #ffe070 !important }
+.tag_Insurance     {color: #8ee7ff; background-color: #703815 !important }
 .tag_Joint         {color: #0000ff; background-color: #c0aa83 !important }
-.tag_Liquor        {color: #ff0000; background-color: #ffe070 !important }
-.tag_Misc          {color: #ffffff; background-color: #00b0b0 !important }
+.tag_Liquor        {color: #ff9cfd; background-color: #237400 !important }
+.tag_Misc          {color: #ffffff; background-color: #006e6e !important }
 .tag_Music         {color: #ffffff; background-color: #ff4f78 !important }
 .tag_Pay           {color: #000000; background-color: #70ff00 !important }
-.tag_Phone         {color: #ff0000; background-color: #ffe070 !important }
-.tag_Project       {color: #ff0000; background-color: #ffe070 !important }
-.tag_Purchase      {color: #ff0000; background-color: #ffe070 !important }
-.tag_Sport         {color: #ff0000; background-color: #ffe070 !important }
+.tag_Phone         {color: #f100ff; background-color: #b9ffcf !important }
+.tag_Project       {color: #00ff23; background-color: #000000 !important }
+.tag_Purchase      {color: #f6ffc7; background-color: #5590ff !important }
+.tag_Sport         {color: #fef3ff; background-color: #48cdc5 !important }
 .tag_Tech          {color: #ffffff; background-color: #003080 !important }
-.tag_Transfer      {color: #c0c0c0; background-color: #0000b0 !important }
+.tag_Transfer      {color: #fce579; background-color: #0000ff !important }
 .tag_Travel        {color: #000000; background-color: #c0c0c0 !important }
-.tag_Unknown       {color: #ffff00; background-color: #800080 !important }
+.tag_Unknown       {color: #ffff00; background-color: #8f00d2 !important }
 
 .amt_positive input { font-weight: bold; color: black; }
 .amt_negative input { font-weight: bold; color: red; }

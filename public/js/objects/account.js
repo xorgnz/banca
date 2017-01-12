@@ -1,5 +1,7 @@
-class Account {
+class Account extends AjaxRestObject {
     constructor(obj, viewModel) {
+        super("/rest/account/", "account");
+
         this._viewModel = viewModel;
         var self = this;
 
