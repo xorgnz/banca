@@ -37,6 +37,7 @@ var createApp = function (type) {
         app.use('/', require('./routes/index'));
     }
     app.use('/rest/account', require('./routes/account'));
+    app.use('/rest/accounting', require('./routes/accounting'));
     app.use('/rest/budget', require('./routes/budget'));
     app.use('/rest/entry', require('./routes/entry'));
 

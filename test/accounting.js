@@ -7,6 +7,7 @@ const periodDAO     = require("../dao/period.js");
 const accountDAO    = require("../dao/account.js");
 const entryDAO      = require("../dao/entry.js");
 const accountingDAO = require("../dao/accounting.js");
+const accountingAAO = require("./aao/accounting.js");
 
 const beforeEach = require("mocha").beforeEach;
 const describe   = require("mocha").describe;
@@ -213,7 +214,7 @@ describe("Accounting DAO", function () {
 
     // ------------------------------------------------------------- TEST
     it(".createOverDateRange", function () {
-        var period_sp_0 = new periodDAO.Period(null, "September-2015",
+        var period_sp_0     = new periodDAO.Period(null, "September-2015",
             new Date("2015-09-01T00:00:00.000Z"),
             new Date("2015-09-30T23:59:59.999Z"));
         var accounting_sp_0 = new accountingDAO.Accounting(null, period_sp_0, account0, 0, 0);
@@ -290,8 +291,8 @@ describe("Accounting DAO", function () {
 
     // ------------------------------------------------------------- TEST
     it(".getByEntry", function () {
-        var entry_sp0    = testObjects.createTestEntry(0, account0);
-        var entry_sp1    = testObjects.createTestEntry(0, account0);
+        var entry_sp0  = testObjects.createTestEntry(0, account0);
+        var entry_sp1  = testObjects.createTestEntry(0, account0);
         entry_sp0.date = new Date("2000-01-20");
         entry_sp1.date = new Date("2000-06-20");
         return Promise.resolve()
@@ -441,5 +442,72 @@ describe("Accounting DAO", function () {
             .then((rows) => {
                 check.assert.equal(rows.length, 0, "Records remain after removeAll");
             })
+    });
+});
+
+
+describe("Accounting AJAX", function () {
+    const account0 = testObjects.createTestAccount(0);
+    const account1 = testObjects.createTestAccount(1);
+
+    beforeEach(function () {
+        return Promise.resolve()
+            .then(() => { return accountingDAO.removeAll(db); })
+            .then(() => { return accountDAO.removeAll(db); })
+            .then(() => { return accountDAO.add(db, account0); })
+            .then(() => { return accountDAO.add(db, account1); })
+            .then(() => { return periodDAO.removeAll(db); });
+    });
+
+    // ------------------------------------------------------------- TEST
+    it(".listByAccount", function () {
+        return Promise.resolve()
+            .then(() => {
+                return accountingDAO.createOverDateRange(db, new Date("2015-06-01"), new Date("2015-12-01"), account0.id);
+            })
+            .then(() => {
+                return accountingDAO.createOverDateRange(db, new Date("2015-06-01"), new Date("2015-12-01"), account1.id);
+            })
+            .then(() => { return accountingAAO.listByAccount(account0.id); })
+            .then((rows) => {
+                console.log(rows.data);
+                check.assert.equal(rows.data.length, 7, "Incorrect number of accountings retrieved");
+            })
+    });
+
+    // ------------------------------------------------------------- TEST
+    it(".listOverDateRange", function () {
+        return Promise.resolve()
+            .then(() => {
+                return accountingDAO.createOverDateRange(db, new Date("2015-06-01"), new Date("2015-12-01"), account0.id);
+            })
+            .then(() => {
+                return accountingDAO.createOverDateRange(db, new Date("2015-06-01"), new Date("2015-12-01"), account1.id);
+            })
+            .then(() => {
+                return accountingAAO.listOverDateRange(
+                    new Date("2015-07-05").getTime(),
+                    new Date("2015-09-05").getTime(), account0.id);
+            })
+            .then((rows) => {
+                console.log(rows.data);
+                check.assert.equal(rows.data.length, 3, "Incorrect number of accountings retrieved");
+            })
+            .then(() => {
+                return accountingAAO.listOverDateRange(
+                    new Date("2015-04-05").getTime(),
+                    new Date("2015-06-05").getTime(), account0.id);
+            })
+            .then((rows) => {
+                check.assert.equal(rows.data.length, 1, "Incorrect number of accountings retrieved");
+            })
+            .then(() => {
+                return accountingAAO.listOverDateRange(
+                    new Date("2015-11-05").getTime(),
+                    new Date("2016-02-05").getTime(), account0.id);
+            })
+            .then((rows) => {
+                check.assert.equal(rows.data.length, 2, "Incorrect number of accountings retrieved");
+            });
     });
 });
