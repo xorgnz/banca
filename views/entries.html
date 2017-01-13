@@ -37,30 +37,23 @@
 <script type='text/javascript' src='/js/objects/entry.js'></script>
 <script type="text/javascript">
 
-    var account_id = {{account_id}};
-
     class ViewModel {
         constructor() {
             var self = this;
 
-            // Flags
-            this.loadedEntries   = false;
-            this.loadedEntryTags = false;
-            this.loadedAccount   = false;
-
             // Storage
-            this.entries   = [];
-            this.entryTags = [];
-            this.account   = null;
-            this.newEntry      = null;
+            this.accountings          = [];
+            this.entries              = [];
+            this.entryTags            = [];
+            this.availableAccountings = [];
+            this.account              = null;
+            this.newEntry             = null;
         };
 
-        loaded() { return this.loadedEntries && this.loadedEntryTags && this.loadedAccount; };
-
-        blankNewEntry () {
+        blankNewEntry() {
             this.newEntry = new Entry({
                 id:         null,
-                account_id: account_id,
+                account_id: "{{account_id}}",
                 amount:     0,
                 date:       "1970-01-01",
                 bank_note:  "Created via UI",
@@ -71,14 +64,14 @@
             }, [], this);
         };
 
-        expressAccount () {
+        expressAccount() {
             var div = $("#div_acct_info");
             div.empty();
             div.append(this.account.expressAsPanel());
             div.show();
         }
 
-        expressEntries () {
+        expressEntries() {
             var tbody = $("#tbody_entries");
             tbody.empty();
             for (var entry of this.entries)
@@ -95,6 +88,10 @@
         // Configure view model
         var viewModel = new ViewModel();
 
+        var date_end   = new Date().getTime();
+//        var date_start = date_end - 15552000000;
+        var date_start = date_end - 311040000000;
+
         // Set up promise chain
         Promise.resolve()
 
@@ -104,12 +101,27 @@
                     url:     "/rest/account/{{account_id}}",
                     success: function (response) {
                         viewModel.account = new Account(response.data, viewModel);
-                        viewModel.loadedAccount = true;
                         viewModel.expressAccount();
                     },
                     error:   function (err) {
                         alert("Cannot load accounts. See console for details");
                         console.log("Received HTTP 500. Server said: " + err.responseText)
+                    }
+                }).promise();
+            })
+
+            // Load available acccountings
+            .then(() => {
+                return $.ajax({
+                    url:     "/rest/accounting/byAccount/{{account_id}}",
+                    success: function (response) {
+                        for (var d of response.data) {
+                            viewModel.availableAccountings.push(d);
+                        }
+                    },
+                    error:   function (err) {
+                        alert("Cannot load available accountings. See console for details");
+                        console.log("Received HTTP 500. Server said: " + err.responseText);
                     }
                 }).promise();
             })
@@ -122,12 +134,27 @@
                         for (var d of response.data) {
                             viewModel.entryTags.push(d);
                         }
-                        viewModel.loadedEntryTags = true;
                         viewModel.blankNewEntry();
                     },
                     error:   function (err) {
-                        alert("Cannot load entries. See console for details");
+                        alert("Cannot load entry tags. See console for details");
                         console.log("Received HTTP 500. Server said: " + err.responseText)
+                    }
+                }).promise();
+            })
+
+            // Load selected accountings
+            .then(() => {
+                return $.ajax({
+                    url:     "/rest/accounting/byDate/" + date_start + "/" + date_end + "/{{account_id}}",
+                    success: function (response) {
+                        for (var d of response.data) {
+                            viewModel.accountings.push(d);
+                        }
+                    },
+                    error:   function (err) {
+                        alert("Cannot load selected accountings. See console for details");
+                        console.log("Received HTTP 500. Server said: " + err.responseText);
                     }
                 }).promise();
             })
@@ -140,7 +167,6 @@
                         for (var d of data.data) {
                             viewModel.entries.push(new Entry(d, [], viewModel));
                         }
-                        viewModel.loadedEntries = true;
                     },
                     error:   function (err) {
                         alert("Cannot load accounts. See console for details");
@@ -149,10 +175,11 @@
                 }).promise();
             })
 
-            // Load accountings
-            .then (() => {
+            // Display results
+            .then(() => {
                 viewModel.expressEntries();
                 viewModel.hideLoadingDialog();
+                console.log(viewModel);
             });
     });
 

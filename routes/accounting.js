@@ -18,7 +18,6 @@ router.get('/byAccount/:account_id', function (req, res, next) {
 
 /* SPECIAL GET - Retrieve accountings spanning date range */
 router.get('/byDate/:start/:end/:account_id', function (req, res, next) {
-    console.log(req.params);
     Promise.resolve()
         .then(() => {
             return accountingDAO.listOverDateRange(

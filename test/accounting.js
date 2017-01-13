@@ -257,7 +257,6 @@ describe("Accounting DAO", function () {
             .then(() => { return accountingDAO.listAll(db); })
             .then((rows) => {
                 check.assert.equal(rows.length, 7, "Incorrect number of accountings created");
-                console.log(rows);
             });
     });
 
@@ -470,13 +469,12 @@ describe("Accounting AJAX", function () {
             })
             .then(() => { return accountingAAO.listByAccount(account0.id); })
             .then((rows) => {
-                console.log(rows.data);
                 check.assert.equal(rows.data.length, 7, "Incorrect number of accountings retrieved");
             })
     });
 
     // ------------------------------------------------------------- TEST
-    it(".listOverDateRange", function () {
+    it.only(".listOverDateRange", function () {
         return Promise.resolve()
             .then(() => {
                 return accountingDAO.createOverDateRange(db, new Date("2015-06-01"), new Date("2015-12-01"), account0.id);
@@ -490,7 +488,6 @@ describe("Accounting AJAX", function () {
                     new Date("2015-09-05").getTime(), account0.id);
             })
             .then((rows) => {
-                console.log(rows.data);
                 check.assert.equal(rows.data.length, 3, "Incorrect number of accountings retrieved");
             })
             .then(() => {

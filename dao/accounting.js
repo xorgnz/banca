@@ -70,6 +70,21 @@ class Accounting extends shared.BancaObject {
             obj.amount_end);
     }
 
+    static fromObjectWithPeriod(obj) {
+        var p = new periodDAO.Period(
+            obj.period_id,
+            obj.period_name,
+            obj.period_date_start,
+            obj.period_date_end);
+
+        return new Accounting(
+            obj.id,
+            p,
+            obj.account ? obj.account : obj.account_id,
+            obj.amount_start,
+            obj.amount_end);
+    }
+
     assertEquivalence(obj) {
         this.assertEquivalenceIgnoreFields(obj, ["account", "period"]);
     }
@@ -82,8 +97,11 @@ class Accounting extends shared.BancaObject {
 
     toJSON() {
         var json = super.toJSON();
+        if (this.period !== null)
+            json.period = this.period.toJSON();
+        else
+            _.unset(json, "period");
         _.unset(json, "account");
-        _.unset(json, "period");
         return json;
     }
 }
@@ -213,13 +231,19 @@ exports.getByPeriodAndAccount = function (db, period_id, account_id) {
     check.assert(check.__numberlike(period_id));
     return new Promise((resolve, reject) => {
         db.get(
-            "SELECT * FROM accounting " +
+            "SELECT " +
+            "   accounting.*," +
+            "   period_name AS accounting_period_name," +
+            "   period_date_start AS accounting_period_date_start, " +
+            "   period_date_end AS accounting_period_date_end " +
+            "FROM accounting " +
+            "INNER JOIN period ON period_id = accounting_period_id " +
             "WHERE " +
             "   accounting_period_id = ? AND " +
             "   accounting_account_id = ?",
             period_id,
             account_id,
-            shared.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObject)
+            shared.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObjectWithPeriod)
         );
     });
 };
@@ -233,7 +257,12 @@ exports.getByDateAndAccount = function (db, date, account_id) {
     check.assert(check.__numberlike(account_id));
     return new Promise((resolve, reject) => {
         db.get(
-            "SELECT accounting.* FROM accounting " +
+            "SELECT " +
+            "   accounting.*," +
+            "   period_name AS accounting_period_name," +
+            "   period_date_start AS accounting_period_date_start, " +
+            "   period_date_end AS accounting_period_date_end " +
+            "FROM accounting " +
             "INNER JOIN period ON period_id = accounting_period_id " +
             "WHERE " +
             "   period_date_start <= ? AND " +
@@ -241,7 +270,7 @@ exports.getByDateAndAccount = function (db, date, account_id) {
             "   accounting_account_id = ?",
             date, date,
             account_id,
-            shared.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObject)
+            shared.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObjectWithPeriod)
         );
     });
 };
@@ -262,10 +291,15 @@ exports.listAll = function (db) {
     check.assert.equal(db.constructor.name, "Database");
     return new Promise((resolve, reject) => {
         db.all(
-            "SELECT accounting.* FROM accounting " +
+            "SELECT " +
+            "   accounting.*," +
+            "   period_name AS accounting_period_name," +
+            "   period_date_start AS accounting_period_date_start, " +
+            "   period_date_end AS accounting_period_date_end " +
+            "FROM accounting " +
             "INNER JOIN period ON period_id = accounting_period_id " +
             "ORDER BY period_date_start",
-            shared.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObject)
+            shared.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObjectWithPeriod)
         );
     });
 };
@@ -280,7 +314,12 @@ exports.listSelfAndFollowing = function (db, id) {
         .then((peek) => {
             return new Promise((resolve, reject) => {
                 db.all(
-                    "SELECT accounting.* FROM accounting " +
+                    "SELECT " +
+                    "   accounting.*," +
+                    "   period_name AS accounting_period_name," +
+                    "   period_date_start AS accounting_period_date_start, " +
+                    "   period_date_end AS accounting_period_date_end " +
+                    "FROM accounting " +
                     "INNER JOIN period ON period_id = accounting_period_id " +
                     "WHERE " +
                     "   accounting_account_id = ? AND " +
@@ -288,7 +327,7 @@ exports.listSelfAndFollowing = function (db, id) {
                     "ORDER BY period_date_start",
                     peek.account_id,
                     peek.date_start,
-                    shared.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObject)
+                    shared.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObjectWithPeriod)
                 );
             });
         });
@@ -301,12 +340,17 @@ exports.listByAccount = function (db, account_id) {
     check.assert(check.__numberlike(account_id));
     return new Promise((resolve, reject) => {
         db.all(
-            "SELECT accounting.* FROM accounting " +
+            "SELECT " +
+            "   accounting.*," +
+            "   period_name AS accounting_period_name," +
+            "   period_date_start AS accounting_period_date_start, " +
+            "   period_date_end AS accounting_period_date_end " +
+            "FROM accounting " +
             "INNER JOIN period ON period_id = accounting_period_id " +
             "WHERE accounting_account_id = ? " +
             "ORDER BY period_date_start",
             account_id,
-            shared.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObject)
+            shared.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObjectWithPeriod)
         );
     });
 };
@@ -324,7 +368,12 @@ exports.listOverDateRange = function (db, date_start, date_end, account_id) {
     check.assert(check.__numberlike(account_id));
     return new Promise((resolve, reject) => {
         db.all(
-            "SELECT accounting.* FROM accounting " +
+            "SELECT " +
+            "   accounting.*," +
+            "   period_name AS accounting_period_name," +
+            "   period_date_start AS accounting_period_date_start, " +
+            "   period_date_end AS accounting_period_date_end " +
+            "FROM accounting " +
             "INNER JOIN period ON accounting_period_id = period_id " +
             "WHERE " +
             "   period_date_start <= ? AND " +
@@ -334,7 +383,7 @@ exports.listOverDateRange = function (db, date_start, date_end, account_id) {
             date_end,
             date_start,
             account_id,
-            shared.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObject)
+            shared.generateDBResponseFunctionGet(resolve, reject, Accounting.fromObjectWithPeriod)
         );
     });
 };
