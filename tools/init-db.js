@@ -67,11 +67,16 @@ Promise.resolve()
         return Promise.all(promises);
     })
 
-    .then(() => { periodDAO.createOverDateRange(db, new Date("2000-01-01"), new Date("2020-12-31")); })
-    .then(() => { db.close(); })
-    .catch((err) => { console.log(err); });
+    .then(() => { return periodDAO.createOverDateRange(db, new Date("2000-01-01"), new Date("2020-12-31")); })
+    .then(() => {
+        logger.trace("Database initialization complete");
+        db.close();
+    })
+    .catch((err) => {
+        logger.error("Database initialization failed");
+        console.log(err);
+    });
 
 
-console.log("Database initialization complete");
 
 
