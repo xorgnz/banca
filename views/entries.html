@@ -34,6 +34,7 @@
 
 {% block scripts %}
 <script type='text/javascript' src='/js/objects/account.js'></script>
+<script type='text/javascript' src='/js/objects/accounting.js'></script>
 <script type='text/javascript' src='/js/objects/entry.js'></script>
 <script type="text/javascript">
 
@@ -116,7 +117,7 @@
                     url:     "/rest/accounting/byAccount/{{account_id}}",
                     success: function (response) {
                         for (var d of response.data) {
-                            viewModel.availableAccountings.push(d);
+                            viewModel.availableAccountings.push(new Accounting(d, viewModel));
                         }
                     },
                     error:   function (err) {
@@ -149,7 +150,7 @@
                     url:     "/rest/accounting/byDate/" + date_start + "/" + date_end + "/{{account_id}}",
                     success: function (response) {
                         for (var d of response.data) {
-                            viewModel.accountings.push(d);
+                            viewModel.accountings.push(new Accounting(d, viewModel));
                         }
                     },
                     error:   function (err) {
