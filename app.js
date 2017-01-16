@@ -40,6 +40,7 @@ var createApp = function (type) {
     app.use('/rest/accounting', require('./routes/accounting'));
     app.use('/rest/budget', require('./routes/budget'));
     app.use('/rest/entry', require('./routes/entry'));
+    app.use('/rest/period', require('./routes/period'));
 
     // catch 404 and forward to error handler
     app.use(function (req, res, next) {
