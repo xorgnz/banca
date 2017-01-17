@@ -35,7 +35,7 @@ class UIComponent {
 }
 
 class EditableTextField extends UIComponent {
-    constructor(object, field, container, className, flag_updateEnabled) {
+    constructor(object, field, container, className, flag_triggerUpdates) {
         super(container, className);
 
         // Initialize
@@ -56,7 +56,7 @@ class EditableTextField extends UIComponent {
         this.input.onchange    = () => {
             this.dirty    = true;
             object[field] = this.input.value;
-            if (flag_updateEnabled)
+            if (flag_triggerUpdates)
                 object.update();
         };
 
@@ -166,13 +166,13 @@ class EditableAmountTextField extends EditableTextField {
 }
 
 class TagSelectionField extends UIComponent {
-    constructor(object, field, tags, container, className, onchange) {
+    constructor(object, field, tags, container, className, flag_triggerUpdates) {
         super(container, className);
 
         // Initialize
         var self      = this;
         this.object   = object;
-        this.onchange = onchange;
+        this.flag_triggerUpdates = flag_triggerUpdates;
         this.field    = field;
 
         // Set up elements
@@ -189,11 +189,11 @@ class TagSelectionField extends UIComponent {
             self.startEditing();
             var onclick = (e) => {
                 if (e.path[0] != self.input && _.indexOf(e.path, TagSelectionField.tag_selector.container) == -1) {
-                    document.getElementsByTagName("body")[0].removeEventListener("click", onclick);
+                    window.removeEventListener("click", onclick);
                     self.stopEditing();
                 }
             };
-            document.getElementsByTagName("body")[0].addEventListener("click", onclick);
+            window.addEventListener("click", onclick);
         };
 
         // Configure
@@ -223,8 +223,8 @@ class TagSelectionField extends UIComponent {
 
         // Update
         this.object[this.field] = selected;
-        if (this.onchange)
-            this.onchange();
+        if (this.flag_triggerUpdates)
+            this.object.update();
     }
 
     setTagStyle(selected) {

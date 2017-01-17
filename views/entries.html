@@ -29,6 +29,9 @@
     <tbody id="tbody_entries" style="display:none"></tbody>
 
 </table>
+Fish <br/>
+Fish <br/>
+Fish <br/>
 
 {% endblock %}
 
@@ -49,12 +52,8 @@
             var fn_add = this.callbacks.add;
             this.callbacks.add = function (result) {
                 if (result.success) {
-
-                    // Update view model
                     self.viewModel.entries.push(self);
                     self.viewModel.blankNewEntry();
-
-                    // Update expression
                     self.viewModel.expressEntryAddition(self);
                 }
                 fn_add(result);
@@ -62,12 +61,12 @@
 
             // Extend delete callback
             var fn_del = this.callbacks.del;
-            this.callbacks.del= function (result) {
+            this.callbacks.del = function (result) {
                 if (result.success) {
                     _.pull(self.viewModel.entries, self);
-                    self.container.parentNode.removeChild(self.container);
+                    self.viewModel.expressEntryRemoval(self);
                 }
-                fn_add(result);
+                fn_del(result);
             };
         }
     }
@@ -111,6 +110,10 @@
             $(entry.container).remove();
             tbody.append(entry.expressAsEditableTableRow());
             tbody.append(entry.viewModel.newEntry.expressAsAddForm());
+        }
+
+        expressEntryRemoval(entry) {
+            $(entry.container).remove();
         }
 
         expressCurrentPeriod() {
@@ -238,7 +241,7 @@
                     url:     "/rest/entry/byAccountAndPeriod/{{account_id}}/" + viewModel.currentPeriod.id,
                     success: function (data) {
                         for (var d of data.data) {
-                            viewModel.entries.push(new Entry(d, [], viewModel));
+                            viewModel.entries.push(new CustomEntry(d, [], viewModel));
                         }
                     },
                     error:   function (err) {
