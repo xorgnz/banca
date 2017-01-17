@@ -22,22 +22,13 @@ router.get('/', function (req, res, next) {
 });
 
 
-// GET - Specific
-router.get('/:id', function (req, res, next) {
-    Promise.resolve()
-        .then(() => { return budgetDAO.get(req.db, req.params.id); })
-        .then((row) => { res.status(HTTP.OK).json({success: true, data: row}); })
-        .catch(next);
-});
-
-
 // SPECIAL GET - List allowed budget types 
 router.get('/types', function (req, res, next) {
     res.status(HTTP.OK).json({success: true, data: budgetDAO.types});
 });
 
 
-// SPECIAL GET - Retrieve particular budget 
+// GET - Specific
 router.get('/:id', function (req, res, next) {
     Promise.resolve()
         .then(() => { return budgetDAO.get(req.db, req.params.id); })

@@ -187,7 +187,7 @@
             // Load entries
             .then(() => {
                 return $.ajax({
-                    url:     "/rest/account/{{account_id}}/entries",
+                    url:     "/rest/entry/byAccountAndPeriod/{{account_id}}/" + viewModel.currentPeriod.id,
                     success: function (data) {
                         for (var d of data.data) {
                             viewModel.entries.push(new Entry(d, [], viewModel));

@@ -30,12 +30,6 @@ router.get('/', function (req, res, next) {
 });
 
 
-// GET - Specific - Blocked
-router.get('/:id', function (req, res, next) {
-    res.status(HTTP.OK).json({success: false, message: "Endpoint blocked"});
-});
-
-
 // SPECIAL GET - List entries associated with given account
 router.get('/byAccount/:id', function (req, res, next) {
     Promise.resolve()
@@ -57,6 +51,12 @@ router.get('/byAccountAndPeriod/:account_id/:period_id', function (req, res, nex
 // SPECIAL GET - List allowed budget types
 router.get('/tags', function (req, res, next) {
     res.status(HTTP.OK).json({success: true, data: entryDAO.tags});
+});
+
+
+// GET - Specific - Blocked
+router.get('/:id', function (req, res, next) {
+    res.status(HTTP.OK).json({success: false, message: "Endpoint blocked"});
 });
 
 
