@@ -48,7 +48,7 @@ router.get('/byAccount/:id', function (req, res, next) {
 // SPECIAL GET - List entries associated with given account and period
 router.get('/byAccountAndPeriod/:account_id/:period_id', function (req, res, next) {
     Promise.resolve()
-        .then(() => { return entryDAO.listByAccount(req.db, req.params.id); })
+        .then(() => { return entryDAO.listByAccountAndPeriod(req.db, req.params.account_id, req.params.period_id); })
         .then((rows) => { res.status(HTTP.OK).json({success: true, data: rows}); })
         .catch(next);
 });
