@@ -224,8 +224,8 @@ exports.get = function (db, id) {
 };
 
 
-exports.getByPeriodAndAccount = function (db, period_id, account_id) {
-    logger.trace("Accounting DAO - getByPeriodAndAccount: P: " + period_id + ", A: " + account_id);
+exports.getByAccountAndPeriod = function (db, account_id, period_id) {
+    logger.trace("Accounting DAO - getByAccountAndPeriod: P: " + account_id + ", A: " + period_id);
     check.assert.equal(db.constructor.name, "Database");
     check.assert(check.__numberlike(account_id));
     check.assert(check.__numberlike(period_id));

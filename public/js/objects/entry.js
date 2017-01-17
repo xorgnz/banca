@@ -66,6 +66,7 @@ class Entry extends AjaxRestObject {
         this.field_where     = new EditableTextField(this, "where", "td", "width-6", true);
         this.field_what      = new EditableTextField(this, "what", "td", "width-6", true);
         this.field_amount    = new EditableAmountTextField(this, "amount", "td", "width-3", true);
+        this.field_balance   = domsugar_td("", {class: "balance"});
         this.buttons         = new DeleteButtonPanel(this, "td", "width-3", true);
 
         // Create container
@@ -80,6 +81,7 @@ class Entry extends AjaxRestObject {
         this.container.appendChild(this.field_where.container);
         this.container.appendChild(this.field_what.container);
         this.container.appendChild(this.field_amount.container);
+        this.container.appendChild(this.field_balance);
         this.container.appendChild(this.buttons.container);
 
         return this.container;
@@ -96,6 +98,7 @@ class Entry extends AjaxRestObject {
         this.field_where     = new EditableTextField(this, "where", "td", "width-6", false);
         this.field_what      = new EditableTextField(this, "what", "td", "width-6", false);
         this.field_amount    = new EditableAmountTextField(this, "amount", "td", "width-3", false);
+        this.field_balance   = domsugar_td("", {class: "balance"});
         this.buttons         = new AddButtonPanel(this, "td", "width-3");
 
         // Create container
@@ -110,11 +113,16 @@ class Entry extends AjaxRestObject {
         this.container.appendChild(this.field_where.container);
         this.container.appendChild(this.field_what.container);
         this.container.appendChild(this.field_amount.container);
+        this.container.appendChild(this.field_balance);
         this.container.appendChild(this.buttons.container);
 
         return this.container;
     }
 
+    expressBalance(val) {
+        if (this.field_balance)
+            $(this.field_balance).text(val);
+    }
 
     refreshFields() {
         this.field_date.refresh();

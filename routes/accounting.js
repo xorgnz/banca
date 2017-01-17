@@ -28,6 +28,15 @@ router.get('/byAccount/:account_id', function (req, res, next) {
 });
 
 
+// SPECIAL GET - Retrieve accountings for given account
+router.get('/byAccountAndPeriod/:account_id/:period_id', function (req, res, next) {
+    Promise.resolve()
+        .then(() => { return accountingDAO.getByAccountAndPeriod(req.db, req.params.account_id, req.params.period_id); })
+        .then((rows) => { res.status(HTTP.OK).json({success: true, data: rows}); })
+        .catch(next);
+});
+
+
 // SPECIAL GET - Retrieve accountings spanning date range 
 router.get('/byDate/:start/:end/:account_id', function (req, res, next) {
     Promise.resolve()

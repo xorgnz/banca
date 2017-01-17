@@ -299,19 +299,19 @@ describe("Accounting DAO", function () {
     });
 
     // ------------------------------------------------------------- TEST
-    it(".getByPeriodAndAccount", function () {
+    it(".getByAccountAndPeriod", function () {
         const accounting0 = testObjects.createTestAccounting(0, period0, account0);
         const accounting1 = testObjects.createTestAccounting(1, period1, account1);
         return Promise.resolve()
             .then(() => { return accountingDAO.add(db, accounting0); })
             .then(() => { return accountingDAO.add(db, accounting1); })
-            .then(() => { return accountingDAO.getByPeriodAndAccount(db, period0.id, account0.id); })
+            .then(() => { return accountingDAO.getByAccountAndPeriod(db, account0.id, period0.id); })
             .then((obj) => { accounting0.assertEquivalence(obj); })
-            .then(() => { return accountingDAO.getByPeriodAndAccount(db, period0.id, account1.id); })
+            .then(() => { return accountingDAO.getByAccountAndPeriod(db, account1.id, period0.id); })
             .then((obj) => {
                 check.assert.equal(obj, null, "Accounting found when should have been null");
             })
-            .then(() => { return accountingDAO.getByPeriodAndAccount(db, period1.id, account1.id); })
+            .then(() => { return accountingDAO.getByAccountAndPeriod(db, account1.id, period1.id); })
             .then((obj) => { accounting1.assertEquivalence(obj); });
     });
 
