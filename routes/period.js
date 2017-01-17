@@ -8,8 +8,15 @@ const periodDAO = require("../dao/period.js");
 router.get('/', function (req, res, next) {
     Promise.resolve()
         .then(() => { return periodDAO.listAll(req.db); })
-        .then((rows) => {
-            res.status(HTTP.OK).json({success: true, data: rows}); })
+        .then((rows) => { res.status(HTTP.OK).json({success: true, data: rows}); })
+        .catch(next);
+});
+
+// GET specific periods
+router.get('/:id', function (req, res, next) {
+    Promise.resolve()
+        .then(() => { return periodDAO.get(req.db, req.params.id); })
+        .then((rows) => { res.status(HTTP.OK).json({success: true, data: rows}); })
         .catch(next);
 });
 
