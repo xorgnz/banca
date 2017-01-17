@@ -36,18 +36,20 @@ class Entry extends AjaxRestObject {
             }
             else {
                 console.log("Entry " + self.date + " - " + self.amount + " add failed.");
+                self.refreshFields();
             }
         };
 
         this.callbacks.update = function (result) {
             if (result.success) {
-                console.log("Entry " + self.date + " - " + self.amount + " updated.");
+                console.log("Entry " + self.date + " - " + self.amount + " updated.")
+                self.refreshFields();
                 self.releaseFields();
             }
             else {
                 console.log("Entry " + self.date + " - " + self.amount + " update failed.");
+                self.refreshFields();
             }
-            self.refreshFields();
         }
     }
 
