@@ -4,6 +4,7 @@ const _     = require('lodash');
 const db          = require("./_shared.js").db;
 const testObjects = require("./_shared.js").testObjects;
 const periodDAO   = require("../dao/period.js");
+const periodAAO   = require("./aao/period.js");
 
 const beforeEach = require("mocha").beforeEach;
 const describe   = require("mocha").describe;
@@ -178,6 +179,28 @@ describe("Period DAO", function () {
             .then(() => { return periodDAO.listAll(db); })
             .then((rows) => {
                 check.assert.equal(rows.length, 0, "Records remain after removeAll");
+            })
+    });
+});
+
+
+describe("Period AJAX", function () {
+    beforeEach(function () {
+        return Promise.resolve()
+            .then(() => { return periodDAO.removeAll(db); });
+    });
+
+    // ------------------------------------------------------------- TEST
+    it.only(".getByDate", function () {
+        return Promise.resolve()
+            .then(() => {
+                return periodDAO.createOverDateRange(db, new Date("2015-06-01"), new Date("2015-12-01"));
+            })
+            .then(() => {
+                return periodAAO.getByDate(new Date("2015-09-01"));
+            })
+            .then((r) => {
+                check.assert.equal(r.data.name, "September-2015");
             })
     });
 });

@@ -474,7 +474,7 @@ describe("Accounting AJAX", function () {
     });
 
     // ------------------------------------------------------------- TEST
-    it.only(".listOverDateRange", function () {
+    it(".listOverDateRange", function () {
         return Promise.resolve()
             .then(() => {
                 return accountingDAO.createOverDateRange(db, new Date("2015-06-01"), new Date("2015-12-01"), account0.id);

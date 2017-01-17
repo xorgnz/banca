@@ -4,6 +4,7 @@
 {% block content %}
 
 <div id="div_acct_info" style="display:none"></div>
+<div id="div_range_selector" style="display:none"></div>
 
 <link href="/stylesheets/entries.css" rel="stylesheet">
 
@@ -36,6 +37,7 @@
 <script type='text/javascript' src='/js/objects/account.js'></script>
 <script type='text/javascript' src='/js/objects/accounting.js'></script>
 <script type='text/javascript' src='/js/objects/entry.js'></script>
+<script type='text/javascript' src='/js/objects/period.js'></script>
 <script type="text/javascript">
 
     class ViewModel {
@@ -43,12 +45,12 @@
             var self = this;
 
             // Storage
-            this.accountings          = [];
-            this.entries              = [];
-            this.entryTags            = [];
-            this.availableAccountings = [];
-            this.account              = null;
-            this.newEntry             = null;
+            this.accountings = [];
+            this.entries     = [];
+            this.entryTags   = [];
+            this.periods     = [];
+            this.account     = null;
+            this.newEntry    = null;
         };
 
         blankNewEntry() {
@@ -63,7 +65,7 @@
                 what:       "",
                 where:      ""
             }, [], this);
-        };
+        }
 
         expressAccount() {
             var div = $("#div_acct_info");
@@ -80,6 +82,23 @@
             tbody.show();
         }
 
+        expressRangeSelector() {
+            var div = $("#div_range_selector");
+            div.empty();
+
+            var select = document.createElement("select");
+            div.append(select);
+
+            for (var period of this.periods) {
+                var option = document.createElement("option");
+                option.value = period.id;
+                $(option).text(period.date_start.toLocaleString("en-us", { month: "long", year: "numeric" }));
+                $(select).append(option);
+            }
+
+            div.show();
+        }
+
         hideLoadingDialog() {
             $("#div_loading").hide();
         }
@@ -90,8 +109,7 @@
         var viewModel = new ViewModel();
 
         var date_end   = new Date().getTime();
-//        var date_start = date_end - 15552000000;
-        var date_start = date_end - 311040000000;
+        var date_start = date_end - 15552000000;
 
         // Set up promise chain
         Promise.resolve()
@@ -111,14 +129,15 @@
                 }).promise();
             })
 
-            // Load available acccountings
+            // Load periods for range selection
             .then(() => {
                 return $.ajax({
-                    url:     "/rest/accounting/byAccount/{{account_id}}",
+                    url:     "/rest/period/",
                     success: function (response) {
                         for (var d of response.data) {
-                            viewModel.availableAccountings.push(new Accounting(d, viewModel));
+                            viewModel.periods.push(new Period(d, viewModel));
                         }
+                        viewModel.expressRangeSelector();
                     },
                     error:   function (err) {
                         alert("Cannot load available accountings. See console for details");

@@ -6,7 +6,7 @@ const client = request.createClient('http://localhost:3001/');
 
 
 exports.listByAccount = function (account_id) {
-    logger.trace("Budget AJAX - .listOverDateRange:");
+    logger.trace("Accounting AJAX - .listOverDateRange:");
     logger.trace(account_id);
     return new Promise((resolve, reject) => {
         client.get("/rest/accounting/byAccount/" + account_id, shared.fn_response_get(resolve, reject));
@@ -15,7 +15,7 @@ exports.listByAccount = function (account_id) {
 
 
 exports.listOverDateRange = function (date_start, date_end, account_id) {
-    logger.trace("Budget AJAX - .listOverDateRange:");
+    logger.trace("Accounting AJAX - .listOverDateRange:");
     logger.trace(date_start);
     logger.trace(date_end);
     logger.trace(account_id);
