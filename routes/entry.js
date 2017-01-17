@@ -6,7 +6,7 @@ const accountingDAO = require("../dao/accounting.js");
 const entryDAO      = require("../dao/entry.js");
 
 
-/* GET list of all objects of this type */
+// GET list of all objects of this type 
 router.get('/', function (req, res, next) {
     Promise.resolve()
         .then(() => { return entryDAO.listAll(req.db); })
@@ -15,13 +15,28 @@ router.get('/', function (req, res, next) {
 });
 
 
-/* SPECIAL GET - List allowed budget types */
+// SPECIAL GET - List allowed budget types
 router.get('/tags', function (req, res, next) {
     res.status(HTTP.OK).json({success: true, data: entryDAO.tags});
 });
 
+// SPECIAL GET - List entries associated with given account
+router.get('/byAccount/:id', function (req, res, next) {
+    Promise.resolve()
+        .then(() => { return entryDAO.listByAccount(req.db, req.params.id); })
+        .then((rows) => { res.status(HTTP.OK).json({success: true, data: rows}); })
+        .catch(next);
+});
 
-/* POST - Create new object */
+// SPECIAL GET - List entries associated with given account and period
+router.get('/byAccountAndPeriod/:account_id/:period_id', function (req, res, next) {
+    Promise.resolve()
+        .then(() => { return entryDAO.listByAccount(req.db, req.params.id); })
+        .then((rows) => { res.status(HTTP.OK).json({success: true, data: rows}); })
+        .catch(next);
+});
+
+// POST - Create new object 
 router.post('/', function (req, res, next) { shared.validate(req, res, next, entryDAO.Entry); });
 router.post('/', function (req, res, next) {
     var entry = entryDAO.Entry.fromObject(req.body);
@@ -38,7 +53,7 @@ router.post('/', function (req, res, next) {
 });
 
 
-/* DELETE - Delete specified object */
+// DELETE - Delete specified object 
 router.delete("/:id", function (req, res, next) {
     Promise.resolve()
         .then(() => { return accountingDAO.getByEntry(req.db, req.params.id); })
@@ -53,7 +68,7 @@ router.delete("/:id", function (req, res, next) {
 });
 
 
-/* PATCH - Update specified object */
+// PATCH - Update specified object 
 router.patch('/:id', function (req, res, next) { shared.validate(req, res, next, entryDAO.Entry); });
 router.patch("/:id", function (req, res, next) {
     req.body.id = req.params.id;

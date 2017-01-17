@@ -229,6 +229,34 @@ exports.listByAccount = function(db, account_id) {
 };
 
 
+exports.listByAccountAndPeriod = function(db, account_id, period_id) {
+    logger.trace("Entry DAO - listByAccountAndPeriod");
+    check.assert.equal(db.constructor.name, "Database");
+    check.assert(check.__numberlike(account_id));
+    check.assert(check.__numberlike(period_id));
+
+    return Promise.resolve()
+        .then(() => { return periodDAO.get(db, period_id); })
+        .then((period) => {
+            return new Promise((resolve, reject) => {
+                db.all(
+                    "SELECT * FROM entry " +
+                    "WHERE " +
+                    "   entry_date >= ? AND " +
+                    "   entry_date <= ? AND " +
+                    "   entry_account_id = ? " +
+                    "ORDER BY entry_date",
+                    period.date_start,
+                    period.date_end,
+                    account_id,
+                    shared.generateDBResponseFunctionGet(resolve, reject, Entry.fromObject)
+                );
+            });
+        });
+};
+
+
+
 exports.listByAccounting = function(db, accounting_id) {
     logger.trace("Entry DAO - listByAccounting. ID: " + accounting_id);
     check.assert.equal(db.constructor.name, "Database");

@@ -56,13 +56,5 @@ router.patch("/:id", function (req, res, next) {
         .catch(next);
 });
 
-/* SPECIAL GET - List entries associated with account */
-router.get('/:id/entries', function (req, res, next) {
-    Promise.resolve()
-        .then(() => { return entryDAO.listByAccount(req.db, req.params.id); })
-        .then((rows) => { res.status(HTTP.OK).json({success: true, data: rows}); })
-        .catch(next);
-});
-
 
 module.exports = router;

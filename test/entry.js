@@ -115,6 +115,37 @@ describe("Entry DAO", function () {
                 rows[0].assertEquivalence(entry_sp_2);
             });
     });
+    // ------------------------------------------------------------- TEST
+    it.only(".listByAccountAndPeriod", function () {
+        var period0     = testObjects.createTestPeriod(0);
+        var period1     = testObjects.createTestPeriod(1);
+        var entry_sp_0  = testObjects.createTestEntry(0, account0);
+        var entry_sp_1  = testObjects.createTestEntry(1, account0);
+        var entry_sp_2  = testObjects.createTestEntry(2, account0);
+        var entry_sp_3  = testObjects.createTestEntry(3, account1);
+        entry_sp_0.date = period0.date_start + 1001;
+        entry_sp_1.date = period0.date_start + 1002;
+        entry_sp_2.date = period1.date_start + 1003;
+        entry_sp_3.date = period0.date_start + 1004;
+
+        return Promise.resolve()
+            .then(() => { return periodDAO.removeAll(db); })
+            .then(() => {
+                return Promise.all([
+                    periodDAO.add(db, period0),
+                    periodDAO.add(db, period1),
+                    entryDAO.add(db, entry_sp_0),
+                    entryDAO.add(db, entry_sp_1),
+                    entryDAO.add(db, entry_sp_2),
+                    entryDAO.add(db, entry_sp_3)]);
+            })
+            .then(() => { return entryDAO.listByAccountAndPeriod(db, account0.id, period0.id) })
+            .then((rows) => {
+                check.assert.equal(rows.length, 2, "Incorrect number of entries retrieved");
+                rows[0].assertEquivalence(entry_sp_0);
+                rows[1].assertEquivalence(entry_sp_1);
+            });
+    });
 
     // ------------------------------------------------------------- TEST
     it(".listByAccounting", function () {
