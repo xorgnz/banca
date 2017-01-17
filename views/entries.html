@@ -40,6 +40,38 @@
 <script type='text/javascript' src='/js/objects/period.js'></script>
 <script type="text/javascript">
 
+    class CustomEntry extends Entry {
+        constructor(obj, budget_allocations, viewModel) {
+            super(obj, budget_allocations, viewModel);
+            var self = this;
+
+            // Extend add callback
+            var fn_add = this.callbacks.add;
+            this.callbacks.add = function (result) {
+                if (result.success) {
+
+                    // Update view model
+                    self.viewModel.entries.push(self);
+                    self.viewModel.blankNewEntry();
+
+                    // Update expression
+                    self.viewModel.expressEntryAddition(self);
+                }
+                fn_add(result);
+            };
+
+            // Extend delete callback
+            var fn_del = this.callbacks.del;
+            this.callbacks.del= function (result) {
+                if (result.success) {
+                    _.pull(self.viewModel.entries, self);
+                    self.container.parentNode.removeChild(self.container);
+                }
+                fn_add(result);
+            };
+        }
+    }
+
     class ViewModel {
         constructor() {
             var self = this;
@@ -54,14 +86,14 @@
         };
 
         blankNewEntry() {
-            this.newEntry = new Entry({
+            this.newEntry = new CustomEntry({
                 id:         null,
                 account_id: "{{account_id}}",
                 amount:     0,
-                date:       "1970-01-01",
+                date:       new Date().getTime(),
                 bank_note:  "Created via UI",
                 note:       "",
-                tag:        "",
+                tag:        "Unknown",
                 what:       "",
                 where:      ""
             }, [], this);
@@ -74,6 +106,13 @@
             div.show();
         }
 
+        expressEntryAddition(entry) {
+            var tbody = $("#tbody_entries");
+            $(entry.container).remove();
+            tbody.append(entry.expressAsEditableTableRow());
+            tbody.append(entry.viewModel.newEntry.expressAsAddForm());
+        }
+
         expressCurrentPeriod() {
             var div = $("#div_period_info");
             div.empty();
@@ -82,10 +121,19 @@
         }
 
         expressEntries() {
+            var self = this;
+
+            // Init table
             var tbody = $("#tbody_entries");
             tbody.empty();
+
+            // Express entries for editing
             for (var entry of this.entries)
                 tbody.append(entry.expressAsEditableTableRow());
+
+            // Express new entry form
+            tbody.append(this.newEntry.expressAsAddForm());
+
             tbody.show();
         }
 

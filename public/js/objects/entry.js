@@ -3,7 +3,7 @@ class Entry extends AjaxRestObject {
         super("/rest/entry/", "entry");
 
         this.viewModel = viewModel;
-        var self        = this;
+        var self       = this;
 
         // Storage
         this.id                 = obj.id;
@@ -23,17 +23,20 @@ class Entry extends AjaxRestObject {
         // AJAX callbacks
         this.callbacks.del = function (result) {
             if (result.success) {
-                _.pull(viewModel.entries, self);
-                self.container.parentNode.removeChild(self.container);
                 console.log("Entry " + self.date + " - " + self.amount + " removed.");
             }
         };
 
         this.callbacks.add = function (result) {
-            viewModel.entries.push(self);
-            viewModel.blankNewEntry();
-            this.amount = "" + Number.parseFloat(this.amount).toFixed(2);
-            console.log("Entry " + self.date + " - " + self.amount + " added.");
+            if (result.success) {
+                console.log("Entry " + self.date + " - " + self.amount + " added.");
+                self.amount = "" + Number.parseFloat(self.amount).toFixed(2);
+                self.refreshFields();
+                self.releaseFields();
+            }
+            else {
+                console.log("Entry " + self.date + " - " + self.amount + " add failed.");
+            }
         };
 
         this.callbacks.update = function (result) {
@@ -52,14 +55,14 @@ class Entry extends AjaxRestObject {
         var self = this;
 
         // Create components
-        this.field_date      = new EditableTextField(this, "date", "td", "width-3");
-        this.field_tag       = new TagSelectionField(this, "tag", this.viewModel.entryTags, "td", "width-3");
-        this.field_bank_note = new EditableTextField(this, "bank_note", "td", "width-6");
-        this.field_note      = new EditableTextField(this, "note", "td", "width-6");
-        this.field_where     = new EditableTextField(this, "where", "td", "width-6");
-        this.field_what      = new EditableTextField(this, "what", "td", "width-6");
-        this.field_amount    = new EditableAmountTextField(this, "amount", "td", "width-3");
-        this.deleteButtons   = new DeleteButtonPanel(this, "td", "width-3");
+        this.field_date      = new EditableTextField(this, "date", "td", "width-3", true);
+        this.field_tag       = new TagSelectionField(this, "tag", this.viewModel.entryTags, "td", "width-3", true);
+        this.field_bank_note = new EditableTextField(this, "bank_note", "td", "width-6", true);
+        this.field_note      = new EditableTextField(this, "note", "td", "width-6", true);
+        this.field_where     = new EditableTextField(this, "where", "td", "width-6", true);
+        this.field_what      = new EditableTextField(this, "what", "td", "width-6", true);
+        this.field_amount    = new EditableAmountTextField(this, "amount", "td", "width-3", true);
+        this.buttons         = new DeleteButtonPanel(this, "td", "width-3", true);
 
         // Create container
         this.container = document.createElement("tr");
@@ -73,10 +76,41 @@ class Entry extends AjaxRestObject {
         this.container.appendChild(this.field_where.container);
         this.container.appendChild(this.field_what.container);
         this.container.appendChild(this.field_amount.container);
-        this.container.appendChild(this.deleteButtons.container);
+        this.container.appendChild(this.buttons.container);
 
         return this.container;
     }
+
+    expressAsAddForm() {
+        var self = this;
+
+        // Create components
+        this.field_date      = new EditableTextField(this, "date", "td", "width-3", false);
+        this.field_tag       = new TagSelectionField(this, "tag", this.viewModel.entryTags, "td", "width-3", false);
+        this.field_bank_note = new EditableTextField(this, "bank_note", "td", "width-6", false);
+        this.field_note      = new EditableTextField(this, "note", "td", "width-6", false);
+        this.field_where     = new EditableTextField(this, "where", "td", "width-6", false);
+        this.field_what      = new EditableTextField(this, "what", "td", "width-6", false);
+        this.field_amount    = new EditableAmountTextField(this, "amount", "td", "width-3", false);
+        this.buttons         = new AddButtonPanel(this, "td", "width-3");
+
+        // Create container
+        this.container = document.createElement("tr");
+
+        // Assemble
+        this.container.appendChild(domsugar_td("", {class: "id"}));
+        this.container.appendChild(this.field_date.container);
+        this.container.appendChild(this.field_tag.container);
+        this.container.appendChild(this.field_bank_note.container);
+        this.container.appendChild(this.field_note.container);
+        this.container.appendChild(this.field_where.container);
+        this.container.appendChild(this.field_what.container);
+        this.container.appendChild(this.field_amount.container);
+        this.container.appendChild(this.buttons.container);
+
+        return this.container;
+    }
+
 
     refreshFields() {
         this.field_date.refresh();

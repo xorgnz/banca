@@ -35,7 +35,7 @@ class UIComponent {
 }
 
 class EditableTextField extends UIComponent {
-    constructor(object, field, container, className) {
+    constructor(object, field, container, className, flag_updateEnabled) {
         super(container, className);
 
         // Initialize
@@ -56,7 +56,8 @@ class EditableTextField extends UIComponent {
         this.input.onchange    = () => {
             this.dirty    = true;
             object[field] = this.input.value;
-            object.update();
+            if (flag_updateEnabled)
+                object.update();
         };
 
         // Configure
@@ -87,6 +88,23 @@ class EditableTextField extends UIComponent {
     stopEditing() {
         this.dirty          = false;
         this.input.disabled = true;
+    }
+}
+
+class AddButtonPanel extends UIComponent {
+    constructor(object, container, className) {
+        super(container, className);
+
+        // Initialize
+        var self    = this;
+        this.object = object;
+
+        // Set up elements
+        this.button = domsugar_button("Add");
+        this.container.appendChild(this.button);
+
+        // Events
+        this.button.onclick = () => { object.add(); };
     }
 }
 
@@ -126,12 +144,11 @@ class DeleteButtonPanel extends UIComponent {
         stylesugar_hide(this.button_delConfirm);
         stylesugar_hide(this.button_delCancel);
     }
-
 }
 
 class EditableAmountTextField extends EditableTextField {
-    constructor(object, field, container, className) {
-        super(object, field, container, className);
+    constructor(object, field, container, className, onchange) {
+        super(object, field, container, className, onchange);
         this.refresh();
     }
 
@@ -149,13 +166,14 @@ class EditableAmountTextField extends EditableTextField {
 }
 
 class TagSelectionField extends UIComponent {
-    constructor(object, field, tags, container, className) {
+    constructor(object, field, tags, container, className, onchange) {
         super(container, className);
 
         // Initialize
-        var self    = this;
-        this.object = object;
-        this.field  = field;
+        var self      = this;
+        this.object   = object;
+        this.onchange = onchange;
+        this.field    = field;
 
         // Set up elements
         this.input          = document.createElement("input");
@@ -205,7 +223,8 @@ class TagSelectionField extends UIComponent {
 
         // Update
         this.object[this.field] = selected;
-        this.object.update();
+        if (this.onchange)
+            this.onchange();
     }
 
     setTagStyle(selected) {

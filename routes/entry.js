@@ -4,6 +4,7 @@ const shared = require('./_shared');
 
 const accountingDAO = require("../dao/accounting.js");
 const entryDAO      = require("../dao/entry.js");
+const periodDAO     = require("../dao/period.js");
 
 
 // DELETE - Delete
@@ -67,16 +68,14 @@ router.patch("/:id", function (req, res, next) {
     var entry   = entryDAO.Entry.fromObject(req.body);
     Promise.resolve()
         .then(() => { return entryDAO.update(req.db, entry); })
-        .then(() => { return accountingDAO.getByEntry(req.db, req.params.id); })
+        .then(() => { return accountingDAO.getByDateAndAccount(req.db, entry.date, entry.account_id); })
         .then((accounting) => {
             if (!accounting) {
-                console.log(entry.account_id);
                 return Promise.resolve()
                     .then(() => { return accountingDAO.createOverDateRange(req.db, entry.date, entry.date, entry.account_id); })
-                    .then(() => { return accountingDAO.getByEntry(req.db, req.params.id); })
+                    .then(() => { return accountingDAO.getByDateAndAccount(req.db, entry.date, entry.account_id); })
             }
-            else
-                return accounting;
+            return accounting;
         })
         .then((accounting) => {
             return Promise.resolve()
@@ -94,7 +93,15 @@ router.post('/', function (req, res, next) {
     var entry = entryDAO.Entry.fromObject(req.body);
     Promise.resolve()
         .then(() => { return entryDAO.add(req.db, entry); })
-        .then(() => { return accountingDAO.getByEntry(req.db, entry.id); })
+        .then(() => { return accountingDAO.getByDateAndAccount(req.db, entry.date, entry.account_id); })
+        .then((accounting) => {
+            if (!accounting) {
+                return Promise.resolve()
+                    .then(() => { return accountingDAO.createOverDateRange(req.db, entry.date, entry.date, entry.account_id); })
+                    .then(() => { return accountingDAO.getByDateAndAccount(req.db, entry.date, entry.account_id); })
+            }
+            return accounting;
+        })
         .then((accounting) => {
             return Promise.resolve()
                 .then(() => { return accountingDAO.calc(req.db, accounting.id); })
