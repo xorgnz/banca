@@ -94,14 +94,13 @@ table.data_table td input {
     font-weight: bold;
     padding: 2px;
 }
-table.data_table td input:enabled{ color: yellow; }
-table.data_table td input:focus { color: blue; }
-table.data_table td input.error {
-    background-color: #ffb0b0;
+table.data_table td input:enabled{ color: #0000a0; }
+table.data_table td input:focus { color: #0000ff; }
+table.data_table td.error input {
+    color: #a00000;
     border: 1px solid #ff0000;
 }
 table.data_table td span.error {
-    color: #c00000;
     font-size: 10px;
     padding: 4px;
 }

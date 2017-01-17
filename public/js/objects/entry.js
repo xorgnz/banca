@@ -37,6 +37,7 @@ class Entry extends AjaxRestObject {
             else {
                 console.log("Entry " + self.date + " - " + self.amount + " add failed.");
                 self.refreshFields();
+                self.releaseFields();
             }
         };
 
@@ -49,6 +50,7 @@ class Entry extends AjaxRestObject {
             else {
                 console.log("Entry " + self.date + " - " + self.amount + " update failed.");
                 self.refreshFields();
+                self.releaseFields();
             }
         }
     }

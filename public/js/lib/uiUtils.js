@@ -170,10 +170,10 @@ class TagSelectionField extends UIComponent {
         super(container, className);
 
         // Initialize
-        var self      = this;
-        this.object   = object;
+        var self                 = this;
+        this.object              = object;
         this.flag_triggerUpdates = flag_triggerUpdates;
-        this.field    = field;
+        this.field               = field;
 
         // Set up elements
         this.input          = document.createElement("input");
