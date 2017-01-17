@@ -196,7 +196,7 @@ describe("Entry DAO", function () {
         const entry1      = testObjects.createTestEntry(1, account1);
         return Promise.resolve()
             .then(() => { return entryDAO.add(db, entry0); })
-            .then(() => { return entryDAO.add(db, entry0); })
+            .then(() => { return entryDAO.add(db, entry1); })
             .then(() => { return entryDAO.removeAll(db); })
             .then(() => { return entryDAO.listAll(db); })
             .then((rows) => {

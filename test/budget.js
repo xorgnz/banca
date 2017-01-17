@@ -1,4 +1,5 @@
-const check   = require('../lib/types.js').check;
+const check = require('../lib/types.js').check;
+const _     = require('lodash');
 
 const db          = require("./_shared.js").db;
 const testObjects = require("./_shared.js").testObjects;
@@ -11,8 +12,6 @@ const it         = require("mocha").it;
 
 
 describe("Budget DAO", function () {
-    const budget0 = testObjects.createTestBudget(0);
-    const budget1 = testObjects.createTestBudget(1);
 
     beforeEach(function () {
         return Promise.resolve()
@@ -20,15 +19,16 @@ describe("Budget DAO", function () {
     });
 
     it("CRUD", function () {
+        const budget0 = testObjects.createTestBudget(0);
+        const budget1 = testObjects.createTestBudget(1);
         return Promise.resolve()
-
             // Test Add
             .then(() => { return budgetDAO.add(db, budget0); })
             .then((id) => { return budgetDAO.get(db, id); })
             .then((obj) => {
                 check.assert.assigned(obj, "Added object is null");
                 check.assert.assigned(obj.id, "ID not set");
-                obj.assertEquivalence(budget0);
+                budget0.assertEquivalence(obj);
             })
             .then(() => { return budgetDAO.listAll(db); })
             .then((rows) => {
@@ -39,7 +39,7 @@ describe("Budget DAO", function () {
             .then(() => { budget1.id = budget0.id; })
             .then(() => { return budgetDAO.update(db, budget1); })
             .then(() => { return budgetDAO.get(db, budget1.id); })
-            .then((obj) => { obj.assertEquivalence(budget1); })
+            .then((obj) => { budget1.assertEquivalence(obj); })
 
             // Test remove
             .then(() => { return budgetDAO.remove(db, budget0.id); })
@@ -62,9 +62,11 @@ describe("Budget DAO", function () {
 
     // ------------------------------------------------------------- TEST
     it(".removeAll", function () {
+        const budget0 = testObjects.createTestBudget(0);
+        const budget1 = testObjects.createTestBudget(1);
         return Promise.resolve()
             .then(() => { return budgetDAO.add(db, budget0); })
-            .then(() => { return budgetDAO.add(db, budget0); })
+            .then(() => { return budgetDAO.add(db, budget1); })
             .then(() => { return budgetDAO.removeAll(db); })
             .then(() => { return budgetDAO.listAll(db); })
             .then((rows) => {
@@ -75,9 +77,6 @@ describe("Budget DAO", function () {
 
 
 describe("Budget AJAX", function () {
-    const budget0 = testObjects.createTestBudget(0);
-    const budget1 = testObjects.createTestBudget(1);
-
     beforeEach(function () {
         return Promise.resolve()
             .then(() => { return budgetDAO.removeAll(db); })
@@ -85,11 +84,13 @@ describe("Budget AJAX", function () {
 
     // ------------------------------------------------------------- TEST
     it("CRUD", function () {
+        const budget0 = testObjects.createTestBudget(0);
+        const budget1 = testObjects.createTestBudget(1);
         return Promise.resolve()
             // Test Add
             .then(() => { return budgetAAO.add(budget0); })
             .then((r) => { return budgetAAO.get(budget0.id); })
-            .then((r) => { budget0.assertEquivalenceIgnoreFields(r.data); })
+            .then((r) => { budget0.assertEquivalence(r.data); })
             .then(() => { return budgetAAO.listAll(db); })
             .then((r) => {
                 check.assert.array(r.data, ".listAll - Returned data is not array");
@@ -107,7 +108,8 @@ describe("Budget AJAX", function () {
             // Test remove
             .then(() => {
                 console.log(budget0);
-            return budgetAAO.remove(budget0.id, "id"); })
+                return budgetAAO.remove(budget0.id, "id");
+            })
             .then(() => { return budgetAAO.listAll(db); })
             .then((r) => {
                 check.assert.equal(r.data.length, 0, "Record remains after remove");

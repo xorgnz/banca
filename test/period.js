@@ -12,10 +12,6 @@ const it         = require("mocha").it;
 
 
 describe("Period DAO", function () {
-    const period0 = testObjects.createTestPeriod(0);
-    const period1 = testObjects.createTestPeriod(1);
-    const period2 = testObjects.createTestPeriod(2);
-
     beforeEach(function () {
         return Promise.resolve()
             .then(() => { return periodDAO.removeAll(db); })
@@ -23,8 +19,9 @@ describe("Period DAO", function () {
 
     // ------------------------------------------------------------- TEST
     it("CRUD", function () {
+        const period0 = testObjects.createTestPeriod(0);
+        const period1 = testObjects.createTestPeriod(1);
         return Promise.resolve()
-
             // Test Add
             .then(() => { return periodDAO.add(db, period0); })
             .then((id) => {
@@ -33,7 +30,7 @@ describe("Period DAO", function () {
             .then((obj) => {
                 check.assert.assigned(obj, "Added object is null");
                 check.assert.assigned(obj.id, "ID not set");
-                obj.assertEquivalence(period0);
+                period0.assertEquivalence(obj);
             })
             .then(() => { return periodDAO.listAll(db); })
             .then((rows) => {
@@ -44,7 +41,7 @@ describe("Period DAO", function () {
             .then(() => { period1.id = period0.id; })
             .then(() => { return periodDAO.update(db, period1); })
             .then(() => { return periodDAO.get(db, period1.id); })
-            .then((obj) => { obj.assertEquivalence(period1); })
+            .then((obj) => { period1.assertEquivalence(obj); })
 
             // Test remove
             .then(() => { return periodDAO.remove(db, period0.id); })
@@ -108,16 +105,19 @@ describe("Period DAO", function () {
 
     // ------------------------------------------------------------- TEST
     it(".getByDate", function () {
+        const period0 = testObjects.createTestPeriod(0);
+        const period1 = testObjects.createTestPeriod(1);
+        const period2 = testObjects.createTestPeriod(2);
         return Promise.resolve()
             .then(() => { return periodDAO.add(db, period0); })
             .then(() => { return periodDAO.add(db, period1); })
             .then(() => { return periodDAO.add(db, period2); })
             .then(() => { return periodDAO.getByDate(db, new Date("2000-01-20")); })
-            .then((obj) => { obj.assertEquivalence(period0); })
+            .then((obj) => { period0.assertEquivalence(obj); })
             .then(() => { return periodDAO.getByDate(db, new Date("2001-01-31T23:59:59.999Z")); })
-            .then((obj) => { obj.assertEquivalence(period1); })
+            .then((obj) => { period1.assertEquivalence(obj); })
             .then(() => { return periodDAO.getByDate(db, new Date("2002-01-01T00:00:00.000Z")); })
-            .then((obj) => { obj.assertEquivalence(period2); })
+            .then((obj) => { period2.assertEquivalence(obj); })
             .then(() => { return periodDAO.getByDate(db, new Date("2003-01-01T00:00:00.000Z")); })
             .then((obj) => {
                 check.assert.equal(obj, null, "Expecting null - no period should match - bad date");
@@ -172,9 +172,11 @@ describe("Period DAO", function () {
 
     // ------------------------------------------------------------- TEST
     it(".removeAll", function () {
+        const period0 = testObjects.createTestPeriod(0);
+        const period1 = testObjects.createTestPeriod(1);
         return Promise.resolve()
             .then(() => { return periodDAO.add(db, period0); })
-            .then(() => { return periodDAO.add(db, period0); })
+            .then(() => { return periodDAO.add(db, period1); })
             .then(() => { return periodDAO.removeAll(db); })
             .then(() => { return periodDAO.listAll(db); })
             .then((rows) => {
@@ -191,7 +193,7 @@ describe("Period AJAX", function () {
     });
 
     // ------------------------------------------------------------- TEST
-    it.only(".getByDate", function () {
+    it(".getByDate", function () {
         return Promise.resolve()
             .then(() => {
                 return periodDAO.createOverDateRange(db, new Date("2015-06-01"), new Date("2015-12-01"));

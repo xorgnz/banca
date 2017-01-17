@@ -15,22 +15,19 @@ const it         = require("mocha").it;
 
 
 describe("Accounting DAO", function () {
-    const period0     = testObjects.createTestPeriod(0);
-    const account0    = testObjects.createTestAccount(0);
-    const period1     = testObjects.createTestPeriod(1);
-    const account1    = testObjects.createTestAccount(1);
-    const period2     = testObjects.createTestPeriod(2);
-    const account2    = testObjects.createTestAccount(2);
-    const accounting0 = testObjects.createTestAccounting(0, period0, account0);
-    const accounting1 = testObjects.createTestAccounting(1, period1, account1);
-    const accounting2 = testObjects.createTestAccounting(2, period2, account2);
+    const period0  = testObjects.createTestPeriod(0);
+    const period1  = testObjects.createTestPeriod(1);
+    const period2  = testObjects.createTestPeriod(2);
+    const account0 = testObjects.createTestAccount(0);
+    const account1 = testObjects.createTestAccount(1);
+    const account2 = testObjects.createTestAccount(2);
 
     before(() => {
         return Promise.resolve()
             .then(() => { return accountDAO.removeAll(db); })
             .then(() => { return accountDAO.add(db, account0); })
             .then(() => { return accountDAO.add(db, account1); })
-            .then(() => { return accountDAO.add(db, account2); });
+            .then(() => { return accountDAO.add(db, account2); })
     });
 
     beforeEach(() => {
@@ -39,19 +36,20 @@ describe("Accounting DAO", function () {
             .then(() => { return periodDAO.add(db, period0); })
             .then(() => { return periodDAO.add(db, period1); })
             .then(() => { return periodDAO.add(db, period2); })
-            .then(() => { return accountingDAO.removeAll(db); })
+            .then(() => { return accountingDAO.removeAll(db); });
     });
 
     // ------------------------------------------------------------- TEST
     it("CRUD", function () {
+        const accounting0 = testObjects.createTestAccounting(0, period0, account0);
+        const accounting1 = testObjects.createTestAccounting(1, period1, account1);
         return Promise.resolve()
-
             .then(() => { return accountingDAO.add(db, accounting0); })
             .then((id) => { return accountingDAO.get(db, id); })
             .then((obj) => {
                 check.assert.assigned(obj, "Added object is null");
                 check.assert.assigned(obj.id, "ID not set");
-                obj.assertEquivalence(accounting0);
+                accounting0.assertEquivalence(obj);
             })
             .then(() => { return accountingDAO.listAll(db); })
             .then((rows) => {
@@ -61,7 +59,7 @@ describe("Accounting DAO", function () {
             .then(() => { accounting1.id = accounting0.id; })
             .then(() => { return accountingDAO.update(db, accounting1); })
             .then(() => { return accountingDAO.get(db, accounting1.id); })
-            .then((obj) => { obj.assertEquivalence(accounting1); })
+            .then((obj) => { accounting1.assertEquivalence(obj); })
 
             .then(() => { return accountingDAO.remove(db, accounting0.id); })
             .then(() => { return accountingDAO.listAll(db); })
@@ -84,20 +82,21 @@ describe("Accounting DAO", function () {
 
     // ------------------------------------------------------------- TEST
     it(".calc", function () {
+        const accounting0 = testObjects.createTestAccounting(0, period0, account0);
         return Promise.resolve()
             .then(() => { return entryDAO.removeAll(db); })
-            .then(() => { return accountingDAO.add(db, accounting2); })
+            .then(() => { return accountingDAO.add(db, accounting0); })
             .then(() => {
-                var entry_good0    = testObjects.createTestEntry(0, account2);
-                var entry_good1    = testObjects.createTestEntry(0, account2);
-                var entry_good2    = testObjects.createTestEntry(0, account2);
-                var entry_bad0     = testObjects.createTestEntry(0, account2);
+                var entry_good0    = testObjects.createTestEntry(0, account0);
+                var entry_good1    = testObjects.createTestEntry(0, account0);
+                var entry_good2    = testObjects.createTestEntry(0, account0);
+                var entry_bad0     = testObjects.createTestEntry(0, account0);
                 var entry_bad1     = testObjects.createTestEntry(0, account1);
-                entry_good0.date   = period2.date_start + 1000;
-                entry_good1.date   = period2.date_start + 1001;
-                entry_good2.date   = period2.date_start + 1002;
-                entry_bad0.date    = period1.date_start + 1003;
-                entry_bad1.date    = period2.date_start + 1004;
+                entry_good0.date   = period0.date_start + 1000;
+                entry_good1.date   = period0.date_start + 1001;
+                entry_good2.date   = period0.date_start + 1002;
+                entry_bad0.date    = period2.date_start + 1003;
+                entry_bad1.date    = period0.date_start + 1004;
                 entry_good0.amount = 2.95;
                 entry_good1.amount = -1.00;
                 entry_good2.amount = 3.82;
@@ -108,28 +107,20 @@ describe("Accounting DAO", function () {
                     entryDAO.add(db, entry_bad0),
                     entryDAO.add(db, entry_bad1)]);
             })
-            .then(() => { return accountingDAO.calc(db, accounting2.id); })
-            .then(() => { return accountingDAO.get(db, accounting2.id); })
+            .then(() => { return accountingDAO.calc(db, accounting0.id); })
+            .then(() => { return accountingDAO.get(db, accounting0.id); })
             .then((obj) => {
-                check.assert.equal(obj.amount_start, 0.02);
-                check.assert.equal(obj.amount_end, 5.79); // 2.95 - 1.00 + 3.82 + 0.02 (from test obj)
+                check.assert.equal(obj.amount_start, 0.00);
+                check.assert.equal(obj.amount_end, 5.77); // 2.95 - 1.00 + 3.82 + 0.02 (from test obj)
             });
     });
 
     // ------------------------------------------------------------- TEST
     it(".cascade", function () {
-        var period_sp0     = new periodDAO.Period(null, "January-2010",
-            new Date("2010-01-01"),
-            new Date("2010-01-31"));
-        var period_sp1     = new periodDAO.Period(null, "February-2010",
-            new Date("2010-02-01"),
-            new Date("2010-02-28"));
-        var period_sp2     = new periodDAO.Period(null, "March-2010",
-            new Date("2010-03-01"),
-            new Date("2010-03-31"));
-        var period_sp3     = new periodDAO.Period(null, "April-2010",
-            new Date("2010-04-01"),
-            new Date("2010-04-30"));
+        var period_sp0     = new periodDAO.Period(null, "January-2010", new Date("2010-01-01"), new Date("2010-01-31"));
+        var period_sp1     = new periodDAO.Period(null, "February-2010", new Date("2010-02-01"), new Date("2010-02-28"));
+        var period_sp2     = new periodDAO.Period(null, "March-2010", new Date("2010-03-01"), new Date("2010-03-31"));
+        var period_sp3     = new periodDAO.Period(null, "April-2010", new Date("2010-04-01"), new Date("2010-04-30"));
         var accounting_sp0 = new accountingDAO.Accounting(null, period_sp0, account0, 10.50, 20.50);
         var accounting_sp1 = new accountingDAO.Accounting(null, period_sp1, account0, 3.24, 13.24);
         var accounting_sp2 = new accountingDAO.Accounting(null, period_sp2, account0, 892.33, 907.33);
@@ -148,9 +139,9 @@ describe("Accounting DAO", function () {
             .then(() => { return accountingDAO.add(db, accounting_sp4); })
             .then(() => { return accountingDAO.cascade(db, accounting_sp1.id); })
             .then(() => { return accountingDAO.get(db, accounting_sp0.id); })
-            .then((obj) => { obj.assertEquivalence(accounting_sp0); })
+            .then((obj) => { accounting_sp0.assertEquivalence(obj); })
             .then(() => { return accountingDAO.get(db, accounting_sp1.id); })
-            .then((obj) => { obj.assertEquivalence(accounting_sp1); })
+            .then((obj) => { accounting_sp1.assertEquivalence(obj); })
             .then(() => { return accountingDAO.get(db, accounting_sp2.id); })
             .then((accounting) => {
                 check.assert.equal(accounting.amount_start, 13.24);
@@ -171,11 +162,7 @@ describe("Accounting DAO", function () {
     // ------------------------------------------------------------- TEST
     it(".createForPeriods (single period)", function () {
         return Promise.resolve()
-            .then(() => {
-                return accountingDAO.createForPeriods(db,
-                    [period0.id],
-                    account0.id);
-            })
+            .then(() => { return accountingDAO.createForPeriods(db, [period0.id], account0.id); })
             .then(() => { return accountingDAO.listAll(db); })
             .then((rows) => {
                 check.assert.equal(rows.length, 1, "Incorrect number of accountings created");
@@ -262,6 +249,9 @@ describe("Accounting DAO", function () {
 
     // ------------------------------------------------------------- TEST
     it(".getByDateAndAccount", function () {
+        const accounting0 = testObjects.createTestAccounting(0, period0, account0);
+        const accounting1 = testObjects.createTestAccounting(1, period1, account1);
+        const accounting2 = testObjects.createTestAccounting(2, period2, account2);
         return Promise.resolve()
             .then(() => { return accountingDAO.add(db, accounting0); })
             .then(() => { return accountingDAO.add(db, accounting1); })
@@ -269,15 +259,15 @@ describe("Accounting DAO", function () {
             .then(() => {
                 return accountingDAO.getByDateAndAccount(db, new Date("2000-01-20"), account0.id);
             })
-            .then((obj) => { obj.assertEquivalence(accounting0); })
+            .then((obj) => { accounting0.assertEquivalence(obj); })
             .then(() => {
                 return accountingDAO.getByDateAndAccount(db, new Date("2001-01-31T23:59:59.999Z"), account1.id);
             })
-            .then((obj) => { obj.assertEquivalence(accounting1); })
+            .then((obj) => { accounting1.assertEquivalence(obj); })
             .then(() => {
-                return accountingDAO.getByDateAndAccount(db, new Date("2002-01-01T00:00:00.000Z"), account2.id);
+                return accountingDAO.getByDateAndAccount(db, new Date("2002-01-03T14:00:00.000Z"), account2.id);
             })
-            .then((obj) => { obj.assertEquivalence(accounting2); })
+            .then((obj) => { accounting2.assertEquivalence(obj); })
             .then(() => {
                 return accountingDAO.getByDateAndAccount(db, new Date("2000-04-20"), account0.id);
             })
@@ -290,10 +280,12 @@ describe("Accounting DAO", function () {
 
     // ------------------------------------------------------------- TEST
     it(".getByEntry", function () {
-        var entry_sp0  = testObjects.createTestEntry(0, account0);
-        var entry_sp1  = testObjects.createTestEntry(0, account0);
-        entry_sp0.date = new Date("2000-01-20");
-        entry_sp1.date = new Date("2000-06-20");
+        const accounting0 = testObjects.createTestAccounting(0, period0, account0);
+        const accounting1 = testObjects.createTestAccounting(1, period1, account1);
+        var entry_sp0     = testObjects.createTestEntry(0, account0);
+        var entry_sp1     = testObjects.createTestEntry(0, account0);
+        entry_sp0.date    = new Date("2000-01-20");
+        entry_sp1.date    = new Date("2000-06-20");
         return Promise.resolve()
             .then(() => { return accountingDAO.add(db, accounting0); })
             .then(() => { return accountingDAO.add(db, accounting1); })
@@ -301,24 +293,26 @@ describe("Accounting DAO", function () {
             .then(() => { return entryDAO.add(db, entry_sp1); })
             .then(() => { return accountingDAO.listAll(db); })
             .then(() => { return accountingDAO.getByEntry(db, entry_sp0.id); })
-            .then((obj) => { obj.assertEquivalence(accounting0); })
+            .then((obj) => { accounting0.assertEquivalence(obj); })
             .then(() => { return accountingDAO.getByEntry(db, entry_sp1.id); })
             .then((obj) => { check.assert.equal(obj, null, "Expected null - entry outside accountings"); })
     });
 
     // ------------------------------------------------------------- TEST
     it(".getByPeriodAndAccount", function () {
+        const accounting0 = testObjects.createTestAccounting(0, period0, account0);
+        const accounting1 = testObjects.createTestAccounting(1, period1, account1);
         return Promise.resolve()
             .then(() => { return accountingDAO.add(db, accounting0); })
             .then(() => { return accountingDAO.add(db, accounting1); })
             .then(() => { return accountingDAO.getByPeriodAndAccount(db, period0.id, account0.id); })
-            .then((obj) => { obj.assertEquivalence(accounting0); })
+            .then((obj) => { accounting0.assertEquivalence(obj); })
             .then(() => { return accountingDAO.getByPeriodAndAccount(db, period0.id, account1.id); })
             .then((obj) => {
                 check.assert.equal(obj, null, "Accounting found when should have been null");
             })
             .then(() => { return accountingDAO.getByPeriodAndAccount(db, period1.id, account1.id); })
-            .then((obj) => { obj.assertEquivalence(accounting1); });
+            .then((obj) => { accounting1.assertEquivalence(obj); });
     });
 
     // ------------------------------------------------------------- TEST
@@ -421,6 +415,7 @@ describe("Accounting DAO", function () {
 
     // ------------------------------------------------------------- TEST
     it(".peekDatesAndAccount", function () {
+        const accounting0 = testObjects.createTestAccounting(0, period0, account0);
         return Promise.resolve()
             .then(() => { return accountingDAO.add(db, accounting0); })
             .then(() => { return accountingDAO.peekDatesAndAccount(db, accounting0.id); })
@@ -433,6 +428,7 @@ describe("Accounting DAO", function () {
 
     // ------------------------------------------------------------- TEST
     it(".removeAll", function () {
+        const accounting0 = testObjects.createTestAccounting(0, period0, account0);
         return Promise.resolve()
             .then(() => { return accountingDAO.add(db, accounting0); })
             .then(() => { return accountingDAO.add(db, accounting0); })
@@ -451,11 +447,11 @@ describe("Accounting AJAX", function () {
 
     beforeEach(function () {
         return Promise.resolve()
-            .then(() => { return accountingDAO.removeAll(db); })
             .then(() => { return accountDAO.removeAll(db); })
             .then(() => { return accountDAO.add(db, account0); })
             .then(() => { return accountDAO.add(db, account1); })
-            .then(() => { return periodDAO.removeAll(db); });
+            .then(() => { return periodDAO.removeAll(db); })
+            .then(() => { return accountingDAO.removeAll(db); })
     });
 
     // ------------------------------------------------------------- TEST

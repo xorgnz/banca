@@ -1,4 +1,5 @@
 const check = require('../lib/types.js').check;
+const _     = require('lodash');
 
 const db          = require("./_shared.js").db;
 const testObjects = require("./_shared.js").testObjects;
@@ -9,8 +10,6 @@ const describe   = require("mocha").describe;
 const it         = require("mocha").it;
 
 describe("Account DAO", function () {
-    const account0 = testObjects.createTestAccount(0);
-    const account1 = testObjects.createTestAccount(1);
 
     beforeEach(function () {
         return Promise.resolve()
@@ -19,6 +18,8 @@ describe("Account DAO", function () {
 
     // ------------------------------------------------------------- TEST
     it("CRUD", function () {
+        const account0 = testObjects.createTestAccount(0);
+        const account1 = testObjects.createTestAccount(1);
         return Promise.resolve()
             // Test Add
             .then(() => { return accountDAO.add(db, account0); })
@@ -26,7 +27,7 @@ describe("Account DAO", function () {
             .then((obj) => {
                 check.assert.assigned(obj, "Added object is null");
                 check.assert.assigned(obj.id, "ID not set");
-                obj.assertEquivalence(account0);
+                account0.assertEquivalence(obj);
             })
             .then(() => { return accountDAO.listAll(db); })
             .then((rows) => {
@@ -37,7 +38,7 @@ describe("Account DAO", function () {
             .then(() => { account1.id = account0.id; })
             .then(() => { return accountDAO.update(db, account1); })
             .then(() => { return accountDAO.get(db, account1.id); })
-            .then((obj) => { obj.assertEquivalence(account1); })
+            .then((obj) => { account1.assertEquivalence(obj); })
 
             // Test remove
             .then(() => { return accountDAO.remove(db, account0.id); })
@@ -59,9 +60,11 @@ describe("Account DAO", function () {
 
     // ------------------------------------------------------------- TEST
     it(".removeAll", function () {
+        const account0 = testObjects.createTestAccount(0);
+        const account1 = testObjects.createTestAccount(1);
         return Promise.resolve()
             .then(() => { return accountDAO.add(db, account0); })
-            .then(() => { return accountDAO.add(db, account0); })
+            .then(() => { return accountDAO.add(db, account1); })
             .then(() => { return accountDAO.removeAll(db); })
             .then(() => { return accountDAO.listAll(db); })
             .then((rows) => {

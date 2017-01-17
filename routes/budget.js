@@ -22,9 +22,12 @@ router.get('/', function (req, res, next) {
 });
 
 
-// GET - Specific - Blocked
+// GET - Specific
 router.get('/:id', function (req, res, next) {
-    res.status(HTTP.OK).json({success: false, message: "Endpoint blocked"});
+    Promise.resolve()
+        .then(() => { return budgetDAO.get(req.db, req.params.id); })
+        .then((row) => { res.status(HTTP.OK).json({success: true, data: row}); })
+        .catch(next);
 });
 
 
