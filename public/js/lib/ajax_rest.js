@@ -46,7 +46,7 @@ class AjaxRestObject {
                     }
                     else {
                         _.forEach(result.errors, (e) => {
-                            self.validationResults[e.field] = errorToString(e, this.type);
+                            self.validationResults[e.field] = errorToString(e, self.type);
                         });
                     }
                     self.doCallback(self.callbacks.add, result);
@@ -81,7 +81,7 @@ class AjaxRestObject {
                             self.editing = false;
                         } else {
                             _.forEach(result.errors, (e) => {
-                                self.validationResults[e.field] = errorToString(e, this.type);
+                                self.validationResults[e.field] = errorToString(e, self.type);
                             });
                             self.editing = true;
                         }

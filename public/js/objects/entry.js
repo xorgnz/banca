@@ -42,12 +42,12 @@ class Entry extends AjaxRestObject {
         this.callbacks.update = function (result) {
             if (result.success) {
                 console.log("Entry " + self.date + " - " + self.amount + " updated.");
-                self.refreshFields();
                 self.releaseFields();
             }
             else {
                 console.log("Entry " + self.date + " - " + self.amount + " update failed.");
             }
+            self.refreshFields();
         }
     }
 
