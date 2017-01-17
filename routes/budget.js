@@ -5,7 +5,15 @@ const shared = require('./_shared');
 const budgetDAO = require("../dao/budget.js");
 
 
-/* GET - List all budgets */
+// DELETE - Delete
+router.delete("/:id", function (req, res, next) {
+    Promise.resolve()
+        .then(() => { budgetDAO.remove(req.db, req.params.id); })
+        .then(() => { res.status(HTTP.OK).json({success: true}); })
+        .catch(next);
+});
+
+// GET - All
 router.get('/', function (req, res, next) {
     return Promise.resolve()
         .then(() => { return budgetDAO.listAll(req.db); })
@@ -14,13 +22,19 @@ router.get('/', function (req, res, next) {
 });
 
 
-/* SPECIAL GET - List allowed budget types */
+// GET - Specific - Blocked
+router.get('/:id', function (req, res, next) {
+    res.status(HTTP.OK).json({success: false, message: "Endpoint blocked"});
+});
+
+
+// SPECIAL GET - List allowed budget types 
 router.get('/types', function (req, res, next) {
     res.status(HTTP.OK).json({success: true, data: budgetDAO.types});
 });
 
 
-/* SPECIAL GET - Retrieve particular budget */
+// SPECIAL GET - Retrieve particular budget 
 router.get('/:id', function (req, res, next) {
     Promise.resolve()
         .then(() => { return budgetDAO.get(req.db, req.params.id); })
@@ -29,27 +43,7 @@ router.get('/:id', function (req, res, next) {
 });
 
 
-/* POST - Create new budget */
-router.post('/', function (req, res, next) { shared.validate(req, res, next, budgetDAO.Budget); });
-router.post('/', function (req, res, next) {
-    var budget = budgetDAO.Budget.fromObject(req.body);
-    Promise.resolve()
-        .then(() => { return budgetDAO.add(req.db, budget); })
-        .then((rows) => { res.status(HTTP.OK).json({success: true, data: {id: budget.id}}); })
-        .catch(next);
-});
-
-
-/* DELETE - Delete specified budget */
-router.delete("/:id", function (req, res, next) {
-    Promise.resolve()
-        .then(() => { budgetDAO.remove(req.db, req.params.id); })
-        .then(() => { res.status(HTTP.OK).json({success: true}); })
-        .catch(next);
-});
-
-
-/* PATCH - Update specified budget */
+// PATCH - Update
 router.patch('/:id', function (req, res, next) { shared.validate(req, res, next, budgetDAO.Budget); });
 router.patch("/:id", function (req, res, next) {
     req.body.id = req.params.id;
@@ -57,6 +51,17 @@ router.patch("/:id", function (req, res, next) {
     Promise.resolve()
         .then(() => { return budgetDAO.update(req.db, budget); })
         .then((rows) => { res.status(HTTP.OK).json({success: true, data: budget}); })
+        .catch(next);
+});
+
+
+// POST - Create
+router.post('/', function (req, res, next) { shared.validate(req, res, next, budgetDAO.Budget); });
+router.post('/', function (req, res, next) {
+    var budget = budgetDAO.Budget.fromObject(req.body);
+    Promise.resolve()
+        .then(() => { return budgetDAO.add(req.db, budget); })
+        .then((rows) => { res.status(HTTP.OK).json({success: true, data: {id: budget.id}}); })
         .catch(next);
 });
 
