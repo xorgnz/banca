@@ -3,6 +3,7 @@ const HTTP   = require('http-status');
 const shared = require('./_shared');
 
 const accountDAO = require("../dao/account.js");
+const accountingDAO = require("../dao/account.js");
 const entryDAO   = require("../dao/entry.js");
 
 
@@ -52,6 +53,7 @@ router.post('/', function (req, res, next) {
     var account = accountDAO.Account.fromObject(req.body);
     Promise.resolve()
         .then(() => { return accountDAO.add(req.db, account); })
+        .then(() => { return accountingDAO.createForAccount(req.db, account.id); })
         .then((rows) => { res.status(HTTP.OK).json({success: true, data: {id: account.id}}); })
         .catch(next);
 });

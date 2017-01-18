@@ -160,6 +160,19 @@ describe("Accounting DAO", function () {
     });
 
     // ------------------------------------------------------------- TEST
+    it.only(".createForAccount", function () {
+        return Promise.resolve()
+            .then(() => { return periodDAO.removeAll(db); })
+            .then(() => { return periodDAO.createOverDateRange(db, new Date("2010-01-01"), new Date("2010-06-01")); })
+            .then(() => { return accountingDAO.createForAccount(db, account0.id); })
+            .then(() => { return accountingDAO.createForAccount(db, account0.id); })
+            .then(() => { return accountingDAO.listAll(db); })
+            .then((rows) => {
+                check.assert.equal(rows.length, 6, "Incorrect number of accountings created");
+            });
+    });
+
+    // ------------------------------------------------------------- TEST
     it(".createForPeriods (single period)", function () {
         return Promise.resolve()
             .then(() => { return accountingDAO.createForPeriods(db, [period0.id], account0.id); })

@@ -169,6 +169,19 @@ exports.cascade = function (db, id) {
 };
 
 
+exports.createForAccount = function (db, account_id) {
+    logger.trace("Accounting DAO - createForAccount: " + account_id);
+    check.assert.equal(db.constructor.name, "Database");
+    check.assert(check.__numberlike(account_id));
+    return Promise.resolve()
+        .then(() => { return periodDAO.listAll(db); })
+        .then((periods) => {
+            var period_ids = _.map(periods, "id");
+            return exports.createForPeriods(db, period_ids, account_id);
+        });
+};
+
+
 exports.createForPeriods = function (db, period_ids, account_id) {
     logger.trace("Accounting DAO - createForPeriods: [" + period_ids + "], " + account_id);
     check.assert.equal(db.constructor.name, "Database");
