@@ -3,8 +3,9 @@ const sqlite3 = require('sqlite3');
 const fs      = require("fs");
 const logger  = require("../lib/debug.js").logger;
 
-const accountDAO = require("../dao/account.js");
-const periodDAO  = require("../dao/period.js");
+const accountDAO    = require("../dao/account.js");
+const accountingDAO = require("../dao/accounting.js");
+const periodDAO     = require("../dao/period.js");
 
 // Define constants
 const FILENAME_DB_LIVE = "database.sqlite";
@@ -70,12 +71,16 @@ Promise.resolve()
     })
 
     .then(() => {
-        logger.trace("Creating initial periods from 2000 to 2020");
-        return periodDAO.createOverDateRange(db, new Date("2000-01-01"), new Date("2020-12-31"));
+        logger.trace("Creating initial periods from 2015 to 2017");
+        return periodDAO.createOverDateRange(db, new Date("2015-01-01"), new Date("2017-12-31"));
     })
     .then(() => {
         logger.trace("Creating initial account");
         return accountDAO.add(db, new accountDAO.Account(null, "First Account", "Your first account"));
+    })
+    .then((id) => {
+        logger.trace("Creating accountings for initial account");
+        return accountingDAO.createForAccount(db, id);
     })
     .then(() => {
         logger.trace("Database initialization complete");
