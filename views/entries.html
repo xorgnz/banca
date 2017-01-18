@@ -44,6 +44,11 @@
 <script type='text/javascript' src='/js/objects/period.js'></script>
 <script type="text/javascript">
 
+    // Configure view model
+    var viewModel = null;
+    var view      = null;
+    var period_id = "{{period_id}}";
+
     class CustomEntry extends Entry {
         constructor(obj, budget_allocations, viewModel) {
             super(obj, budget_allocations, viewModel);
@@ -55,7 +60,9 @@
                 if (result.success) {
                     self.viewModel.entries.push(self);
                     self.viewModel.blankNewEntry();
-                    self.viewModel.expressEntryAddition(self);
+                    view.expressEntryAddition(self);
+                    self.viewModel.sortEntries();
+                    view.expressEntriesSortUpdate();
                 }
                 fn_add(result);
             };
@@ -65,9 +72,19 @@
             this.callbacks.del = function (result) {
                 if (result.success) {
                     _.pull(self.viewModel.entries, self);
-                    self.viewModel.expressEntryRemoval(self);
+                    view.expressEntryRemoval(self);
                 }
                 fn_del(result);
+            };
+
+            // Extend delete callback
+            var fn_update         = this.callbacks.update;
+            this.callbacks.update = function (result) {
+                if (result.success) {
+                    self.viewModel.sortEntries();
+                    view.expressEntriesSortUpdate();
+                }
+                fn_update(result);
             };
         }
     }
@@ -77,11 +94,12 @@
             var self = this;
 
             // Storage
+            this.account       = null;
+            this.accounting    = null;
+            this.currentPeriod = null;
             this.entries       = [];
             this.entryTags     = [];
-            this.currentPeriod = null;
             this.periods       = [];
-            this.account       = null;
             this.newEntry      = null;
         };
 
@@ -99,10 +117,36 @@
             }, [], this);
         }
 
+        sortEntries() {
+            this.entries = _.sortBy(this.entries, ["date"]);
+
+            // Link neighbords - first
+            if (this.entries.length > 0)
+                this.entries[0].linkNeighbors(null, this.entries[1]);
+
+            // Link neighbors - middle
+            for (var i = 1; i < this.entries.length - 1; i++)
+                this.entries[i].linkNeighbors(this.entries[i - 1], this.entries[i + 1]);
+
+            // Link neighbors - last
+            if (this.entries.length > 1)
+                this.entries[this.entries.length - 1].linkNeighbors(this.entries[this.entries.length - 2], null);
+
+            // Cascade balances
+            if (this.entries.length > 0)
+                this.entries[0].cascadingBalanceUpdate(Number.parseFloat(this.accounting.amount_start));
+        }
+    }
+
+    class View {
+        constructor(viewModel) {
+            this.viewModel = viewModel;
+        }
+
         expressAccount() {
             var div = $("#div_acct_info");
             div.empty();
-            div.append(this.account.expressAsPanel());
+            div.append(this.viewModel.account.expressAsPanel());
             div.show();
         }
 
@@ -120,7 +164,7 @@
         expressCurrentPeriod() {
             var div = $("#div_period_info");
             div.empty();
-            div.append(domsugar_h(2, "Entries for " + this.currentPeriod.name));
+            div.append(domsugar_h(2, "Entries for " + this.viewModel.currentPeriod.name));
             div.show();
         }
 
@@ -132,16 +176,33 @@
             tbody.empty();
 
             // Express entries for editing
-            for (var entry of this.entries)
+            for (var entry of this.viewModel.entries)
                 tbody.append(entry.expressAsEditableTableRow());
 
             // Express new entry form
-            tbody.append(this.newEntry.expressAsAddForm());
+            tbody.append(this.viewModel.newEntry.expressAsAddForm());
 
             tbody.show();
         }
 
-        expressRangeSelector() {
+        expressEntriesSortUpdate() {
+            var self = this;
+
+            // Init table
+            var tbody = $("#tbody_entries");
+            tbody.empty();
+
+            // Express entries for editing
+            for (var entry of this.viewModel.entries)
+                tbody.append(entry.container);
+
+            // Express new entry form
+            tbody.append(this.viewModel.newEntry.container);
+
+            tbody.show();
+        }
+
+        expressPeriodSelector() {
             var self = this;
 
             var div = $("#div_period_selector");
@@ -150,7 +211,7 @@
             var select = document.createElement("select");
             div.append(select);
 
-            for (var period of this.periods) {
+            for (var period of this.viewModel.periods) {
                 var option   = document.createElement("option");
                 option.value = period.id;
                 $(option).text(period.name);
@@ -168,7 +229,7 @@
                         return $.ajax({
                             url:     "/rest/period/" + select.value,
                             success: function (response) {
-                                self.currentPeriod = new Period(response.data, self);
+                                self.viewModel.currentPeriod = new Period(response.data, self);
                                 self.expressCurrentPeriod();
                             },
                             error:   function (err) {
@@ -178,16 +239,32 @@
                         }).promise();
                     })
 
+                    // Load accounting
+                    .then(() => {
+                        return $.ajax({
+                            url:     "/rest/accounting/byAccountAndPeriod/{{account_id}}/" + self.viewModel.currentPeriod.id,
+                            success: function (response) {
+                                self.viewModel.accounting = new Accounting(response.data, self.viewModel);
+                            },
+                            error:   function (err) {
+                                alert("Cannot load account. See console for details");
+                                console.log("Received HTTP 500. Server said: " + err.responseText)
+                            }
+                        }).promise();
+                    })
+
                     // Load new entries
                     .then(() => {
                         return $.ajax({
-                            url:     "/rest/entry/byAccountAndPeriod/{{account_id}}/" + self.currentPeriod.id,
+                            url:     "/rest/entry/byAccountAndPeriod/{{account_id}}/" + self.viewModel.currentPeriod.id,
                             success: function (data) {
-                                self.entries = [];
+                                self.viewModel.entries = [];
                                 for (var d of data.data) {
-                                    self.entries.push(new CustomEntry(d, [], self));
+                                    var entry = new CustomEntry(d, [], self.viewModel);
+                                    self.viewModel.entries.push(entry);
                                 }
-                                self.expressEntries();
+                                self.viewModel.sortEntries();
+                                view.expressEntries();
                             },
                             error:   function (err) {
                                 alert("Cannot load accounts. See console for details");
@@ -199,31 +276,29 @@
                     // Display results
                     .then(() => {
                         self.hideLoadingDialog();
-                    });;
+                    });
+                ;
             };
 
             div.show();
         }
 
-        expressRangeChangeArrows() {
+        expressPeriodChangeArrows() {
             var self = this;
         }
 
-        hideLoadingDialog() {
-            $("#div_loading").hide();
-        }
+        // Visibility toggles
+        hideLoadingDialog() { $("#div_loading").hide(); }
 
-        showLoadingDialog() {
-            $("#div_loading").show();
-        }
+        showLoadingDialog() { $("#div_loading").show(); }
     }
 
     $(document)
         .ready(
             function () {
                 // Configure view model
-                var viewModel = new ViewModel();
-                var period_id = "{{period_id}}";
+                viewModel = new ViewModel();
+                view      = new View(viewModel);
 
                 // Set up promise chain
                 Promise.resolve()
@@ -235,7 +310,7 @@
                             url:     url,
                             success: function (response) {
                                 viewModel.currentPeriod = new Period(response.data, viewModel);
-                                viewModel.expressCurrentPeriod();
+                                view.expressCurrentPeriod();
                             },
                             error:   function (err) {
                                 alert("Cannot load current period. See console for details");
@@ -250,7 +325,7 @@
                             url:     "/rest/account/{{account_id}}",
                             success: function (response) {
                                 viewModel.account = new Account(response.data, viewModel);
-                                viewModel.expressAccount();
+                                view.expressAccount();
                             },
                             error:   function (err) {
                                 alert("Cannot load account. See console for details");
@@ -264,7 +339,6 @@
                         return $.ajax({
                             url:     "/rest/accounting/byAccountAndPeriod/{{account_id}}/" + viewModel.currentPeriod.id,
                             success: function (response) {
-                                console.log(response);
                                 viewModel.accounting = new Accounting(response.data, viewModel);
                             },
                             error:   function (err) {
@@ -282,7 +356,7 @@
                                 for (var d of response.data) {
                                     viewModel.periods.push(new Period(d, viewModel));
                                 }
-                                viewModel.expressRangeSelector();
+                                view.expressPeriodSelector();
                             },
                             error:   function (err) {
                                 alert("Cannot load available accountings. See console for details");
@@ -315,9 +389,11 @@
                             success: function (data) {
                                 viewModel.entries = [];
                                 for (var d of data.data) {
-                                    viewModel.entries.push(new CustomEntry(d, [], viewModel));
+                                    var entry = new CustomEntry(d, [], viewModel);
+                                    viewModel.entries.push(entry);
                                 }
-                                viewModel.expressEntries();
+                                viewModel.sortEntries();
+                                view.expressEntries();
                             },
                             error:   function (err) {
                                 alert("Cannot load accounts. See console for details");
@@ -328,14 +404,7 @@
 
                     // Display results
                     .then(() => {
-                        var bal = Number.parseFloat(viewModel.accounting.amount_start);
-
-                        for (var e of viewModel.entries) {
-                            bal += Number.parseFloat(e.amount);
-                            e.expressBalance(bal);
-                        }
-
-                        viewModel.hideLoadingDialog();
+                        view.hideLoadingDialog();
                     });
             }
         )

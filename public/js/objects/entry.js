@@ -5,7 +5,7 @@ class Entry extends AjaxRestObject {
         this.viewModel = viewModel;
         var self       = this;
 
-        // Storage
+        // Storage - Fields
         this.id                 = obj.id;
         this.account_id         = obj.account_id;
         this.amount             = "" + obj.amount.toFixed(2);
@@ -15,7 +15,13 @@ class Entry extends AjaxRestObject {
         this.tag                = obj.tag;
         this.what               = obj.what;
         this.where              = obj.where;
+
+        // Storage Other
+        this.balance          = 0;
+        this.balance_previous = 0;
         this.budget_allocations = budget_allocations;
+        this.neighbor_previous = null;
+        this.neighbor_next     = null;
 
         // UI
         this.container = null;
@@ -30,28 +36,23 @@ class Entry extends AjaxRestObject {
         this.callbacks.add = function (result) {
             if (result.success) {
                 console.log("Entry " + self.date + " - " + self.amount + " added.");
-                self.amount = "" + Number.parseFloat(self.amount).toFixed(2);
-                self.refreshFields();
-                self.releaseFields();
             }
             else {
                 console.log("Entry " + self.date + " - " + self.amount + " add failed.");
-                self.refreshFields();
-                self.releaseFields();
             }
+            self.refreshFields();
+            self.releaseFields();
         };
 
         this.callbacks.update = function (result) {
             if (result.success) {
-                console.log("Entry " + self.date + " - " + self.amount + " updated.")
-                self.refreshFields();
-                self.releaseFields();
+                console.log("Entry " + self.date + " - " + self.amount + " updated.");
             }
             else {
                 console.log("Entry " + self.date + " - " + self.amount + " update failed.");
-                self.refreshFields();
-                self.releaseFields();
             }
+            self.refreshFields();
+            self.releaseFields();
         }
     }
 
@@ -66,7 +67,7 @@ class Entry extends AjaxRestObject {
         this.field_where     = new EditableTextField(this, "where", "td", "width-6", true);
         this.field_what      = new EditableTextField(this, "what", "td", "width-6", true);
         this.field_amount    = new EditableAmountTextField(this, "amount", "td", "width-3", true);
-        this.field_balance   = domsugar_td("", {class: "balance"});
+        this.field_balance   = domsugar_td(this.balance, {class: "balance"});
         this.buttons         = new DeleteButtonPanel(this, "td", "width-3", true);
 
         // Create container
@@ -98,7 +99,7 @@ class Entry extends AjaxRestObject {
         this.field_where     = new EditableTextField(this, "where", "td", "width-6", false);
         this.field_what      = new EditableTextField(this, "what", "td", "width-6", false);
         this.field_amount    = new EditableAmountTextField(this, "amount", "td", "width-3", false);
-        this.field_balance   = domsugar_td("", {class: "balance"});
+        this.field_balance   = domsugar_td(this.balance, {class: "balance"});
         this.buttons         = new AddButtonPanel(this, "td", "width-3");
 
         // Create container
@@ -119,9 +120,14 @@ class Entry extends AjaxRestObject {
         return this.container;
     }
 
-    expressBalance(val) {
+    cascadingBalanceUpdate(val) {
+        this.balance_previous = val;
+        this.balance          = this.balance_previous + Number.parseFloat(this.amount);
         if (this.field_balance)
-            $(this.field_balance).text(val);
+            $(this.field_balance).text(this.balance);
+
+        if (this.neighbor_next)
+            this.neighbor_next.cascadingBalanceUpdate(this.balance);
     }
 
     refreshFields() {
@@ -142,6 +148,11 @@ class Entry extends AjaxRestObject {
         this.field_where.stopEditing();
         this.field_what.stopEditing();
         this.field_amount.stopEditing();
+    }
+
+    linkNeighbors(previous, next) {
+        this.neighbor_previous = previous;
+        this.neighbor_next     = next;
     }
 
     updateFromObject(obj) {
