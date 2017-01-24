@@ -122,8 +122,37 @@ div.data_panel h1 {
     font-size: 18px;
     margin: 0 0 6px 0;
 }
-div.data_panel.width-12 { width: 480px; }
 
+
+
+
+div#info_banner {
+    text-align: center;
+}
+div#info_banner div {
+    text-align: left;
+    display: inline-block;
+    vertical-align: top;
+}
+div#info_banner div div {
+    width: 400px;
+    height: 60px;
+}
+
+
+
+div#div_period_navigation {
+    text-align: center;
+}
+div#div_period_navigation div {
+    text-align: left;
+    display: inline-block;
+    vertical-align: top;
+}
+div#div_period_navigation div button {
+    height: 19px;
+    width: 68px;
+}
 
 
 

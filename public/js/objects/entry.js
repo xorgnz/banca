@@ -1,8 +1,7 @@
 class Entry extends AjaxRestObject {
-    constructor(obj, budget_allocations, viewModel) {
+    constructor(obj, budget_allocations) {
         super("/rest/entry/", "entry");
 
-        this.viewModel = viewModel;
         var self       = this;
 
         // Storage - Fields
@@ -56,12 +55,12 @@ class Entry extends AjaxRestObject {
         }
     }
 
-    expressAsEditableTableRow() {
+    expressAsEditableTableRow(tags) {
         var self = this;
 
         // Create components
         this.field_date      = new EditableTextField(this, "date", "td", "width-3", true);
-        this.field_tag       = new TagSelectionField(this, "tag", this.viewModel.entryTags, "td", "width-3", true);
+        this.field_tag       = new TagSelectionField(this, "tag", tags, "td", "width-3", true);
         this.field_bank_note = new EditableTextField(this, "bank_note", "td", "width-6", true);
         this.field_note      = new EditableTextField(this, "note", "td", "width-6", true);
         this.field_where     = new EditableTextField(this, "where", "td", "width-6", true);
@@ -88,12 +87,12 @@ class Entry extends AjaxRestObject {
         return this.container;
     }
 
-    expressAsAddForm() {
+    expressAsAddForm(tags) {
         var self = this;
 
         // Create components
         this.field_date      = new EditableTextField(this, "date", "td", "width-3", false);
-        this.field_tag       = new TagSelectionField(this, "tag", this.viewModel.entryTags, "td", "width-3", false);
+        this.field_tag       = new TagSelectionField(this, "tag", tags, "td", "width-3", false);
         this.field_bank_note = new EditableTextField(this, "bank_note", "td", "width-6", false);
         this.field_note      = new EditableTextField(this, "note", "td", "width-6", false);
         this.field_where     = new EditableTextField(this, "where", "td", "width-6", false);

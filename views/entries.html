@@ -3,10 +3,19 @@
 
 {% block content %}
 
-<div id="div_acct_info" style="display:none"></div>
-<div id="div_period">
+<div id="info_banner">
+    <div id="div_account_info" style="display:none"></div>
     <div id="div_period_info" style="display:none"></div>
-    <div id="div_period_selector" style="display:none"></div>
+    <div id="div_accounting_info" style="display:none"></div>
+</div>
+<div id="div_period_navigation">
+    <div id="div_period_previous">
+        <button id="button_period_previous" onclick="controller.loadNextPeriod()">Previous</button>
+    </div>
+    <div id="div_period_selector"></div>
+    <div id="div_period_next">
+        <button id="button_period_next" onclick="controller.loadPrevPeriod()">Next</button>
+    </div>
 </div>
 
 <link href="/stylesheets/entries.css" rel="stylesheet">
@@ -45,24 +54,20 @@
 <script type="text/javascript">
 
     // Configure view model
-    var viewModel = null;
-    var view      = null;
-    var period_id = "{{period_id}}";
+    var __account_id = "{{account_id}}";
+    var __period_id  = "{{period_id}}";
+    var controller   = null;
 
     class CustomEntry extends Entry {
-        constructor(obj, budget_allocations, viewModel) {
-            super(obj, budget_allocations, viewModel);
+        constructor(obj, budget_allocations) {
+            super(obj, budget_allocations);
             var self = this;
 
             // Extend add callback
             var fn_add         = this.callbacks.add;
             this.callbacks.add = function (result) {
                 if (result.success) {
-                    self.viewModel.entries.push(self);
-                    self.viewModel.blankNewEntry();
-                    view.expressEntryAddition(self);
-                    self.viewModel.sortEntries();
-                    view.expressEntriesSortUpdate();
+                    controller.event_addedEntry(self);
                 }
                 fn_add(result);
             };
@@ -71,8 +76,7 @@
             var fn_del         = this.callbacks.del;
             this.callbacks.del = function (result) {
                 if (result.success) {
-                    _.pull(self.viewModel.entries, self);
-                    view.expressEntryRemoval(self);
+                    controller.event_deletedEntry(self);
                 }
                 fn_del(result);
             };
@@ -81,8 +85,7 @@
             var fn_update         = this.callbacks.update;
             this.callbacks.update = function (result) {
                 if (result.success) {
-                    self.viewModel.sortEntries();
-                    view.expressEntriesSortUpdate();
+                    controller.event_updatedEntry(self);
                 }
                 fn_update(result);
             };
@@ -94,19 +97,19 @@
             var self = this;
 
             // Storage
-            this.account       = null;
-            this.accounting    = null;
-            this.currentPeriod = null;
-            this.entries       = [];
-            this.entryTags     = [];
-            this.periods       = [];
-            this.newEntry      = null;
+            this.account    = null;
+            this.accounting = null;
+            this.period     = null;
+            this.entries    = [];
+            this.entryTags  = [];
+            this.periods    = [];
+            this.newEntry   = null;
         };
 
         blankNewEntry() {
             this.newEntry = new CustomEntry({
                 id:         null,
-                account_id: "{{account_id}}",
+                account_id: this.account.id,
                 amount:     0,
                 date:       new Date().getTime(),
                 bank_note:  "Created via UI",
@@ -139,33 +142,30 @@
     }
 
     class View {
-        constructor(viewModel) {
-            this.viewModel = viewModel;
+        constructor(model, controller) {
+            this.model      = model;
+            this.controller = controller;
         }
 
-        expressAccount() {
-            var div = $("#div_acct_info");
+        expressAccountInfo() {
+            var div = $("#div_account_info");
             div.empty();
-            div.append(this.viewModel.account.expressAsPanel());
+            div.append(this.model.account.expressAsPanel());
+            div.show();
+        }
+
+        expressAccountingInfo() {
+            var div = $("#div_accounting_info");
+            div.empty();
+            div.append(this.model.accounting.expressAsPanel());
             div.show();
         }
 
         expressEntryAddition(entry) {
             var tbody = $("#tbody_entries");
             $(entry.container).remove();
-            tbody.append(entry.expressAsEditableTableRow());
-            tbody.append(entry.viewModel.newEntry.expressAsAddForm());
-        }
-
-        expressEntryRemoval(entry) {
-            $(entry.container).remove();
-        }
-
-        expressCurrentPeriod() {
-            var div = $("#div_period_info");
-            div.empty();
-            div.append(domsugar_h(2, "Entries for " + this.viewModel.currentPeriod.name));
-            div.show();
+            tbody.append(entry.expressAsEditableTableRow(this.model.entryTags));
+            tbody.append(this.model.newEntry.expressAsAddForm(this.model.entryTags));
         }
 
         expressEntries() {
@@ -176,30 +176,20 @@
             tbody.empty();
 
             // Express entries for editing
-            for (var entry of this.viewModel.entries)
-                tbody.append(entry.expressAsEditableTableRow());
+            for (var entry of this.model.entries)
+                tbody.append(entry.expressAsEditableTableRow(this.model.entryTags));
 
             // Express new entry form
-            tbody.append(this.viewModel.newEntry.expressAsAddForm());
+            tbody.append(this.model.newEntry.expressAsAddForm(this.model.entryTags));
 
             tbody.show();
         }
 
-        expressEntriesSortUpdate() {
-            var self = this;
-
-            // Init table
-            var tbody = $("#tbody_entries");
-            tbody.empty();
-
-            // Express entries for editing
-            for (var entry of this.viewModel.entries)
-                tbody.append(entry.container);
-
-            // Express new entry form
-            tbody.append(this.viewModel.newEntry.container);
-
-            tbody.show();
+        expressPeriodInfo() {
+            var div = $("#div_period_info");
+            div.empty();
+            div.append(this.model.period.expressAsPanel());
+            div.show();
         }
 
         expressPeriodSelector() {
@@ -211,7 +201,7 @@
             var select = document.createElement("select");
             div.append(select);
 
-            for (var period of this.viewModel.periods) {
+            for (var period of this.model.periods) {
                 var option   = document.createElement("option");
                 option.value = period.id;
                 $(option).text(period.name);
@@ -219,72 +209,49 @@
             }
 
             select.onclick = () => {
-
-                self.showLoadingDialog();
-
-                Promise.resolve()
-
-                    // Load new period
-                    .then(() => {
-                        return $.ajax({
-                            url:     "/rest/period/" + select.value,
-                            success: function (response) {
-                                self.viewModel.currentPeriod = new Period(response.data, self);
-                                self.expressCurrentPeriod();
-                            },
-                            error:   function (err) {
-                                alert("Cannot load current period. See console for details");
-                                console.log("Received HTTP 500. Server said: " + err.responseText);
-                            }
-                        }).promise();
-                    })
-
-                    // Load accounting
-                    .then(() => {
-                        return $.ajax({
-                            url:     "/rest/accounting/byAccountAndPeriod/{{account_id}}/" + self.viewModel.currentPeriod.id,
-                            success: function (response) {
-                                self.viewModel.accounting = new Accounting(response.data, self.viewModel);
-                            },
-                            error:   function (err) {
-                                alert("Cannot load account. See console for details");
-                                console.log("Received HTTP 500. Server said: " + err.responseText)
-                            }
-                        }).promise();
-                    })
-
-                    // Load new entries
-                    .then(() => {
-                        return $.ajax({
-                            url:     "/rest/entry/byAccountAndPeriod/{{account_id}}/" + self.viewModel.currentPeriod.id,
-                            success: function (data) {
-                                self.viewModel.entries = [];
-                                for (var d of data.data) {
-                                    var entry = new CustomEntry(d, [], self.viewModel);
-                                    self.viewModel.entries.push(entry);
-                                }
-                                self.viewModel.sortEntries();
-                                view.expressEntries();
-                            },
-                            error:   function (err) {
-                                alert("Cannot load accounts. See console for details");
-                                console.log("Received HTTP 500. Server said: " + err.responseText)
-                            }
-                        }).promise();
-                    })
-
-                    // Display results
-                    .then(() => {
-                        self.hideLoadingDialog();
-                    });
-                ;
+                this.controller.loadPeriod(select.value);
             };
 
             div.show();
         }
 
-        expressPeriodChangeArrows() {
+        updateEntries() {
             var self = this;
+
+            // Init table
+            var tbody = $("#tbody_entries");
+            tbody.empty();
+
+            // Express entries for editing
+            for (var entry of this.model.entries)
+                tbody.append(entry.container);
+
+            // Express new entry form
+            tbody.append(this.model.newEntry.container);
+
+            tbody.show();
+        }
+
+        updatePeriodControls() {
+            var button_next = $("#button_period_next");
+            var button_prev = $("#button_period_previous");
+
+            var ids                = _.map(this.model.periods, "id");
+            var current_period_idx = _.indexOf(ids, this.model.period.id);
+
+            if (ids.length === 0) {
+                button_next[0].disabled = true;
+                button_prev[0].disabled = true;
+            }
+            else {
+                button_next[0].disabled = (current_period_idx === ids.length - 1);
+                button_prev[0].disabled = (current_period_idx === 0);
+            }
+
+            var select = $("#div_period_selector").find("select");
+            for (var option of select[0].options) {
+                option.selected = (option.value == this.model.period.id);
+            }
         }
 
         // Visibility toggles
@@ -293,122 +260,221 @@
         showLoadingDialog() { $("#div_loading").show(); }
     }
 
-    $(document)
-        .ready(
-            function () {
-                // Configure view model
-                viewModel = new ViewModel();
-                view      = new View(viewModel);
+    class Communicator {
+        loadAccount(account_id) {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url:     "/rest/account/" + account_id,
+                    success: function (response) {
+                        resolve(new Account(response.data));
+                    },
+                    error:   function (err) {
+                        alert("Cannot load account. See console for details");
+                        reject(new Error("Received HTTP 500. Server said: " + err.responseText));
+                    }
+                })
+            });
+        }
 
-                // Set up promise chain
-                Promise.resolve()
+        loadAccounting(account_id, period_id) {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url:     "/rest/accounting/byAccountAndPeriod/" + account_id + "/" + period_id,
+                    success: function (response) {
+                        resolve(new Accounting(response.data));
+                    },
+                    error:   function (err) {
+                        alert("Cannot load accounting. See console for details");
+                        reject(new Error("Received HTTP 500. Server said: " + err.responseText));
+                    }
+                });
+            });
+        }
 
-                    // Load current period
-                    .then(() => {
-                        var url = period_id ? "/rest/period/" + period_id : "/rest/period/byDate/" + new Date().getTime();
-                        return $.ajax({
-                            url:     url,
-                            success: function (response) {
-                                viewModel.currentPeriod = new Period(response.data, viewModel);
-                                view.expressCurrentPeriod();
-                            },
-                            error:   function (err) {
-                                alert("Cannot load current period. See console for details");
-                                console.log("Received HTTP 500. Server said: " + err.responseText);
-                            }
-                        }).promise();
-                    })
+        loadEntries(account_id, period_id) {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url:     "/rest/entry/byAccountAndPeriod/" + account_id + "/" + period_id,
+                    success: function (data) {
+                        var entries = [];
+                        for (var d of data.data) {
+                            entries.push(new CustomEntry(d, []));
+                        }
+                        resolve(entries);
+                    },
+                    error:   function (err) {
+                        alert("Cannot load entries. See console for details");
+                        reject(new Error("Received HTTP 500. Server said: " + err.responseText));
+                    }
+                });
+            });
+        }
 
-                    // Load account
-                    .then(() => {
-                        return $.ajax({
-                            url:     "/rest/account/{{account_id}}",
-                            success: function (response) {
-                                viewModel.account = new Account(response.data, viewModel);
-                                view.expressAccount();
-                            },
-                            error:   function (err) {
-                                alert("Cannot load account. See console for details");
-                                console.log("Received HTTP 500. Server said: " + err.responseText)
-                            }
-                        }).promise();
-                    })
+        loadEntryTags() {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url:     "/rest/entry/tags",
+                    success: function (response) {
+                        var tags = [];
+                        for (var d of response.data) {
+                            tags.push(d);
+                        }
+                        resolve(tags);
+                    },
+                    error:   function (err) {
+                        alert("Cannot load entry tags. See console for details");
+                        reject(new Error("Received HTTP 500. Server said: " + err.responseText));
+                    }
+                });
+            });
+        }
 
-                    // Load accounting
-                    .then(() => {
-                        return $.ajax({
-                            url:     "/rest/accounting/byAccountAndPeriod/{{account_id}}/" + viewModel.currentPeriod.id,
-                            success: function (response) {
-                                viewModel.accounting = new Accounting(response.data, viewModel);
-                            },
-                            error:   function (err) {
-                                alert("Cannot load account. See console for details");
-                                console.log("Received HTTP 500. Server said: " + err.responseText)
-                            }
-                        }).promise();
-                    })
+        loadPeriod(period_id, model) {
+            var url = period_id ? "/rest/period/" + period_id : "/rest/period/byDate/" + new Date().getTime();
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url:     url,
+                    success: function (response) {
+                        resolve(new Period(response.data));
+                    },
+                    error:   function (err) {
+                        alert("Cannot load period. See console for details");
+                        reject(new Error("Received HTTP 500. Server said: " + err.responseText));
+                    }
+                });
+            });
+        }
 
-                    // Load periods for range selection
-                    .then(() => {
-                        return $.ajax({
-                            url:     "/rest/period/",
-                            success: function (response) {
-                                for (var d of response.data) {
-                                    viewModel.periods.push(new Period(d, viewModel));
-                                }
-                                view.expressPeriodSelector();
-                            },
-                            error:   function (err) {
-                                alert("Cannot load available accountings. See console for details");
-                                console.log("Received HTTP 500. Server said: " + err.responseText);
-                            }
-                        }).promise();
-                    })
+        loadPeriods() {
+            return new Promise((resolve, reject) => {
+                $.ajax({
+                    url:     "/rest/period/",
+                    success: function (response) {
+                        var periods = [];
+                        for (var d of response.data) {
+                            periods.push(new Period(d));
+                        }
+                        resolve(periods);
+                    },
+                    error:   function (err) {
+                        alert("Cannot load periods. See console for details");
+                        reject(new Error("Received HTTP 500. Server said: " + err.responseText));
+                    }
+                });
+            });
+        }
+    }
 
-                    // Load entry tags
-                    .then(() => {
-                        return $.ajax({
-                            url:     "/rest/entry/tags",
-                            success: function (response) {
-                                for (var d of response.data) {
-                                    viewModel.entryTags.push(d);
-                                }
-                                viewModel.blankNewEntry();
-                            },
-                            error:   function (err) {
-                                alert("Cannot load entry tags. See console for details");
-                                console.log("Received HTTP 500. Server said: " + err.responseText)
-                            }
-                        }).promise();
-                    })
+    class ViewController {
+        constructor() {
+            this.model        = new ViewModel();
+            this.view         = new View(this.model, this);
+            this.communicator = new Communicator();
+        }
 
-                    // Load entries
-                    .then(() => {
-                        return $.ajax({
-                            url:     "/rest/entry/byAccountAndPeriod/{{account_id}}/" + viewModel.currentPeriod.id,
-                            success: function (data) {
-                                viewModel.entries = [];
-                                for (var d of data.data) {
-                                    var entry = new CustomEntry(d, [], viewModel);
-                                    viewModel.entries.push(entry);
-                                }
-                                viewModel.sortEntries();
-                                view.expressEntries();
-                            },
-                            error:   function (err) {
-                                alert("Cannot load accounts. See console for details");
-                                console.log("Received HTTP 500. Server said: " + err.responseText)
-                            }
-                        }).promise();
-                    })
+        event_addedEntry(entry) {
+            this.model.entries.push(entry);
+            this.model.blankNewEntry();
+            this.view.expressEntryAddition(entry);
+            this.model.sortEntries();
+            this.view.updateEntries();
+        }
 
-                    // Display results
-                    .then(() => {
-                        view.hideLoadingDialog();
-                    });
-            }
-        )
-    ;
+        event_deletedEntry(entry) {
+            _.pull(this.model.entries, entry);
+            this.model.sortEntries();
+            this.view.updateEntries();
+        }
+
+        event_updatedEntry(entry) {
+            this.model.sortEntries();
+            this.view.updateEntries();
+        }
+
+        initialize() {
+            Promise.resolve()
+                // Load period
+                .then(() => { return this.communicator.loadPeriod(__period_id); })
+                .then((r) => { this.model.period = r; })
+                .then(() => {this.view.expressPeriodInfo(); })
+
+                // Load account
+                .then(() => { return this.communicator.loadAccount(__account_id); })
+                .then((r) => { this.model.account = r; })
+                .then(() => { this.view.expressAccountInfo(); })
+
+                // Load accounting
+                .then(() => { return this.communicator.loadAccounting(this.model.account.id, this.model.period.id); })
+                .then((r) => { this.model.accounting = r; })
+                .then(() => { this.view.expressAccountingInfo(); })
+
+                // Load periods (for selector)
+                .then(() => { return this.communicator.loadPeriods(); })
+                .then((r) => { this.model.periods = r; })
+                .then(() => { this.view.expressPeriodSelector(); })
+                .then(() => { this.view.updatePeriodControls(); })
+
+                // Load entry tags, create blank entry form
+                .then(() => { return this.communicator.loadEntryTags(); })
+                .then((r) => { this.model.entryTags = r; })
+                .then(() => { this.model.blankNewEntry(); })
+
+                // Load entries
+                .then(() => { return this.communicator.loadEntries(this.model.account.id, this.model.period.id); })
+                .then((r) => { this.model.entries = r; })
+                .then(() => { this.model.sortEntries(); })
+                .then(() => { this.view.expressEntries(); })
+                .then(() => { this.view.hideLoadingDialog(); })
+
+                // Handle errors
+                .catch((e) => {
+                    console.error(e);
+                });
+        }
+
+        loadPeriod(period_id) {
+            var self = this;
+            this.view.showLoadingDialog();
+            return Promise.resolve()
+                .then(() => { return this.communicator.loadPeriod(period_id); })
+                .then((period) => { this.model.period = period; })
+                .then(() => { this.view.expressPeriodInfo(); })
+
+                .then(() => { return this.communicator.loadAccounting(this.model.account.id, this.model.period.id); })
+                .then((r) => { this.model.accounting = r; })
+                .then(() => { this.view.expressAccountingInfo(); })
+
+                .then(() => { return this.communicator.loadEntries(this.model.account.id, this.model.period.id); })
+                .then((r) => { this.model.entries = r; })
+                .then(() => { this.model.sortEntries(); })
+                .then(() => { this.view.expressEntries(); })
+                .then(() => { this.view.hideLoadingDialog(); })
+
+                // Handle errors
+                .catch((e) => {
+                    console.error(e);
+                });
+        }
+
+        loadNextPeriod() {
+            var period_index = _.indexOf(_.map(this.model.periods, "id"), this.model.period.id);
+            Promise.resolve()
+                .then(() => { return this.loadPeriod(this.model.periods[period_index - 1].id) })
+                .then(() => { this.view.updatePeriodControls(); });
+        }
+
+        loadPrevPeriod() {
+            var period_index = _.indexOf(_.map(this.model.periods, "id"), this.model.period.id);
+            Promise.resolve()
+                .then(() => { return this.loadPeriod(this.model.periods[period_index + 1].id) })
+                .then(() => { this.view.updatePeriodControls(); });
+        }
+    }
+
+    $(document).ready(() => {
+        controller = new ViewController();
+        controller.initialize();
+    });
 
 </script>
 {% endblock %}

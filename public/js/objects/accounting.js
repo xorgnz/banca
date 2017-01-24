@@ -1,8 +1,7 @@
 class Accounting extends AjaxRestObject {
-    constructor(obj, viewModel) {
+    constructor(obj) {
         super("/rest/account/", "account");
 
-        this._viewModel = viewModel;
         var self        = this;
 
         // Storage
@@ -16,32 +15,15 @@ class Accounting extends AjaxRestObject {
             date_start: obj.period.date_start,
             date_end:   obj.period.date_end
         };
-
-        // Register for AJAX calls
-        // decorateAjaxRest(
-        //     self, "account", "/rest/account/",
-        //     {
-        //         del:    function () {
-        //             self._viewModel.accounts.remove(self);
-        //             console.log("Account " + self.name() + " removed.");
-        //         },
-        //         add:    function () {
-        //             self._viewModel.accounts.push(self);
-        //             self._viewModel.blankNewAccount();
-        //             console.log(self);
-        //             console.log("Account " + self.name() + " added.");
-        //         },
-        //         update: function () {
-        //             console.log("Account " + self.name() + " updated.");
-        //         }
-        //     }
-        // );
     }
 
-
-    expressAsTable() {
+    expressAsPanel() {
         var div = document.createElement("div");
-        div.appendChild(document.createTextNode(this));
+        div.className = "data_panel";
+        div.append(domsugar_h(1, "Accounting Information"));
+        div.append(domsugar_text("Start Balance: " + this.amount_start));
+        div.append(domsugar_br());
+        div.append(domsugar_text("End Balance: " + this.amount_end));
         return div;
     }
 
