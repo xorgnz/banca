@@ -125,6 +125,32 @@ describe("Period DAO", function () {
     });
 
     // ------------------------------------------------------------- TEST
+    it.only("getFirst", function () {
+        const period0 = testObjects.createTestPeriod(0);
+        const period1 = testObjects.createTestPeriod(1);
+        const period2 = testObjects.createTestPeriod(2);
+        return Promise.resolve()
+            .then(() => { return periodDAO.add(db, period0); })
+            .then(() => { return periodDAO.add(db, period1); })
+            .then(() => { return periodDAO.add(db, period2); })
+            .then(() => { return periodDAO.getFirst(db); })
+            .then((obj) => { period0.assertEquivalence(obj); })
+    });
+
+    // ------------------------------------------------------------- TEST
+    it.only("getLast", function () {
+        const period0 = testObjects.createTestPeriod(0);
+        const period1 = testObjects.createTestPeriod(1);
+        const period2 = testObjects.createTestPeriod(2);
+        return Promise.resolve()
+            .then(() => { return periodDAO.add(db, period0); })
+            .then(() => { return periodDAO.add(db, period1); })
+            .then(() => { return periodDAO.add(db, period2); })
+            .then(() => { return periodDAO.getLast(db); })
+            .then((obj) => { period2.assertEquivalence(obj); })
+    });
+
+    // ------------------------------------------------------------- TEST
     it(".listOverDateRange", function () {
         return Promise.resolve()
             .then(() => {

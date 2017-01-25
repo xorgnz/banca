@@ -148,6 +148,34 @@ exports.getByDate = function (db, date) {
 };
 
 
+exports.getFirst = function (db) {
+    logger.trace("Period DAO - getFirst");
+    check.assert.equal(db.constructor.name, "Database");
+    return new Promise((resolve, reject) => {
+        db.get(
+            "SELECT * FROM period " +
+            "ORDER BY period_date_start ASC " +
+            "LIMIT 1",
+            shared.generateDBResponseFunctionGet(resolve, reject, Period.fromObject)
+        );
+    });
+};
+
+
+exports.getLast = function (db) {
+    logger.trace("Period DAO - getLast");
+    check.assert.equal(db.constructor.name, "Database");
+    return new Promise((resolve, reject) => {
+        db.get(
+            "SELECT * FROM period " +
+            "ORDER BY period_date_start DESC " +
+            "LIMIT 1",
+            shared.generateDBResponseFunctionGet(resolve, reject, Period.fromObject)
+        );
+    });
+};
+
+
 exports.listAll = function (db) {
     logger.trace("Period DAO - listAll");
     check.assert.equal(db.constructor.name, "Database");
