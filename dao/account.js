@@ -20,11 +20,11 @@ class Account extends shared.BancaObject {
     set name(v)         { this._name = v ? v.toString() : ""; }
     set description(v)  { this._description = v ? v.toString() : ""; }
 
-    validate(obj) {
+    validate(obj, db) {
         var errors = [];
         errors = _.concat(errors, shared.vs_stringNotEmpty(obj.name, "name"));
         errors = _.concat(errors, shared.vs_stringNotEmpty(obj.description, "description"));
-        return errors;
+        return Promise.resolve(errors);
     }
 
     static fromObject(obj) {

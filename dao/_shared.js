@@ -96,49 +96,53 @@ class ValidationError {
             this.message = message;
         }
     }
+
     get field() { return this._field; }
+
     get type() { return this._type; }
+
     toJSON() {
         return {
             field: this._field,
-            type: this._type
+            type:  this._type
         };
     }
 }
-exports.VET_MISSING     = "missing";
-exports.VET_INVALID     = "invalid";
-exports.ValidationError = ValidationError;
+exports.VET_MISSING       = "missing";
+exports.VET_INVALID       = "invalid";
+exports.VET_OUTSIDE_RANGE = "outside_range";
+exports.ValidationError   = ValidationError;
 
 // Validation sugar
-exports.vs_exists   = function (v, field) {
+exports.vs_exists         = function (v, field) {
     var errors = [];
-    if (! check.assigned(v)) {
+    if (!check.assigned(v)) {
         errors.push(new ValidationError(field, exports.VET_MISSING));
     }
     return errors;
 };
-exports.vs_date = function (v, field) {
-    var errors = [];
-
-    if (! check.assigned(v)) {
-        errors.push(new ValidationError(field, exports.VET_MISSING));
-    }
-    else if (check.string(v) && check.emptyString(v)) {
-        errors.push(new ValidationError(field, exports.VET_MISSING));
-    }
-    else if (! check.__datelike(v)) {
-        errors.push(new ValidationError(field, exports.VET_INVALID));
-    }
-
-    return errors;
-};
-exports.vs_number   = function (v, field) {
+exports.vs_date           = function (v, field) {
     var errors = [];
 
     if (!check.assigned(v)) {
         errors.push(new ValidationError(field, exports.VET_MISSING));
     }
-    else if (! (check.string(v) || check.number(v))) {
+    else if (check.string(v) && check.emptyString(v)) {
+        errors.push(new ValidationError(field, exports.VET_MISSING));
+    }
+    else if (!check.__datelike(v)) {
+        errors.push(new ValidationError(field, exports.VET_INVALID));
+    }
+
+    return errors;
+};
+exports.vs_number         = function (v, field) {
+    var errors = [];
+
+    if (!check.assigned(v)) {
+        errors.push(new ValidationError(field, exports.VET_MISSING));
+    }
+    else if (!(check.string(v) || check.number(v))) {
         errors.push(new ValidationError(field, exports.VET_INVALID));
     }
     else if (check.string(v) && check.emptyString(v)) {
@@ -150,22 +154,22 @@ exports.vs_number   = function (v, field) {
 
     return errors;
 };
-exports.vs_string = function (v, field) {
+exports.vs_string         = function (v, field) {
     var errors = [];
-    if (! check.assigned(v)) {
+    if (!check.assigned(v)) {
         errors.push(new ValidationError(field, exports.VET_MISSING));
     }
-    else if (! check.string(v)) {
+    else if (!check.string(v)) {
         errors.push(new ValidationError(field, exports.VET_INVALID));
     }
     return errors;
 };
 exports.vs_stringNotEmpty = function (v, field) {
     var errors = [];
-    if (! check.assigned(v)) {
+    if (!check.assigned(v)) {
         errors.push(new ValidationError(field, exports.VET_MISSING));
     }
-    else if (! check.string(v)) {
+    else if (!check.string(v)) {
         errors.push(new ValidationError(field, exports.VET_INVALID));
     }
     else if (!check.nonEmptyString(v)) {
@@ -202,7 +206,7 @@ class BancaObject {
         });
     }
 
-    validate (obj) {
+    validate(obj) {
         throw new Error("Attempt to validate BancaObject for which no validation is defined");
     }
 }

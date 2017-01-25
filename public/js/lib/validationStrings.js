@@ -25,7 +25,8 @@ var validationDescriptors = {
     "entry": {
         "date": {
             "missing": "Entries must have a date. Can be specified in most formats",
-            "invalid": "Couldn't understand the date given. Try yyyy-mm-dd"
+            "invalid": "Couldn't understand the date given. Try yyyy-mm-dd",
+            "outside_range": "Date outside valid range for Banca"
         },
         "tag": {
             "missing": "Entries must have tags",

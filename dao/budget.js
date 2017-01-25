@@ -34,7 +34,7 @@ class Budget extends shared.BancaObject {
     set type(v)         { this._type = (v > 1 && v <= 4) ? Number.parseInt(v) : 1; }
     set amount(v)       { this._amount = check.__numberlike(v) ? _.round(Number.parseFloat(v), 2) : 0; }
 
-    validate(obj) {
+    validate(obj, db) {
         var errors = [];
         errors = _.concat(errors, shared.vs_stringNotEmpty(obj.code, "code"));
         errors = _.concat(errors, shared.vs_number(obj.amount, "amount"));
@@ -46,7 +46,7 @@ class Budget extends shared.BancaObject {
             errors.push(new shared.ValidationError("type", exports.VET_INVALID));
         }
 
-        return errors;
+        return Promise.resolve(errors);
     }
 
     static fromObject(obj) {

@@ -99,24 +99,36 @@ class Entry extends shared.BancaObject {
         this._account_id = v ? Number.parseInt(v) : -1;
     }
 
-    validate(obj) {
+    validate(obj, db) {
         var errors = [];
-        errors = _.concat(errors, shared.vs_number(obj.account_id, "account_id"));
-        errors = _.concat(errors, shared.vs_string(obj.bank_note, "bank_note"));
-        errors = _.concat(errors, shared.vs_string(obj.note, "note"));
-        errors = _.concat(errors, shared.vs_string(obj.where, "where"));
-        errors = _.concat(errors, shared.vs_string(obj.what, "what"));
-        errors = _.concat(errors, shared.vs_number(obj.amount, "amount"));
-        errors = _.concat(errors, shared.vs_date(obj.date, "date"));
+        return Promise.resolve()
+            .then(() => {
+                errors = _.concat(errors, shared.vs_number(obj.account_id, "account_id"));
+                errors = _.concat(errors, shared.vs_string(obj.bank_note, "bank_note"));
+                errors = _.concat(errors, shared.vs_string(obj.note, "note"));
+                errors = _.concat(errors, shared.vs_string(obj.where, "where"));
+                errors = _.concat(errors, shared.vs_string(obj.what, "what"));
+                errors = _.concat(errors, shared.vs_number(obj.amount, "amount"));
+                errors = _.concat(errors, shared.vs_date(obj.date, "date"));
 
-        if (! check.assigned(obj.tag)) {
-            errors.push(new shared.ValidationError("tag", shared.VET_MISSING));
-        }
-        else if (_.indexOf(tags, obj.tag) == -1) {
-            errors.push(new shared.ValidationError("tag", shared.VET_INVALID));
-        }
-
-        return errors;
+                if (!check.assigned(obj.tag)) {
+                    errors.push(new shared.ValidationError("tag", shared.VET_MISSING));
+                }
+                else if (_.indexOf(tags, obj.tag) == -1) {
+                    errors.push(new shared.ValidationError("tag", shared.VET_INVALID));
+                }
+            })
+            .then(() => { return periodDAO.getFirst(db); })
+            .then((first) => {
+                if (convert.toDate(obj.date).getTime() < first.date_start)
+                    errors.push(new shared.ValidationError("date", shared.VET_OUTSIDE_RANGE));
+            })
+            .then(() => { return periodDAO.getLast(db); })
+            .then((last) => {
+                if (convert.toDate(obj.date).getTime() > last.date_end)
+                    errors.push(new shared.ValidationError("date", shared.VET_OUTSIDE_RANGE));
+            })
+            .then(() => { return errors; });
     }
 
     static fromObject(obj) {
