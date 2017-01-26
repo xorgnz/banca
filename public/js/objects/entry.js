@@ -2,25 +2,25 @@ class Entry extends AjaxRestObject {
     constructor(obj, budget_allocations) {
         super("/rest/entry/", "entry");
 
-        var self       = this;
+        var self = this;
 
         // Storage - Fields
-        this.id                 = obj.id;
-        this.account_id         = obj.account_id;
-        this.amount             = "" + obj.amount.toFixed(2);
-        this.date               = formatDateIso8601(obj.date);
-        this.bank_note          = obj.bank_note;
-        this.note               = obj.note;
-        this.tag                = obj.tag;
-        this.what               = obj.what;
-        this.where              = obj.where;
+        this.id         = obj.id;
+        this.account_id = obj.account_id;
+        this.amount     = "" + obj.amount.toFixed(2);
+        this.date       = formatDateIso8601(obj.date);
+        this.bank_note  = obj.bank_note;
+        this.note       = obj.note;
+        this.tag        = obj.tag;
+        this.what       = obj.what;
+        this.where      = obj.where;
 
         // Storage Other
-        this.balance          = 0;
-        this.balance_previous = 0;
+        this.balance            = 0;
+        this.balance_previous   = 0;
         this.budget_allocations = budget_allocations;
-        this.neighbor_previous = null;
-        this.neighbor_next     = null;
+        this.neighbor_previous  = null;
+        this.neighbor_next      = null;
 
         // UI
         this.container = null;
@@ -65,8 +65,8 @@ class Entry extends AjaxRestObject {
         this.field_note      = new EditableTextField(this, "note", "td", "width-6", true);
         this.field_where     = new EditableTextField(this, "where", "td", "width-6", true);
         this.field_what      = new EditableTextField(this, "what", "td", "width-6", true);
-        this.field_amount    = new EditableAmountTextField(this, "amount", "td", "width-3", true);
-        this.field_balance   = domsugar_td(this.balance, {class: "balance"});
+        this.field_amount    = new EditableAmountTextField(this, "amount", "td", "width-2", true);
+        this.field_balance   = new AmountTextField(this, "balance", "td", "width-2 balance");
         this.buttons         = new DeleteButtonPanel(this, "td", "width-3", true);
 
         // Create container
@@ -81,7 +81,7 @@ class Entry extends AjaxRestObject {
         this.container.appendChild(this.field_where.container);
         this.container.appendChild(this.field_what.container);
         this.container.appendChild(this.field_amount.container);
-        this.container.appendChild(this.field_balance);
+        this.container.appendChild(this.field_balance.container);
         this.container.appendChild(this.buttons.container);
 
         return this.container;
@@ -97,8 +97,8 @@ class Entry extends AjaxRestObject {
         this.field_note      = new EditableTextField(this, "note", "td", "width-6", false);
         this.field_where     = new EditableTextField(this, "where", "td", "width-6", false);
         this.field_what      = new EditableTextField(this, "what", "td", "width-6", false);
-        this.field_amount    = new EditableAmountTextField(this, "amount", "td", "width-3", false);
-        this.field_balance   = domsugar_td(this.balance, {class: "balance"});
+        this.field_amount    = new EditableAmountTextField(this, "amount", "td", "width-2", false);
+        this.field_balance   = domsugar_td("", {class: "balance"});
         this.buttons         = new AddButtonPanel(this, "td", "width-3");
 
         // Create container
@@ -120,10 +120,12 @@ class Entry extends AjaxRestObject {
     }
 
     cascadingBalanceUpdate(val) {
-        this.balance_previous = val;
-        this.balance          = this.balance_previous + Number.parseFloat(this.amount);
-        if (this.field_balance)
-            $(this.field_balance).text(this.balance);
+        console.log("updating balance");
+        this.balance_previous = Number.parseFloat(val);
+        this.balance          = (this.balance_previous + Number.parseFloat(this.amount)).toFixed(2);
+
+        if (this.field_balance && this.field_balance.refresh)
+            this.field_balance.refresh();
 
         if (this.neighbor_next)
             this.neighbor_next.cascadingBalanceUpdate(this.balance);

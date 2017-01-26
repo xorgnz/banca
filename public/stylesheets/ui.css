@@ -82,14 +82,14 @@ table.data_table td.error {
     padding: 0;
 }
 table.data_table tr:nth-child(odd) td input:disabled { background-color: #f0f0f0; }
-table.data_table tr:nth-child(even) td input:disabled { background-color: #d0d0d0; }
+table.data_table tr:nth-child(even) td input:disabled { background-color: #e0e0e0; }
 table.data_table td.width-1 input { width: 36px; }
 table.data_table td.width-2 input { width: 76px; }
 table.data_table td.width-3 input { width: 116px; }
 table.data_table td.width-4 input { width: 156px; }
 table.data_table td.width-6 input { width: 236px; }
 table.data_table td input {
-    border: 1px solid #c0c0c0;
+    border: 1px solid #808080;
     font-size: 12px;
     font-weight: bold;
     padding: 2px;
@@ -210,5 +210,25 @@ div.loading_message {
 .tag_Travel        {color: #000000; background-color: #c0c0c0 !important }
 .tag_Unknown       {color: #ffff00; background-color: #8f00d2 !important }
 
-.amt_positive input { font-weight: bold; color: black; }
-.amt_negative input { font-weight: bold; color: red; }
+
+.amt_positive input {
+    font-weight: bold;
+    color: black;
+    text-align: right;
+}
+.amt_negative input {
+    font-weight: bold;
+    color: red;
+    text-align: right;
+}
+table.data_table tr:nth-child(odd) td.balance input:disabled {
+    background-color: #e0e0e0;
+    border: 1px solid #e0e0e0;
+}
+table.data_table tr:nth-child(even) td.balance input:disabled {
+    background-color: #d0d0d0;
+    border: 1px solid #d0d0d0;
+}
+.balance input:disabled {
+    /* background-color: #eddcaa !important; */
+}

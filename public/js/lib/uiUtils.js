@@ -91,6 +91,48 @@ class EditableTextField extends UIComponent {
     }
 }
 
+class TextField extends UIComponent {
+    constructor(object, field, container, className) {
+        super(container, className);
+
+        // Initialize
+        var self    = this;
+        this.object = object;
+        this.field  = field;
+
+        // Set up elements
+        this.input                = document.createElement("input");
+        this.container.appendChild(this.input);
+
+        // Configure
+        this.refresh(); // Set up correct field value
+        this.input.disabled = true;
+    }
+
+    refresh() {
+        this.input.value = this.object[this.field];
+    }
+}
+
+class AmountTextField extends TextField {
+    constructor(object, field, container, className) {
+        super(object, field, container, className);
+        this.refresh();
+    }
+
+    refresh() {
+        super.refresh();
+
+        $(this.container).removeClass("amt_positive");
+        $(this.container).removeClass("amt_negative");
+
+        if (this.object[this.field] >= 0)
+            $(this.container).addClass("amt_positive");
+        else
+            $(this.container).addClass("amt_negative");
+    }
+}
+
 class AddButtonPanel extends UIComponent {
     constructor(object, container, className) {
         super(container, className);
@@ -147,21 +189,21 @@ class DeleteButtonPanel extends UIComponent {
 }
 
 class EditableAmountTextField extends EditableTextField {
-    constructor(object, field, container, className, onchange) {
-        super(object, field, container, className, onchange);
+    constructor(object, field, container, className, flag_triggerUpdates) {
+        super(object, field, container, className, flag_triggerUpdates);
         this.refresh();
     }
 
     refresh() {
         super.refresh();
 
-        this.container.className = this.container.className.replace(" amt_positive", "");
-        this.container.className = this.container.className.replace(" amt_negative", "");
+        $(this.container).removeClass("amt_positive");
+        $(this.container).removeClass("amt_negative");
 
         if (this.object[this.field] >= 0)
-            this.container.className += " amt_positive";
+            $(this.container).addClass("amt_positive");
         else
-            this.container.className += " amt_negative";
+            $(this.container).addClass("amt_negative");
     }
 }
 
