@@ -32,7 +32,7 @@ class AjaxRestObject {
             console.log("Cannot add - object is locked");
         }
         else {
-            var self    = this;
+            let self    = this;
             this.locked = true;
             $.ajax({
                 url:         this.ajax_endpoint,
@@ -63,7 +63,7 @@ class AjaxRestObject {
 
     // Updating
     update() {
-        var self = this;
+        let self = this;
         if (this.locked) {
             console.log("Cannot update - object is locked");
         }

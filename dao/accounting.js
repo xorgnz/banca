@@ -71,7 +71,7 @@ class Accounting extends shared.BancaObject {
     }
 
     static fromObjectWithPeriod(obj) {
-        var p = new periodDAO.Period(
+        let p = new periodDAO.Period(
             obj.period_id,
             obj.period_name,
             obj.period_date_start,
