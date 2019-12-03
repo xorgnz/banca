@@ -137,7 +137,7 @@ exports.vs_date           = function (v, field) {
     return errors;
 };
 exports.vs_number         = function (v, field) {
-    var errors = [];
+    let errors = [];
 
     if (!check.assigned(v)) {
         errors.push(new ValidationError(field, exports.VET_MISSING));
@@ -155,7 +155,7 @@ exports.vs_number         = function (v, field) {
     return errors;
 };
 exports.vs_string         = function (v, field) {
-    var errors = [];
+    let errors = [];
     if (!check.assigned(v)) {
         errors.push(new ValidationError(field, exports.VET_MISSING));
     }
@@ -165,7 +165,7 @@ exports.vs_string         = function (v, field) {
     return errors;
 };
 exports.vs_stringNotEmpty = function (v, field) {
-    var errors = [];
+    let errors = [];
     if (!check.assigned(v)) {
         errors.push(new ValidationError(field, exports.VET_MISSING));
     }
