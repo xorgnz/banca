@@ -30,7 +30,7 @@
     "lodash": "^4.17.0",
     "log4js": "^1.0.1",
     "mocha": "^3.2.0",
-    "morgan": "~1.7.0",
+    "morgan": "~1.9.1",
     "nunjucks": "^3.0.0",
     "pad-number": "0.0.4",
     "request-json": "^0.6.1",
